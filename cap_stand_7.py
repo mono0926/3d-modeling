@@ -24,10 +24,11 @@ History:
 """
 
 # --- Parameters ---
-CAP_DIAMETER = 31.0       # キャップ外径 (標準的なサイズ + 余裕)
-CLEARANCE = 0.6           # キャップとの隙間 (片側0.3mm)
+# friction fit（抜けにくい嵌め合い）を目指すため、寸法を調整
+CAP_DIAMETER = 30.0       # キャップ外径 (31.0mmだと緩すぎるため、実測に近い30.0mmに変更)
+CLEARANCE = 0.4           # クリアランス (30.0 + 0.4 = 30.4mm。3Dプリントの収縮を考慮しつつキツめに)
 SOCKET_WALL = 2.0         # ソケットの壁厚
-SOCKET_HEIGHT = 3.0       # ソケットの高さ (ベース面からの立ち上がり。ずれ防止の最低限の高さ)
+SOCKET_HEIGHT = 4.0       # ソケットの高さ (3.0mmだと摩擦面が少なく外れやすいため、4.0mmに微増)
 BASE_THICKNESS = 2.0      # ベースプレートの厚み
 PITCH = 45.0             # キャップ中心間の距離 (干渉防止)
 HOLE_DIA = 15.0           # 底面の通気用貫通穴径
@@ -54,13 +55,16 @@ def generate_stand():
     # 1. Base Structure
     # 全てのソケット位置に円柱を描き、それらをhullで囲んでベースプレート形状を作る予定だったが、
     # 実行環境でhullが使えないため、単純な六角形プレート＋フィレットで代用する
-    BASE_RADIUS = PITCH + (SOCKET_OUTER_DIA / 2.0)
+    # 六角形の「辺」の部分でもソケットがはみ出さないように、外接円半径を大きめに取る
+    # 必要半径 = (PITCH + 半径) / cos(30度)
+    REQ_DIST = PITCH + (SOCKET_OUTER_DIA / 2.0)
+    BASE_RADIUS = REQ_DIST / math.cos(math.radians(30))
 
     base = (
         cq.Workplane("XY")
         .polygon(6, BASE_RADIUS * 2) # 対角距離（直径）を指定
         .extrude(BASE_THICKNESS)
-        .edges("|Z").fillet(10.0) # 角を丸めて優しくする
+        .edges("|Z").fillet(5.0) # フィレットは少し控えめに（大きくしすぎると形状破綻の恐れ）
     )
 
     # 2. Add Sockets (Cylinders)
