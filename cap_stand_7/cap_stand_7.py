@@ -2,37 +2,40 @@ import cadquery as cq
 import math
 
 """
-Project: Bottle Cap Stand for Vase Drying
-Date: 2026-02-16
-Description:
-    花瓶を逆さまにして乾燥させる際に、口が密閉されないように隙間を作るためのスタンド。
-    ペットボトルのキャップを7個（中心1＋周囲6）配置して土台とする。
+設計要件:
+    - ペットボトルのキャップ（計7個、中心1、周囲6のヘキサゴン配置）を保持するスタンド。
+    - 花瓶を逆さまにして乾燥させる用途のため、口を塞がず通気性を確保する。
+    - 各ソケット底面に直径 15mm の通気穴を配置。
+    - キャップの着脱がスムーズな Friction Fit（摩擦保持）を目指す。
+    - 最新の3Dプリンター（Bambu Lab P2S 等）での出力を想定。
+    - モデルごとに専用ディレクトリで管理し、STEPファイルを出力する。
 
-Requirements:
-    - キャップ配置: ヘキサゴン配置（中心1, 周囲6）
-    - キャップ保持: 円柱状のソケットに嵌め込む（深い凹みではなく、薄いベース＋立ち上がり壁）
-    - 通気性: ソケット底面には大きな貫通穴を開ける
-    - サイズ感: キャップがスムーズに入るクリアランス確保
-    - 出力: 3Dプリンター用STEPファイル
+推奨フィラメント:
+    - PETG (耐水性があり、適度な柔軟性がキャップの保持と着脱に適しているため)
+    - PLAでも代用可能だが、水気のある環境での長期使用はPETGを推奨。
 
-History:
-    - Initial Plan: Base plate with recesses.
-    - Rev 1: Thin base plate with cylindrical sockets rising up, for material saving and print speed.
-    - Rev 2: Added large through-holes in sockets for better ventilation and material reduction.
-    - Rev 3: Reduced socket height to 3.0mm based on user feedback (minimal height).
-    - Rev 4: Replaced hull() with polygon() as hull() was causing AttributeError in this environment.
+履歴とプロンプト経緯:
+    - [Initial] ベースプレートに凹みを設けた形状。
+    - [Rev 1] 材料節約と印刷速度向上のため、薄いプレートからソケット壁を立ち上げる形状に変更。
+    - [Rev 2] 通気性と軽量化のため、ソケット底面に貫通穴を追加。
+    - [Rev 3] 高さを 3.0mm に抑えたミニマル設計。
+    - [Rev 4] 環境互換性のため hull() 処理を polygon() 配置に変更。
+    - [Rev 5] 安定保持のためソケット高さを 4.0mm に微増、ソケット1個のテストモデル生成機能を追加。
+    - [Rev 6] ディレクトリ構造の整理（cap_stand_7/）に伴うファイル移動とフィラメント指定ルールの適用。
 """
 
 # --- Parameters ---
-# friction fit（抜けにくい嵌め合い）を目指すため、寸法を調整
-CAP_DIAMETER = 30.0       # キャップ外径 (31.0mmだと緩すぎるため、実測に近い30.0mmに変更)
-CLEARANCE = 0.4           # クリアランス (30.0 + 0.4 = 30.4mm。3Dプリントの収縮を考慮しつつキツめに)
-SOCKET_WALL = 2.0         # ソケットの壁厚
-SOCKET_HEIGHT = 4.0       # ソケットの高さ (3.0mmだと摩擦面が少なく外れやすいため、4.0mmに微増)
+RECOMMENDED_FILAMENT = "PETG"  # 推奨材質: PETG (耐水・適度な弾性)
+
+# 物理的な嵌め合い（Friction Fit）の調整
+CAP_DIAMETER = 30.0       # キャップ外径 (実測値ベース)
+CLEARANCE = 0.4           # クリアランス (PETGの収縮とプリント精度を考慮した 30.4mm 設計)
+SOCKET_WALL = 2.0         # ソケットの壁厚 (強度のバランス)
+SOCKET_HEIGHT = 4.0       # ソケットの高さ (摩擦面を確保しつつ低重心に)
 BASE_THICKNESS = 2.0      # ベースプレートの厚み
 PITCH = 45.0             # キャップ中心間の距離 (干渉防止)
 HOLE_DIA = 15.0           # 底面の通気用貫通穴径
-CHAMFER = 0.8             # エッジの面取りサイズ (2.0mm壁に対して1.0mmだと干渉するため0.8mmに縮小)
+CHAMFER = 0.8             # エッジの面取り (キャップの導入をスムーズにする)
 
 # --- Derived Design Constants ---
 # ソケット外径 = キャップ径 + クリアランス + 壁厚*2
