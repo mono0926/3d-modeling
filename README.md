@@ -53,10 +53,8 @@ VS Code系エディタの場合、Python: Select Interpreterから、`Python 3.1
 
 ### stapファイルの扱い
 
-stepファイルを、Bambu Studioなどでそのまま開くこともできるが、
+stepファイルは、Bambu Studioなどでそのまま開けるが、Autodesk Fusionを経由したい場合は以下。
 
 1. Autodesk Fusionで開く
 2. 3Dプリントのエクスポートで3MFファイルとして出力
 3. Bambu Studioで開く
-
-の方が、より確実。
