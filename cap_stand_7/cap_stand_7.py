@@ -67,7 +67,7 @@ def generate_stand():
         cq.Workplane("XY")
         .polygon(6, BASE_RADIUS * 2) # 対角距離（直径）を指定
         .extrude(BASE_THICKNESS)
-        .edges("|Z").fillet(5.0) # フィレットは少し控えめに（大きくしすぎると形状破綻の恐れ）
+        .edges("not #Z").fillet(5.0) # ルールに基づき堅牢なセレクターを使用
     )
 
     # 2. Add Sockets (Cylinders)
