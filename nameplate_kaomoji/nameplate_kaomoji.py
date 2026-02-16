@@ -23,13 +23,13 @@ import os
 # --- パラメーター定義 ---
 # 文字列は定数定義
 TEXT_STR = "(　´･‿･｀)"
-PLATE_WIDTH = 60.0
+PLATE_WIDTH = 70.0
 PLATE_HEIGHT = 20.0
 PLATE_THICKNESS = 3.0
 CORNER_RADIUS = 2.0
 
-TEXT_SIZE = 12.0
-TEXT_HEIGHT = 1.5  # 文字の浮き出し量
+TEXT_SIZE = 10.0
+TEXT_HEIGHT = 1.6  # 文字の浮き出し量 (食い込み分0.1mmを含む)
 FONT_NAME = "Sans"  # システムに依存するが、一般的に視認性の良いフォントを指定
 
 # --- モデリング ---
@@ -47,7 +47,7 @@ result = (
 # プレートの上面(Z=PLATE_THICKNESS)に文字を配置
 result = (
     result.faces(">Z")
-    .workplane()
+    .workplane(offset=-0.1) # 確実に結合させるために0.1mmベースプレートに食い込ませる
     .center(0, 0)
     .text(
         TEXT_STR,
