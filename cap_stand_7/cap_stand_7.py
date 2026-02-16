@@ -1,4 +1,5 @@
 import cadquery as cq
+import os
 import math
 
 """
@@ -163,16 +164,19 @@ def generate_test_piece():
 
 # --- Execution ---
 if __name__ == "__main__":
+    # スクリプトの場所を基準に出力パスを決定
+    script_dir = os.path.dirname(__file__)
+
     # 1. Full Model
     print("Generating full model...")
     result_full = generate_stand()
-    filename_full = "cap_stand_7.step"
+    filename_full = os.path.join(script_dir, "cap_stand_7.step")
     cq.exporters.export(result_full, filename_full)
     print(f"Exported: {filename_full}")
 
     # 2. Test Piece
     print("Generating test piece...")
     result_test = generate_test_piece()
-    filename_test = "cap_stand_test.step"
+    filename_test = os.path.join(script_dir, "cap_stand_test.step")
     cq.exporters.export(result_test, filename_test)
     print(f"Exported: {filename_test}")
