@@ -28,20 +28,21 @@ import math
 RECOMMENDED_FILAMENT = "PETG"  # 推奨材質: PETG (耐水・適度な弾性)
 
 # 物理的な嵌め合い（Friction Fit）の調整
-CAP_DIAMETER = 30.0       # キャップ外径 (実測値ベース)
-CLEARANCE = 0.4           # クリアランス (PETGの収縮とプリント精度を考慮した 30.4mm 設計)
-SOCKET_WALL = 2.0         # ソケットの壁厚 (強度のバランス)
-SOCKET_HEIGHT = 4.0       # ソケットの高さ (摩擦面を確保しつつ低重心に)
-BASE_THICKNESS = 2.0      # ベースプレートの厚み
+CAP_DIAMETER = 29.6       # キャップの実測外径 (Rev 11 で修正)
+CLEARANCE = 0.1          # はめ合わせの余裕 (摩擦保持のため小さく設定)
+SOCKET_WALL = 1.6        # 壁厚 (0.4mmノズル 4本分)
+SOCKET_HEIGHT = 4.0      # ソケットの高さ
+BASE_THICKNESS = 3.0     # ベースプレートの厚み
+BASE_RADIUS = 50.0       # 六角ベースの外接円半径
+HOLE_DIA = 15.0          # 通気穴の直径
+CHAMFER = 0.6            # 上面エッジの面取り量
 PITCH = 45.0             # キャップ中心間の距離 (干渉防止)
-HOLE_DIA = 15.0           # 底面の通気用貫通穴径
-CHAMFER = 0.8             # エッジの面取り (キャップの導入をスムーズにする)
 
 # --- Derived Design Constants ---
-# ソケット外径 = キャップ径 + クリアランス + 壁厚*2
-SOCKET_OUTER_DIA = CAP_DIAMETER + CLEARANCE + (SOCKET_WALL * 2)
 # ソケット内径 = キャップ径 + クリアランス
 SOCKET_INNER_DIA = CAP_DIAMETER + CLEARANCE
+# ソケット外径 = 内径 + 壁厚*2
+SOCKET_OUTER_DIA = SOCKET_INNER_DIA + (SOCKET_WALL * 2)
 
 # --- Coordinates Generation ---
 # 中心(0,0) + 半径PITCHの正六角形の頂点6つ
