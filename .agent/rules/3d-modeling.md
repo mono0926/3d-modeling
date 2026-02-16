@@ -21,6 +21,14 @@ trigger: always_on
   - ソースコード更新して作業が完了する度に、stepファイルを生成してください。
   - **重要:** 実行環境（カレントディレクトリ）に依存せず、常にスクリプトと同じディレクトリに出力されるよう、`os.path.dirname(__file__)` 等を用いて絶対パスで出力先を指定してください。
   - このタイミングで、コミット・PUSHも自動的にしてください。
+- **hull機能の利用:** `Workplane.hull()` が `AttributeError` で使えない環境（CadQuery 2.7.0など）では、内部モジュールを直接利用して凸包（hull）を生成してください。
+  ```python
+  from cadquery import hull
+  # エッジを収集した後、find_hullで輪郭（Wire）を生成
+  hull_wire = hull.find_hull(all_edges)
+  # Workplaneに追加して押し出す
+  result = cq.Workplane("XY").add(hull_wire).toPending().extrude(height)
+  ```
 
 ## モデリングのベストプラクティス
 
