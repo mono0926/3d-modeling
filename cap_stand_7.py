@@ -111,11 +111,66 @@ def generate_stand():
 
     return result
 
+def generate_test_piece():
+    """
+    サイズ確認用のテストピース (ソケット1個分)
+    """
+    # 1. Base Structure (Single Socket Base)
+    # ソケット外径 + 余白 (5mm程度)
+    TEST_BASE_DIA = SOCKET_OUTER_DIA + 5.0
+
+    base = (
+        cq.Workplane("XY")
+        .circle(TEST_BASE_DIA / 2.0)
+        .extrude(BASE_THICKNESS)
+        # 底面エッジのフィレットは省略(テスト用なので)
+    )
+
+    # 2. Add Socket (Single)
+    socket = (
+        cq.Workplane("XY")
+        .workplane(offset=BASE_THICKNESS)
+        .circle(SOCKET_OUTER_DIA / 2.0)
+        .extrude(SOCKET_HEIGHT)
+    )
+
+    result = base.union(socket)
+
+    # 3. Make Hole (Socket Recess)
+    result = (
+        result
+        .faces(">Z").workplane()
+        .hole(SOCKET_INNER_DIA, depth=SOCKET_HEIGHT)
+    )
+
+    # 4. Make Ventilation Hole (Through Base)
+    result = (
+        result
+        .faces("<Z").workplane()
+        .hole(HOLE_DIA)
+    )
+
+    # 5. Finishing (Chamfer)
+    result = (
+        result
+        .faces(">Z").edges() # 上面の全エッジ（内径円周＋外径円周）
+        .chamfer(CHAMFER)
+    )
+
+    return result
+
 # --- Execution ---
 if __name__ == "__main__":
-    result = generate_stand()
+    # 1. Full Model
+    print("Generating full model...")
+    result_full = generate_stand()
+    filename_full = "cap_stand_7.step"
+    cq.exporters.export(result_full, filename_full)
+    print(f"Exported: {filename_full}")
 
-    # Export
-    filename = "cap_stand_7.step"
-    cq.exporters.export(result, filename)
-    print(f"Exported: {filename}")
+    # 2. Test Piece
+    print("Generating test piece...")
+    result_test = generate_test_piece()
+    filename_test = "cap_stand_test.step"
+    cq.exporters.export(result_test, filename_test)
+    print(f"Exported: {filename_test}")
