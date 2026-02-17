@@ -5,8 +5,10 @@ import math
 """
 設計要件:
     - ペットボトルのキャップ（計7個、中心1、周囲6のヘキサゴン配置）を保持するスタンド。
-    - 花瓶を逆さまにして乾燥させる用途のため、口を塞がず通気性を確保する。
-    - 各ソケット底面に直径 15mm の通気穴を配置。
+    - 各ソケット底面に直径 15mm の穴を配置。
+    - この穴は、キャップを外す際に反対側（底面）から指や棒で押して外しやすくするためのもの。
+    - また、意図せずフィラメントの使用量をわずかに削減する効果もある。
+    - （キャップを嵌めると穴が塞がるため、通気孔としては機能しない）
     - キャップの着脱がスムーズな Friction Fit（摩擦保持）を目指す。
     - 最新の3Dプリンター（Bambu Lab P2S 等）での出力を想定。
     - モデルごとに専用ディレクトリで管理し、STEPファイルを出力する。
@@ -34,7 +36,7 @@ SOCKET_WALL = 1.6        # 壁厚 (0.4mmノズル 4本分)
 SOCKET_HEIGHT = 4.0      # ソケットの高さ
 BASE_THICKNESS = 3.0     # ベースプレートの厚み
 BASE_RADIUS = 50.0       # 六角ベースの外接円半径
-HOLE_DIA = 15.0          # 通気穴の直径
+REMOVAL_HOLE_DIA = 15.0     # 取り外し補助用の穴の直径 (底面から押して外す用)
 CHAMFER = 0.6            # 上面エッジの面取り量
 PITCH = 45.0             # キャップ中心間の距離 (干渉防止)
 
@@ -94,13 +96,14 @@ def generate_stand():
         .hole(SOCKET_INNER_DIA, depth=SOCKET_HEIGHT)
     )
 
-    # 4. Make Ventilation Holes (Through Base)
-    # 底面の通気穴（ベースプレートを貫通）
+    # 4. Make Removal Holes (Through Base)
+    # 取り外し補助用の穴（ベースプレートを貫通）
+    # 反対側から押してキャップを外しやすくするためのもの
     result = (
         result
         .faces("<Z").workplane() # 底面から
         .pushPoints(coords)
-        .hole(HOLE_DIA) # 貫通
+        .hole(REMOVAL_HOLE_DIA) # 貫通
     )
 
     # 5. Finishing (Chamfer)
@@ -147,11 +150,11 @@ def generate_test_piece():
         .hole(SOCKET_INNER_DIA, depth=SOCKET_HEIGHT)
     )
 
-    # 4. Make Ventilation Hole (Through Base)
+    # 4. Make Removal Hole (Through Base)
     result = (
         result
         .faces("<Z").workplane()
-        .hole(HOLE_DIA)
+        .hole(REMOVAL_HOLE_DIA)
     )
 
     # 5. Finishing (Chamfer)
