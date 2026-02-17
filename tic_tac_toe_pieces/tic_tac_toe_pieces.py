@@ -2,22 +2,20 @@
 設計要件:
     - 三目並べ（Tic Tac Toe）用の駒（イチゴとチーズ）を設計。
     - 盤面 18x18mm に対して、駒サイズを 約16x16mm、厚さ 4mm に設定。
-    - イチゴ: 鋭角のない滑らかな雫型（💧）+ 上部に重なるヘタ。
-    - チーズ: ウェッジ型（三角形）+ 上部に重なる穴の装飾。
-    - 印刷最適化: 下部(0-2mm)をベース色、上部(2-4mm)を装飾色とするレイヤー構造。
-      これにより、フィラメント交換回数を最小限（1回）に抑える。
+    - イチゴ: ベジェ曲線を使用した滑らかな雫型（💧）+ 2層構造のヘタ。
+    - チーズ: 三角形ウェッジ型の単色モデル。装飾ではなく物理的な「穴（空洞）」を持つ。
+    - 印刷最適化: イチゴは 0-2mm を赤、2-4mm を緑とする2層構造。
 
 推奨フィラメント:
-    - PLA (発色が良く、細かい造形に適しているため)
-    - 赤、緑、黄、白の4色が必要。
+    - PLA (赤、緑、黄)
 
 印刷統計（予想）:
-    - strawberry.step: 印刷時間 約10分（1個、色替え1回）、フィラメント使用量 約2g
-    - cheese.step: 印刷時間 約10分（1個、色替え1回）、フィラメント使用量 約2g
+    - strawberry.step: 印刷時間 約10分（色替え1回）、フィラメント使用量 約2g
+    - cheese.step: 印刷時間 約5分（単色）、フィラメント使用量 約1.5g
 
 Bambu Studioでの設定:
-    1. STEPファイルをインポートする（マルチパーツオブジェクトとして）。
-    2. 下層パーツにベース色、上層パーツに装飾色を割り当てる。
+    - strawberry: 2パーツとしてインポート。レイヤー高さ 2.0mm で色を切り替える。
+    - cheese: 単色としてインポート。
 
 履歴とプロンプト経緯:
     - 詳細は同ディレクトリの history.md を参照。
@@ -36,98 +34,95 @@ TOTAL_HEIGHT = BASE_HEIGHT + DECO_HEIGHT
 OUTPUT_DIR = os.path.dirname(__file__)
 
 def create_strawberry():
-    """雫型（💧）のイチゴを作成"""
-    # 雫型の輪郭
-    path = [
-        (0, -SIZE/2),
-        (-SIZE/2, -SIZE/4),
-        (-SIZE/4, SIZE/2),
-        (0, SIZE/2),
-        (SIZE/4, SIZE/2),
-        (SIZE/2, -SIZE/4),
-        (0, -SIZE/2)
-    ]
+    """滑らかな雫型（💧）のイチゴを作成"""
+    # 雫型の輪郭をベジェ曲線で定義
+    # 下部を丸く、上部を緩やかに絞る
+    w = SIZE * 1.0
+    h = SIZE * 1.1
 
-    # 輪郭となるWireを作成
-    strawberry_wire = cq.Workplane("XY").spline(path, includeCurrent=True).close().toPending()
+    strawberry_outline = (
+        cq.Workplane("XY")
+        .moveTo(0, -h/2)
+        .bezier([
+            (-w/2, -h/4),
+            (-w/2, h/4),
+            (0, h/2),
+            (w/2, h/4),
+            (w/2, -h/4),
+            (0, -h/2)
+        ])
+        .close()
+    )
 
-    # 0-4mm 全体を赤で作る
-    full_body = strawberry_wire.extrude(TOTAL_HEIGHT)
+    # 全体形状を高さいっぱいに作成
+    full_body = strawberry_outline.extrude(TOTAL_HEIGHT)
 
-    # ヘタ(緑) の形状: 上部に重なる部分を定義
-    # 2.0mmから4.0mmの範囲に緑を配置
-    leaves_shape = (
+    # ヘタ部分の定義 (2.0mm - 4.0mm)
+    # 上部に重なるギザギザ
+    leaves_outline = (
         cq.Workplane("XY")
         .workplane(offset=BASE_HEIGHT)
-        .center(0, SIZE/4)
-        .rect(SIZE*0.8, SIZE*0.5)
-        .extrude(DECO_HEIGHT)
+        .center(0, h/4)
+        .rect(w*0.8, h*0.5)
+        .toPending()
+    )
+
+    # ヘタの実際の形状（上部1/3程度を覆う）
+    leaves = (
+        leaves_outline.extrude(DECO_HEIGHT)
         .intersect(full_body)
     )
 
-    # 本体(赤) から ヘタ(緑) を引く（マルチボディ化）
-    strawberry_red = full_body.cut(leaves_shape)
-    strawberry_green = leaves_shape
+    # 赤い本体: 0-2mm は全域、2-4mm はヘタ以外の領域
+    strawberry_red = full_body.cut(leaves)
+    strawberry_green = leaves
 
     return [
-        ("strawberry_red_base", strawberry_red),
-        ("strawberry_green_deco", strawberry_green)
+        ("strawberry_red_body", strawberry_red),
+        ("strawberry_green_stem", strawberry_green)
     ]
 
 def create_cheese():
-    """ウェッジ型のチーズを作成"""
+    """物理的な穴を持つウェッジ型のチーズを作成"""
+    # イチゴとボリューム感を合わせるためサイズ調整
     c_size = SIZE * 1.1
-    cheese_wire = (
+
+    cheese_outline = (
         cq.Workplane("XY")
         .moveTo(-c_size/2, -c_size/2)
         .lineTo(c_size/2, -c_size/2)
         .lineTo(c_size/2, c_size/2)
         .close()
-        .toPending()
     )
 
-    # 0-4mm 全体
-    full_cheese = cheese_wire.extrude(TOTAL_HEIGHT)
+    # 形状の押し出し
+    cheese_body = cheese_outline.extrude(TOTAL_HEIGHT)
 
-    # かじり跡を抜く
+    # かじり跡
     bite = (
         cq.Workplane("XY")
         .center(c_size/2, 0)
         .circle(c_size*0.2)
         .extrude(TOTAL_HEIGHT)
     )
-    full_cheese = full_cheese.cut(bite)
 
-    # 穴(白) の装飾: 2mmから4mmの高さに配置される
+    # 物理的な空洞としての穴
     hole_positions = [
         (c_size/4, -c_size/4, c_size*0.12),
         (-c_size/8, -c_size/3, c_size*0.08),
         (c_size/2.5, c_size/4, c_size*0.07)
     ]
 
-    cheese_white = cq.Workplane("XY").workplane(offset=BASE_HEIGHT)
-    for i, (x, y, r) in enumerate(hole_positions):
-        hole = (
-            cq.Workplane("XY")
-            .workplane(offset=BASE_HEIGHT)
-            .center(x, y)
-            .circle(r)
-            .extrude(DECO_HEIGHT)
-        )
-        if i == 0:
-            cheese_white = hole
-        else:
-            cheese_white = cheese_white.union(hole)
+    holes = cq.Workplane("XY")
+    for x, y, r in hole_positions:
+        hole = cq.Workplane("XY").center(x, y).circle(r).extrude(TOTAL_HEIGHT)
+        holes = holes.union(hole)
 
-    # チーズ本体との交差部分のみを白とする
-    cheese_white = cheese_white.intersect(full_cheese)
-
-    # 本体(黄) から 穴(白) を引く
-    cheese_yellow = full_cheese.cut(cheese_white)
+    # 全ての空洞を本体から引く
+    cheese_final = cheese_body.cut(bite).cut(holes)
 
     return [
-        ("cheese_yellow_base", cheese_yellow),
-        ("cheese_white_deco", cheese_white)
+        ("cheese_yellow_single", cheese_final)
     ]
 
 def export_step(name, pieces):
