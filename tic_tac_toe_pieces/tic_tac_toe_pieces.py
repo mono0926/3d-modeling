@@ -1,21 +1,12 @@
 """
 設計要件:
     - 三目並べ（Tic Tac Toe）用の駒（イチゴとチーズ）を設計。
-    - 盤面 18x18mm に対して、駒サイズを 約16x16mm、厚さ 4mm に設定。
-    - イチゴ: ベジェ曲線を使用した滑らかな雫型（💧）+ 2層構造のヘタ。
-    - チーズ: 三角形ウェッジ型の単色モデル。装飾ではなく物理的な「穴（空洞）」を持つ。
-    - 印刷最適化: イチゴは 0-2mm を赤、2-4mm を緑とする2層構造。
+    - イチゴ: 真の雫型（💧）を追求。上部を滑らかな円弧、下部の一点のみを鋭角に設計。
+    - チーズ: 三角形ウェッジ型の単色モデル。物理的な貫通穴を持つ。
+    - 印刷最適化: イチゴは 0-2mm を赤、2-4mm を緑とする2層構造（色替え1回）。
 
 推奨フィラメント:
     - PLA (赤、緑、黄)
-
-印刷統計（予想）:
-    - strawberry.step: 印刷時間 約10分（色替え1回）、フィラメント使用量 約2g
-    - cheese.step: 印刷時間 約5分（単色）、フィラメント使用量 約1.5g
-
-Bambu Studioでの設定:
-    - strawberry: 2パーツとしてインポート。レイヤー高さ 2.0mm で色を切り替える。
-    - cheese: 単色としてインポート。
 
 履歴とプロンプト経緯:
     - 詳細は同ディレクトリの history.md を参照。
@@ -25,52 +16,45 @@ import cadquery as cq
 import os
 
 # --- 定数定義 ---
-SIZE = 16.0  # 駒の最大幅/高さ(mm)
-BASE_HEIGHT = 2.0  # ベース部分の厚み(mm)
-DECO_HEIGHT = 2.0  # 装飾部分の厚み(mm)
+SIZE = 16.0
+BASE_HEIGHT = 2.0
+DECO_HEIGHT = 2.0
 TOTAL_HEIGHT = BASE_HEIGHT + DECO_HEIGHT
 
 # 出力ディレクトリの設定
 OUTPUT_DIR = os.path.dirname(__file__)
 
 def create_strawberry():
-    """滑らかな雫型（💧）のイチゴを作成"""
-    # 雫型の輪郭をベジェ曲線で定義
-    # 下部を丸く、上部を緩やかに絞る
+    """真の雫型（💧）のイチゴを作成（鋭角は先端の1点のみ）"""
     w = SIZE * 1.0
     h = SIZE * 1.1
 
+    # 雫型の輪郭: 下端(0, -h/2)を起点とし、左右の肩(w/2, h/8)まで直線、
+    # そこから上端(0, h/2)を経由して反対の肩まで円弧でつなぐ。
     strawberry_outline = (
         cq.Workplane("XY")
-        .moveTo(0, -h/2)
-        .bezier([
-            (-w/2, -h/4),
-            (-w/2, h/4),
-            (0, h/2),
-            (w/2, h/4),
-            (w/2, -h/4),
-            (0, -h/2)
-        ])
-        .close()
+        .moveTo(0, -h/2) # 鋭角となる先端
+        .lineTo(w/2, h/8) # 直線で肩へ
+        .threePointArc((0, h/2), (-w/2, h/8)) # 滑らかな円弧で頂点を通る
+        .close() # 最後に直線で先端へ戻ることで角ができる
     )
 
     # 全体形状を高さいっぱいに作成
     full_body = strawberry_outline.extrude(TOTAL_HEIGHT)
 
     # ヘタ部分の定義 (2.0mm - 4.0mm)
-    # 上部に重なるギザギザ
-    leaves_outline = (
+    # 円弧などを用いて本体の曲線に馴染むヘタの境界を作る
+    leaves_boundary = (
         cq.Workplane("XY")
         .workplane(offset=BASE_HEIGHT)
-        .center(0, h/4)
-        .rect(w*0.8, h*0.5)
-        .toPending()
+        .center(0, h/3)
+        .circle(w * 0.6) # 円形に抜くことで境界を滑らかに
+        .extrude(DECO_HEIGHT)
     )
 
-    # ヘタの実際の形状（上部1/3程度を覆う）
+    # ヘタの実際の形状
     leaves = (
-        leaves_outline.extrude(DECO_HEIGHT)
-        .intersect(full_body)
+        leaves_boundary.intersect(full_body)
     )
 
     # 赤い本体: 0-2mm は全域、2-4mm はヘタ以外の領域
@@ -83,10 +67,8 @@ def create_strawberry():
     ]
 
 def create_cheese():
-    """物理的な穴を持つウェッジ型のチーズを作成"""
-    # イチゴとボリューム感を合わせるためサイズ調整
+    """物理的な貫通穴を持つウェッジ型のチーズを作成"""
     c_size = SIZE * 1.1
-
     cheese_outline = (
         cq.Workplane("XY")
         .moveTo(-c_size/2, -c_size/2)
@@ -95,7 +77,6 @@ def create_cheese():
         .close()
     )
 
-    # 形状の押し出し
     cheese_body = cheese_outline.extrude(TOTAL_HEIGHT)
 
     # かじり跡
@@ -106,7 +87,7 @@ def create_cheese():
         .extrude(TOTAL_HEIGHT)
     )
 
-    # 物理的な空洞としての穴
+    # 穴(貫通)
     hole_positions = [
         (c_size/4, -c_size/4, c_size*0.12),
         (-c_size/8, -c_size/3, c_size*0.08),
@@ -118,7 +99,6 @@ def create_cheese():
         hole = cq.Workplane("XY").center(x, y).circle(r).extrude(TOTAL_HEIGHT)
         holes = holes.union(hole)
 
-    # 全ての空洞を本体から引く
     cheese_final = cheese_body.cut(bite).cut(holes)
 
     return [
