@@ -1,6 +1,7 @@
 import cadquery as cq
 import os
 import math
+from ocp_vscode import show_object
 
 """
 設計要件:
@@ -174,6 +175,7 @@ if __name__ == "__main__":
     # 1. Full Model
     print("Generating full model...")
     result_full = generate_stand()
+    show_object(result_full)
     filename_full = os.path.join(script_dir, "cap_stand_7.step")
     cq.exporters.export(result_full, filename_full)
     print(f"Exported: {filename_full}")

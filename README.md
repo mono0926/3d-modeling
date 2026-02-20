@@ -34,6 +34,83 @@ conda activate cq-conda-env
 conda install -c conda-forge cadquery
 ```
 
+#### 3Dプレビュー
+
+本プロジェクトでは、CadQueryのモデルをエディタ上でリアルタイムプレビューするために **OCP CAD Viewer** を使用します。
+
+##### エディタ拡張機能のインストール
+
+**■ 標準のVS Codeを使用している場合**
+拡張機能マーケットプレイスから `OCP CAD Viewer` (Bernhard Walter作) を検索してインストールしてください。
+
+**■ Cursor / VSCodiumを使用している場合**
+この拡張機能はOpen VSXには登録されていないため、[OCP CAD Viewer Releases](https://github.com/bernhard-42/vscode-ocp-cad-viewer/releases) から最新の `.vsix` ファイルをダウンロード・インストールします。
+
+無事にプレビュー環境が構築できてよかったです！✨ コードを書きながらリアルタイムで形状が確認できると、開発体験が段違いに良くなりますよね。
+
+今後の環境構築や、他のマシンでセットアップする際にも迷わないよう、READMEにそのままコピペして使えるMarkdown形式のテキストを作成しました。先ほど話題に出たCursor等向けのVSIXインストールの手順や、`cq-conda-env` 環境へのパッケージ導入も網羅しています。
+
+以下を `README.md` に追記して活用してください！
+
+---
+
+````markdown
+## 開発環境のセットアップ (3Dプレビュー)
+
+本プロジェクトでは、CadQueryのモデルをエディタ上でリアルタイムプレビューするために **OCP CAD Viewer** を使用します。
+
+### 1. エディタ拡張機能のインストール
+
+**■ 標準のVS Codeを使用している場合**
+拡張機能マーケットプレイスから `OCP CAD Viewer` (Bernhard Walter作) を検索してインストールしてください。
+
+**■ Cursor / VSCodiumを使用している場合**
+この拡張機能はOpen VSXには登録されていないため、GitHubの公式リリースページからVSIXファイルをダウンロードして手動インストールする必要があります。
+
+1. [OCP CAD Viewer Releases](https://github.com/bernhard-42/vscode-ocp-cad-viewer/releases) から最新の `.vsix` ファイルをダウンロードします。
+2. ターミナルから以下のコマンドでインストールします。
+
+```bash
+# Cursorの場合
+cursor --install-extension ocp-cad-viewer-*.vsix
+
+# VSCodiumの場合
+codium --install-extension ocp-cad-viewer-*.vsix
+```
+````
+
+##### 2. Pythonパッケージのインストール
+
+プレビュー機能（エディタとの通信）を有効にするため、CadQueryを実行しているconda環境に専用パッケージをインストールします。
+
+```bash
+conda activate cq-conda-env
+pip install ocp-vscode
+
+```
+
+_(※初回スクリプト実行時に右下に表示される `OCP VS Code not found...` のダイアログで「yes」を選択することでも自動インストール可能です。)_
+
+##### 3. プレビューの実行手順
+
+1. コマンドパレット（`Cmd + Shift + P`）を開き、`OCP CAD Viewer: Start Server` を実行します（右側にビューワーペインが開きます）。
+2. プレビューしたいPythonスクリプト（例: `cube.py`）を実行します。
+3. ビューワーペインに3Dモデルがレンダリングされます。
+
+**コード内の記述要件:**
+スクリプト内でモデルを表示するには、以下のインポートと関数呼び出しが必要です。
+
+```python
+import cadquery as cq
+from ocp_vscode import show_object
+
+# ... (モデルの定義) ...
+
+# プレビューの実行
+show_object(stand)
+
+```
+
 ### 使い方
 
 環境に入る(プレーンな環境では毎回初めに実行必要)。
