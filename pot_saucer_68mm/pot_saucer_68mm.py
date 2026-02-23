@@ -17,7 +17,7 @@ from ocp_vscode import show_object
     - 壁ループ (Wall Loops): 3〜4回
     - 底面レイヤー (Bottom Shell Layers): 4〜5層
     - インフィル: 15-20% (Grid or Gyroid)
-    - Wall generator: Arachne (壁の隙間を埋めるのに有効)
+    - 壁ジェネレーター (Wall generator): Arachne (壁の隙間を埋めるのに有効)
 
 印刷統計（予想）:
     - pot_saucer_68mm: 印刷時間 約45分、フィラメント使用量 約25g

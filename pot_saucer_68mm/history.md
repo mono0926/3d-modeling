@@ -25,4 +25,4 @@
 - **底面レイヤー (Bottom Shell Layers)**: 4〜5層（水漏れ防止）。
 - **積層ピッチ**: 0.2mm。
 - **インフィル**: 15-20% (Grid or Gyroid)。
-- **水漏れが心配な場合**: 外面壁の厚みを増やすか、Bambu Studioの「Wall generator: Arachne」を使用すると隙間が埋まりやすくなります。
+- **水漏れが心配な場合**: 外面壁の厚みを増やすか、Bambu Studioの「壁ジェネレーター (Wall generator): Arachne」を使用すると隙間が埋まりやすくなります。
