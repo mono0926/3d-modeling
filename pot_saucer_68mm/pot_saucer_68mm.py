@@ -1,5 +1,6 @@
 import cadquery as cq
 import os
+from ocp_vscode import show_object
 
 """
 設計要件:
@@ -54,14 +55,17 @@ def create_saucer():
     )
 
     # 底面のリブ（通気・水はけ用）
-    # 同心円状のリブを2つ作成
-    rib_radii = [INNER_DIAMETER / 3.5, INNER_DIAMETER / 1.75]
+    # 内壁から少し離れた位置にリブを配置する
+    rib_width = 1.5
+    # 外側のリブが内壁から1.5mm離れるように計算
+    max_rib_radius = (INNER_DIAMETER / 2) - 1.5
+    rib_radii = [max_rib_radius * 0.5, max_rib_radius]
+
     for r in rib_radii:
         saucer = (
-            saucer.faces("<Z[1]") # 内側の底面を選択
-            .workplane()
+            saucer.faces(">Z").workplane(- (HEIGHT - BOTTOM_THICKNESS)) # 内側の底面へ移動
             .circle(r)
-            .circle(r - 1.5) # リブの幅 1.5mm
+            .circle(r - rib_width)
             .extrude(RIB_HEIGHT)
         )
 
@@ -78,5 +82,6 @@ result = create_saucer()
 
 # STEPファイルへのエクスポート
 print(f"Exporting to {output_path}...")
+show_object(result)
 cq.exporters.export(result, output_path)
 print("Done.")
