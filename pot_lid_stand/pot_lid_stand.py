@@ -1,20 +1,20 @@
 """
 設計要件:
-    - 鍋蓋（直径200~300mm、厚さ40mmまで）を支えるための壁掛け用スタンド。
-    - 鉄の壁に対して背面に磁石テープを貼付可能。
-    - **印刷最適化**: 仰向け（ベース背面 Z=0 を下）にしてサポート材なしで一発印刷可能。
-    - **フィット感の向上**:
-        - アームを深いV字型（谷）にし、分厚い鍋蓋も自重でしっかり壁側にホールド。
-        - カッターで中央をアーチ状にくり抜き、円形の蓋が自然と馴染むクレードル（揺りかご）構造を採用。
+    - 鍋蓋（直径20-30cm、厚さ4cmまで）を支えるための壁掛け用スタンド。
+    - 鉄の壁に対して背面に磁石テープを貼付け可能。
+    - シンプルな形状で、サイズ違いの鍋蓋にも対応しやすいようにアーム2点支持機構を採用。
+    - アームの溝（谷）は壁側に向かって下る傾斜（スロープ）を設け、分厚い蓋でも自然と壁に寄りかかる構造。
+    - サポート材不要で印刷できるように壁付け面を下（Z=0）にして設計。
+    - フルパラメトリックになっており、各種寸法の自由な調整が可能。
 
 推奨フィラメント:
     - PLA, PETG (実用強度として十分。台所なので耐熱性が必要ならPETG推奨)
 
 推奨スライサー設定:
-    - 配置: 背面（平らな面）をビルドプレートに設置。
-    - ウォールループ（Wall loops）: 4 (アーム剛性向上)
-    - インフィル: 15%〜20% Gyroid
-    - サポート: なし
+    - 壁面を下にしてビルドプレートへ配置。
+    - ウォールループ（Wall loops）: 4 (アーム部の強度確保のため)
+    - インフィル（Infill）: 15%〜20% Gyroid
+    - サポート（Support）: なし
 
 履歴とプロンプト経緯:
     - 詳細は同ディレクトリの history.md を参照。
@@ -28,81 +28,86 @@ from ocp_vscode import show_object
 # Parameter Definitions (パラメーター設定)
 # ==========================================
 
-STAND_WIDTH = 140.0    # スタンド全幅 (20~30cm蓋に対応する適度な広さ)
-STAND_HEIGHT = 80.0    # スタンド全高 (テコの原理に耐える広さを確保)
-BASE_THICKNESS = 6.0   # ベース厚（磁石貼付面）
+LID_DIAMETER = 300.0   # 想定する最大鍋蓋の直径（参考値）
+LID_THICKNESS = 42.0   # 鍋蓋の厚み（40mmまで対応できるよう余裕をもたせた数値）
 
-ARM_WIDTH = 25.0       # 各アームの幅
+STAND_WIDTH = 150.0    # スタンドの全幅（20-30cmの蓋に対応）
+STAND_HEIGHT = 60.0    # ベースプレートの縦幅（テコの原理に耐える高さを確保）
+BASE_THICKNESS = 4.0   # 壁接地面のベース肉厚 (磁石テープを貼る平面)
 
-# ジオメトリ算出用の主要 Y(高さ), Z(壁からの距離) 座標
-# Y=0が下、Y=80が上。Z=0が壁(裏面)、Z=6が表面。
-Y_VALLEY = 42.0        # V字溝の谷底の高さ (Y)
-Z_VALLEY = 26.0        # V字溝の谷底の深さ (Z)
+ARM_WIDTH = 25.0       # 各アーム(蓋を受けるフック部)の幅
+ARM_LENGTH = LID_THICKNESS + 8.0 # ベース表面からのアーム突き出し長(奥行き)
+LIP_HEIGHT = 20.0      # 手前に蓋が落ちないようにするこぼれ止めの高さ
+LIP_THICKNESS = 6.0    # リップ部品自体の前方厚み
+BOTTOM_THICKNESS = 10.0 # アーム底面の肉厚（分厚い蓋を支える強度）
 
-Y_WALL_LIP = 55.0      # V字溝の壁側の頂点高さ (Y)
+# ＝ 導出値 ＝
+TOTAL_DEPTH = BASE_THICKNESS + ARM_LENGTH  # 壁から一番手前までの総合距離
 
-Y_LIP_TIP = 70.0       # 前方リップの頂点高さ (Y)
-Z_LIP_TIP = 68.0       # 前方リップの先端の深さ (Z) 厚さ40mmを余裕で入れ込む
-
-TOTAL_DEPTH = Z_LIP_TIP
+# アームの溝（谷）を壁に向かって傾斜させ、蓋が壁に寄りかかるようにする
+SLOPE_DROP = 4.0  # 手前側の底から奥側（壁側）の底への落差（より寄りかかるよう大きくした）
 
 # ==========================================
 # Geometry Generation (幾何学モデル生成)
 # ==========================================
 
-# 1. 断面プロファイル作成
-# サポートなしで印刷するため、Z軸方向へのオーバーハングが45度(勾配1)以下になるよう配慮。
+# 1. YZ平面でのプロファイル（側面図）を作成し、左右対称（X方向）に押し出す。
+# Y軸: 上下方向 (u), Z軸: 壁から手前への奥行き方向 (v)
+# 壁への貼付面（裏面）が Z=0 となる。
+
 pts = [
-    (0, 0),                           # P0: 背面下端
-    (0, BASE_THICKNESS),              # P1: 表面下端
-    (Y_LIP_TIP, Z_LIP_TIP),           # P2: アーム先端 (約45度の安全なせり出し)
-    (Y_VALLEY, Z_VALLEY),             # P3: V字溝の谷底 (V字を形成)
-    (Y_WALL_LIP, BASE_THICKNESS),     # P4: 溝の壁側頂点
-    (STAND_HEIGHT, BASE_THICKNESS),   # P5: 表面上端
-    (STAND_HEIGHT, 0)                 # P6: 背面上端
+    (0, 0),                           # P0: 壁面下端・裏面
+    (0, BASE_THICKNESS),              # P1: 壁面下端・表面
+    (BOTTOM_THICKNESS, TOTAL_DEPTH),  # P2: アーム底外側 (斜めに手前へ立ち上がる)
+    (BOTTOM_THICKNESS + LIP_HEIGHT, TOTAL_DEPTH), # P3: リップ外側頂点
+    (BOTTOM_THICKNESS + LIP_HEIGHT, TOTAL_DEPTH - LIP_THICKNESS), # P4: リップ内側頂点
+    (BOTTOM_THICKNESS, TOTAL_DEPTH - LIP_THICKNESS - 2.0), # P5: 谷底・手前側 (少し面取り)
+    (BOTTOM_THICKNESS - SLOPE_DROP, BASE_THICKNESS), # P6: 谷底・壁側 (奥へ向かって下る)
+    (STAND_HEIGHT, BASE_THICKNESS),   # P7: 壁面上端・表面
+    (STAND_HEIGHT, 0),                # P8: 壁面上端・裏面
 ]
 
-# 左右(X軸方向)に押し出し
+# プロファイルをXの法線方向(左右)にSTAND_WIDTHの半分ずつ両側へ押し出す
 body = (
     cq.Workplane("YZ")
     .polyline(pts).close()
     .extrude(STAND_WIDTH / 2.0, both=True)
 )
 
-# YZプロファイルの角（X軸と平行なエッジ）をすべて丸める（安全性・美観）
+# 押し出し直後の2Dエッジ（X軸に平行なエッジ＝谷底やリップ）にフィレットをかける
 try:
-    body = body.edges("|X").fillet(2.5)
+    body = body.edges("|X").fillet(2.0)
 except Exception as e:
-    print(f"Profile Fillet Warning: {e}")
+    print(f"Base Fillet Warning: {e}")
 
-# 2. 中央のくり抜きアーチカット
+# 2. 中央部分の突き出し（樋）をカットして、左右の「アーム」に分割する。
 cut_w = STAND_WIDTH - (ARM_WIDTH * 2)
-cut_h = STAND_HEIGHT * 2.0
-# 下から15mm残して上部すべてを切り抜く
-cut_y_center = 15.0 + (cut_h / 2.0)
 
-# くり抜き用のBoxを作成し、Z軸平行なエッジに巨大なフィレットをかけてアーチ状にする
+# カッターとなるBoxを作成
+# 位置: Z=BASE_THICKNESS から手前をすべて切り抜くためそこに配置
 cutter = (
-    cq.Workplane("XY", origin=(0, cut_y_center, BASE_THICKNESS))
-    .box(cut_w, cut_h, TOTAL_DEPTH * 2)
-    .edges("|Z").fillet(25.0)  # 25mmの巨大なRで鍋蓋の円弧にフィットするクレードルになる
+    cq.Workplane("XY", origin=(0, 0, BASE_THICKNESS))
+    .rect(cut_w, STAND_HEIGHT * 3) # Yを十分大きくカバー
+    .extrude(TOTAL_DEPTH * 2)      # Zを十分手前までカバー
 )
 
+# ブーリアン減算による切り抜き
 holder = body.cut(cutter)
 
-# カット後のエッジ角丸め（ユーザースキンへの配慮）
+# 3. 切り欠きによって生じた縦・横のエッジの角丸め（フィレット）
 try:
+    # ユーザーが触れる外側の角や切り抜き部のエッジをマイルドにする
+    holder = holder.edges("|Z").fillet(2.0)
     holder = holder.edges("|Y").fillet(2.0)
 except Exception as e:
-    print(f"Inner Cut Fillet Warning: {e}")
+    print(f"Cut Inner Fillet Warning: {e}")
 
 # ==========================================
 # Export (ファイル出力)
 # ==========================================
 
-# ocp_vscodeが利用可能な場合は表示
 try:
-    show_object(holder, name="Pot Lid Stand V2")
+    show_object(holder, name="Pot Lid Stand Simple")
 except Exception:
     pass
 
