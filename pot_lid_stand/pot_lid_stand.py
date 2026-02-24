@@ -2,14 +2,13 @@
 設計要件:
     - 鍋蓋（直径20-30cm、厚さ4cmまで）を支えるための壁掛け用スタンド。
     - 鉄の壁に対して背面に磁石テープを貼付け可能。
-    - **安定性の工夫（スロープ）**:
-      底面（アームの溝）を手前方向に下る傾斜とし、蓋の最下端が自然に手前に滑り、
-      結果的に蓋の上部が壁側へ寄りかかる（傾く）力学構造を持たせる。
-    - **安定性の工夫（アーチ型アーム）**:
-      アーム内側に巨大なフィレット（R30）を持ったU字の空間をくり抜くことで、
-      接触面が直線的ではなく曲面になり、円形の蓋が自然と中央にフィット・安定する。
+    - **力学と安定性**:
+      アームの溝を手前（リップ側）に向かって深く下るスロープとし、
+      蓋が自重で壁と反対側に滑ることで、自然と蓋の上部が「壁に真っ直ぐ寄りかかる」姿勢を担保する。
+    - **曲線的フィット感 (赤丸部の改善)**:
+      内部の切り欠きを単純な直角ではなく、巨大なU字（サドル型）の曲面でシームレスに繋ぐ。
+      底面から手前のリップに至るまで、一切の鋭角（角）をなくし、どのような曲面の蓋でも完璧に定着させる。
     - サポート材不要で印刷できるように壁付け面を下（Z=0）にして設計。
-    - フルパラメトリックになっており、各種寸法の自由な調整が可能。
 
 推奨フィラメント:
     - PLA, PETG (実用強度として十分。台所なので耐熱性が必要ならPETG推奨)
@@ -32,78 +31,65 @@ from ocp_vscode import show_object
 # Parameter Definitions (パラメーター設定)
 # ==========================================
 
-STAND_WIDTH = 160.0    # スタンドの全幅（30cmの蓋に対応できる広さ）
+STAND_WIDTH = 150.0    # スタンドの全幅（30cmの大型蓋に対応）
 STAND_HEIGHT = 80.0    # ベースプレートの縦幅（テコの原理に耐える高さを確保）
+TOTAL_DEPTH = 55.0     # 壁からリップ先端までの奥行き
 
-BASE_THICKNESS = 4.0   # 壁接地面のベース肉厚 (磁石テープを貼る平面)
-INNER_DEPTH = 45.0     # 蓋が入る溝の奥行き（厚さ40mmの蓋が余裕で入る空間）
-LIP_THICKNESS = 6.0    # 手前のこぼれ止めリップ自体の厚み
-
-TOTAL_DEPTH = BASE_THICKNESS + INNER_DEPTH + LIP_THICKNESS
-
-# ＝ Y軸方向の座標（高さ） ＝
-Y_WALL_BOTTOM = 0.0          # 壁面最下部
-Y_UNDERSIDE_FRONT = 10.0     # アーム下側の最前部（ここまでの斜め上がりでサポート不要に）
-Y_GROOVE_FRONT = 33.0        # 溝の手前側（一番高い。ここから壁へ下る）
-Y_GROOVE_WALL = 20.0         # 溝の壁側（一番低い。蓋が寄りかかるように深く）
-Y_LIP_TOP = 43.0             # こぼれ止めリップの頂点高さ
+VALLEY_WIDTH = 100.0   # 中央のU字の幅（広めにとって曲率をなだらかにする）
 
 # ==========================================
-# Geometry Generation (幾何学モデル生成)
+# Geometry Generation (ロフトによる美しい曲面生成)
 # ==========================================
 
-# 1. YZ平面でのプロファイル（側面図）を作成し、左右対称（X方向）に押し出す。
-pts = [
-    (Y_WALL_BOTTOM, 0.0),                           # P0: 背面下端
-    (Y_WALL_BOTTOM, BASE_THICKNESS),                # P1: 表面下端
-    (Y_UNDERSIDE_FRONT, TOTAL_DEPTH),               # P2: アーム下側フロント
-    (Y_LIP_TOP, TOTAL_DEPTH),                       # P3: リップ外側頂点
-    (Y_LIP_TOP, TOTAL_DEPTH - LIP_THICKNESS),       # P4: リップ内側頂点
-    (Y_GROOVE_FRONT, TOTAL_DEPTH - LIP_THICKNESS),  # P5: 溝の手前側（高い）
-    (Y_GROOVE_WALL, BASE_THICKNESS),                # P6: 溝の壁側（低い） -> 蓋が壁に寄りかかる
-    (STAND_HEIGHT, BASE_THICKNESS),                 # P7: 表面上端
-    (STAND_HEIGHT, 0.0),                            # P8: 背面上端
+# 断面形状（U字のくり抜きがある長方形）を生成する関数
+def make_profile_wire(z, y_under, y_valley):
+    v2 = VALLEY_WIDTH / 2.0
+    s2 = STAND_WIDTH / 2.0
+    return (
+        cq.Workplane("XY", origin=(0, 0, z))
+        .moveTo(-s2, y_under)           # 左下
+        .lineTo(s2, y_under)            # 右下
+        .lineTo(s2, STAND_HEIGHT)       # 右上
+        .lineTo(v2, STAND_HEIGHT)       # 右アームの内側端
+        # U字の谷を3点アーク（円弧）で描画し、完全になだらかな曲線にする
+        .threePointArc((0, y_valley), (-v2, STAND_HEIGHT))
+        .lineTo(-s2, STAND_HEIGHT)      # 左上
+        .close()
+    )
+
+# 4点のZ座標（奥行き）に少しずつ変化するプロファイルを設定し、
+# それらを曲面（スプライン）でシームレスに繋ぐ（Loft）ことでネイティブな曲面を作る。
+
+# 1. 背面（壁に接する面）: マグネットを貼れるようフラットだが、上でU字に開いている。
+w_wall = make_profile_wire(z=0.0, y_under=0.0, y_valley=42.0)
+
+# 2. 溝の最下点（谷底）: ここを一番低くすることで蓋が手前に滑り、結果的に蓋上部が壁に倒れ込む。
+w_bottom = make_profile_wire(z=40.0, y_under=8.0, y_valley=15.0)
+
+# 3. リップの内壁ピーク: 谷底から急激に立ち上がり、ご指摘の「赤い丸の部分」のシームレスな曲面（フィレット）を物理的に形成する。
+w_lip_inner = make_profile_wire(z=47.0, y_under=10.0, y_valley=50.0)
+
+# 4. リップの前面（一番手前）: 平らな正面を作る。
+w_lip_outer = make_profile_wire(z=55.0, y_under=12.0, y_valley=50.0)
+
+# プロファイルを束ねてロフト化（ruled=False によりプロファイル間が有機的な三次曲面で保管されます）
+wires = [
+    w_wall.wires().val(),
+    w_bottom.wires().val(),
+    w_lip_inner.wires().val(),
+    w_lip_outer.wires().val()
 ]
+body = cq.Solid.makeLoft(wires, ruled=False)
 
-body = (
-    cq.Workplane("YZ")
-    .polyline(pts).close()
-    .extrude(STAND_WIDTH / 2.0, both=True)
-)
-# ここではまだフィレットをかけない（後の交差エッジ選択を正確にするため）
-
-# 2. 中央部分の突き出し（樋）をカットして、左右の「アーム」に分割する。
-cut_w = 80.0          # くり抜きの幅（アーム間の距離）
-Y_CUT_BOTTOM = 18.0   # くり抜きの最下点（U字の底）
-
-# 完全なU字の美しい曲線を作るため、円弧を持つSlot（長円形）でくり抜く
-# 半径は幅の半分
-cut_r = cut_w / 2.0
-# Slotの中心Y座標（最下点より半径分上）
-cut_center_y = Y_CUT_BOTTOM + cut_r
-
-cutter = (
-    cq.Workplane("XY", origin=(0, cut_center_y, BASE_THICKNESS))
-    .slot2D(STAND_HEIGHT * 4.0, cut_w, 90) # Y方向に長いSlotを作ることで上部は開いたU字になる
-    .extrude(TOTAL_DEPTH * 2.0)
-)
-
-# ブーリアン減算による切り抜き（これで曲線アームが完成）
-holder = body.cut(cutter)
-
-# 3. 滑らかさの付与（面取り加工）
-# 残った直線的な角をマイルドに面取りし、安全性を確保
-try:
-    holder = holder.edges("%LINE").fillet(1.5)
-except Exception as e:
-    print(f"Outer Fillet Warning: {e}")
+# CadQueryワークプレーンオブジェクトに変換
+holder = cq.Workplane("XY").add(body)
 
 # ==========================================
 # Export (ファイル出力)
 # ==========================================
 
 try:
-    show_object(holder, name="Pot Lid Stand Curved")
+    show_object(holder, name="Pot Lid Stand Curved Organic")
 except Exception:
     pass
 
