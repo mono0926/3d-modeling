@@ -21,6 +21,7 @@
 
 import cadquery as cq
 import os
+from ocp_vscode import show_object
 
 # ==========================================
 # Parameter Definitions (パラメーター設定)
@@ -112,5 +113,6 @@ except Exception as e:
 print("Exporting...")
 output_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "pot_lid_stand.step")
 print(f"File path: {output_file}")
+show_object(holder)
 cq.exporters.export(holder, output_file)
 print("Done!")
