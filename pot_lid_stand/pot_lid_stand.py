@@ -86,6 +86,15 @@ body = cq.Solid.makeLoft(wires, ruled=False)
 # CadQueryワークプレーンオブジェクトに変換
 holder = cq.Workplane("XY").add(body)
 
+# --- 最終調整: 底面（Y=0）および背面（Z=0）のフラット化 ---
+# Loftの補間により Y < 0 や Z < 0 に微小にはみ出した部分をカットする
+trim_box = (
+    cq.Workplane("XY", origin=(0, STAND_HEIGHT, TOTAL_DEPTH))
+    .box(STAND_WIDTH * 2, STAND_HEIGHT * 2, TOTAL_DEPTH * 2)
+)
+# 元のSolidと「正の領域」にあるBoxの共通部分(intersect)を取ることでトリミング
+holder = holder.intersect(trim_box)
+
 # ==========================================
 # Export (ファイル出力)
 # ==========================================
