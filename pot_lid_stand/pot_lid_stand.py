@@ -31,9 +31,9 @@ from ocp_vscode import show_object
 # Parameter Definitions (パラメーター設定)
 # ==========================================
 
-STAND_WIDTH = 150.0    # スタンドの全幅（30cmの大型蓋に対応）
-STAND_HEIGHT = 80.0    # ベースプレートの縦幅（テコの原理に耐える高さを確保）
-TOTAL_DEPTH = 55.0     # 壁からリップ先端までの奥行き
+STAND_WIDTH = 140.0    # スタンドの全幅（ややコンパクトに）
+STAND_HEIGHT = 50.0    # ベースプレートの縦幅（深すぎない高さへ変更）
+TOTAL_DEPTH = 45.0     # 壁からリップ先端までの奥行き（4cmの蓋にジャスト）
 
 VALLEY_WIDTH = 100.0   # 中央のU字の幅（広めにとって曲率をなだらかにする）
 
@@ -61,16 +61,16 @@ def make_profile_wire(z, y_under, y_valley):
 # それらを曲面（スプライン）でシームレスに繋ぐ（Loft）ことでネイティブな曲面を作る。
 
 # 1. 背面（壁に接する面）: マグネットを貼れるようフラットだが、上でU字に開いている。
-w_wall = make_profile_wire(z=0.0, y_under=0.0, y_valley=42.0)
+w_wall = make_profile_wire(z=0.0, y_under=0.0, y_valley=35.0)
 
-# 2. 溝の最下点（谷底）: ここを一番低くすることで蓋が手前に滑り、結果的に蓋上部が壁に倒れ込む。
-w_bottom = make_profile_wire(z=40.0, y_under=8.0, y_valley=15.0)
+# 2. 溝の最下点（谷底）: ここを一番低くすることで蓋が手前に滑る。浅めに設定。
+w_bottom = make_profile_wire(z=25.0, y_under=7.0, y_valley=15.0)
 
-# 3. リップの内壁ピーク: 谷底から急激に立ち上がり、ご指摘の「赤い丸の部分」のシームレスな曲面（フィレット）を物理的に形成する。
-w_lip_inner = make_profile_wire(z=47.0, y_under=10.0, y_valley=50.0)
+# 3. リップの内壁ピーク: 谷底からなだらかに立ち上がる。
+w_lip_inner = make_profile_wire(z=37.0, y_under=9.0, y_valley=42.0)
 
 # 4. リップの前面（一番手前）: 平らな正面を作る。
-w_lip_outer = make_profile_wire(z=55.0, y_under=12.0, y_valley=50.0)
+w_lip_outer = make_profile_wire(z=45.0, y_under=10.0, y_valley=42.0)
 
 # プロファイルを束ねてロフト化（ruled=False によりプロファイル間が有機的な三次曲面で保管されます）
 wires = [
