@@ -146,10 +146,7 @@ except Exception:
 # Export (ファイル出力)
 # ==========================================
 
-try:
-    show_object(holder, name="Tower Style Pot Lid Holder")
-except Exception:
-    pass
+show_object(holder)
 
 output_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "tower_pot_lid_holder.step")
 print(f"Exporting to: {output_file}")
