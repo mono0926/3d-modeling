@@ -89,19 +89,20 @@ def create_sample_utility_hook():
 
     hook_base = get_base_hook()
 
-    # フロント側のベースプレート＆J字フック部分のプロファイル
-    # ベースプレートはフック首下からさらに下へ延長し、壁面で支えて安定させます
+    # ベースプレートの厚み
+    base_thickness = 3.0
+
     j_hook_profile = (
         cq.Workplane("XY")
         .polyline([
-            (0, NECK_HEIGHT),
-            (0, -12.0),                                      # ベースプレート下端
-            (-app_hook_length, -12.0),                       # 前方に伸ばす
-            (-app_hook_length, -12.0 + app_hook_height),     # 立ち上がる
-            (-app_hook_length + 3.0, -12.0 + app_hook_height),
-            (-app_hook_length + 3.0, -12.0 + 3.0),           # フック内側の凹み
-            (0, -12.0 + 3.0),
-            (0, 0)
+            (0, NECK_HEIGHT),                                # 1. ベースプレート右上（フック基部と接続）
+            (0, -12.0),                                      # 2. ベースプレート右下
+            (-app_hook_length, -12.0),                       # 3. J字フックの左下
+            (-app_hook_length, -12.0 + app_hook_height),     # 4. J字フックの左上（先端）
+            (-app_hook_length + 3.0, -12.0 + app_hook_height), # 5. J字フック先端の内側
+            (-app_hook_length + 3.0, -12.0 + 3.0),           # 6. J字フックの谷底
+            (-base_thickness, -12.0 + 3.0),                  # 7. トレイ部からベースプレートへの立ち上がり
+            (-base_thickness, NECK_HEIGHT)                   # 8. ベースプレート左上
         ]).close()
     )
 
