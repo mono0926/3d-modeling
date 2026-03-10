@@ -1,5 +1,6 @@
 import cadquery as cq
 import os
+from ocp_vscode import show_object
 
 """
 設計要件:
@@ -42,73 +43,75 @@ EXTRUDE_D = 200.0        # モデルの奥行き（アーム長さ）
 W = TISSUE_W + TISSUE_W_CLEARANCE + (WALL_T * 2) # 全幅 (=118.0)
 H_SHELF_GAP = SHELF_T + SHELF_CLEARANCE          # 棚板ギャップ高さ (=21.5)
 H_TISSUE_GAP = TISSUE_H + TISSUE_H_CLEARANCE     # ティッシュギャップ高さ (=47.0)
-
-# 底面(Y=0)から積み上げる各パーツのY座標中心値(box配置のため)
 TOTAL_H = WALL_T + H_TISSUE_GAP + WALL_T + H_SHELF_GAP + WALL_T # = 83.5
 
-Y_TOP_ARM = TOTAL_H - (WALL_T / 2)
-Y_ROOF = WALL_T + H_TISSUE_GAP + (WALL_T / 2)
-
-# 1. 前面プレート (XY平面に作成・Z奥へ押し出し)
-# Xは原点中心、Yは0始まり、Zは0始まり
+# 1. Front plate (前面の蓋となるプレート)
 holder = cq.Workplane("XY").box(W, TOTAL_H, WALL_T, centered=(True, False, False))
 
-# 2. アームと壁 (背面に延長するパーツ)
-# Z軸方向に EXTRUDE_D 押し出し、Z=WALL_T(5mm)から開始
-holder = holder.union(cq.Workplane("XY").box(W, WALL_T, EXTRUDE_D, centered=(True, False, False)).translate((0, Y_TOP_ARM - WALL_T/2, WALL_T)))
-holder = holder.union(cq.Workplane("XY").box(W, WALL_T, EXTRUDE_D, centered=(True, False, False)).translate((0, Y_ROOF - WALL_T/2, WALL_T)))
-holder = holder.union(cq.Workplane("XY").box(WALL_T, H_TISSUE_GAP, EXTRUDE_D, centered=(False, False, False)).translate((-(W/2), WALL_T, WALL_T)))
-holder = holder.union(cq.Workplane("XY").box(WALL_T, H_TISSUE_GAP, EXTRUDE_D, centered=(False, False, False)).translate(((W/2)-WALL_T, WALL_T, WALL_T)))
-holder = holder.union(cq.Workplane("XY").box(LEDGE_W, WALL_T, EXTRUDE_D, centered=(False, False, False)).translate((-(W/2)+WALL_T, 0, WALL_T)))
-holder = holder.union(cq.Workplane("XY").box(LEDGE_W, WALL_T, EXTRUDE_D, centered=(False, False, False)).translate(((W/2)-WALL_T-LEDGE_W, 0, WALL_T)))
+# 2. Main Body (奥に伸びる C字の層を Boolean Cut で美しく成形)
+# 全体のブロックを作成してから、空間部分を切り抜くアプローチで隙間なく作ります
+main_body = cq.Workplane("XY").box(W, TOTAL_H, EXTRUDE_D, centered=(True, False, False)).translate((0, 0, WALL_T))
+
+# 棚板用の空間を切り抜き
+shelf_cut_w = W - 2*WALL_T
+shelf_cut_y = WALL_T + H_TISSUE_GAP + WALL_T
+main_body = main_body.cut(cq.Workplane("XY").box(shelf_cut_w, H_SHELF_GAP, EXTRUDE_D, centered=(True, False, False)).translate((0, shelf_cut_y, WALL_T)))
+
+# ティッシュ用の空間を切り抜き
+tissue_cut_w = W - 2*WALL_T
+tissue_cut_y = WALL_T
+main_body = main_body.cut(cq.Workplane("XY").box(tissue_cut_w, H_TISSUE_GAP, EXTRUDE_D, centered=(True, False, False)).translate((0, tissue_cut_y, WALL_T)))
+
+# ティッシュ引き出し口（底面の開口部）を切り抜き
+bottom_cut_w = tissue_cut_w - 2*LEDGE_W
+main_body = main_body.cut(cq.Workplane("XY").box(bottom_cut_w, WALL_T + 2, EXTRUDE_D, centered=(True, False, False)).translate((0, -1, WALL_T)))
+
+holder = holder.union(main_body)
 
 # 3. 補強ウェッジ（内側の角を補強・フィレット代わり）
-# filletをエッジ選択すると不安定になることがあるため、確実なプリズム形状をUnionします
-def make_horizontal_wedge(y_corner, size, is_under, length, x_start):
-    y_wall = y_corner - size if is_under else y_corner + size
-    pts = [(y_corner, WALL_T), (y_wall, WALL_T), (y_corner, WALL_T + size)]
-    return cq.Workplane("YZ").polyline(pts).close().extrude(length).translate((x_start, 0, 0))
-
-def make_vertical_wedge(x_corner, size, is_right_side_of_space, height, y_start):
-    x_wall = x_corner + size if is_right_side_of_space else x_corner - size
-    pts = [(x_corner, WALL_T), (x_wall, WALL_T), (x_corner, WALL_T + size)]
-    # Workplane("XZ")の場合、XYがXZにマッピングされZ押し出しがY方向となる
-    return cq.Workplane("XZ").polyline(pts).close().extrude(height).translate((0, y_start, 0))
+# Z方向に押し出すことで確実に奥まで斜めの柱（チャンファー）を形成
+def make_wedge_xy(x, y, dx, dy, length):
+    pts = [(x, y), (x + dx, y), (x, y + dy)]
+    return cq.Workplane("XY").polyline(pts).close().extrude(length).translate((0, 0, WALL_T))
 
 WEDGE_S = 3.0
-WEDGE_SHELF = 1.5 # 棚に奥まで差し込めるよう小さめに設定
-holder = holder.union(make_horizontal_wedge(TOTAL_H - WALL_T, WEDGE_SHELF, True, W, -(W/2))) # Top Arm下
-holder = holder.union(make_horizontal_wedge(WALL_T + H_TISSUE_GAP + WALL_T, WEDGE_SHELF, False, W, -(W/2))) # Roof上
-holder = holder.union(make_horizontal_wedge(WALL_T + H_TISSUE_GAP, WEDGE_S, True, W, -(W/2))) # Roof下
-holder = holder.union(make_horizontal_wedge(WALL_T, WEDGE_S, False, LEDGE_W, -(W/2)+WALL_T)) # Left Ledge上
-holder = holder.union(make_horizontal_wedge(WALL_T, WEDGE_S, False, LEDGE_W, (W/2)-WALL_T-LEDGE_W)) # Right Ledge上
-holder = holder.union(make_vertical_wedge(-(W/2)+WALL_T, WEDGE_S, True, H_TISSUE_GAP, WALL_T)) # Left Wall内側
-holder = holder.union(make_vertical_wedge((W/2)-WALL_T, WEDGE_S, False, H_TISSUE_GAP, WALL_T)) # Right Wall内側
+WEDGE_SHELF = 1.5
+
+# 棚板スペースの内角4箇所
+holder = holder.union(make_wedge_xy(-shelf_cut_w/2, shelf_cut_y, WEDGE_SHELF, WEDGE_SHELF, EXTRUDE_D))
+holder = holder.union(make_wedge_xy(shelf_cut_w/2, shelf_cut_y, -WEDGE_SHELF, WEDGE_SHELF, EXTRUDE_D))
+holder = holder.union(make_wedge_xy(-shelf_cut_w/2, shelf_cut_y + H_SHELF_GAP, WEDGE_SHELF, -WEDGE_SHELF, EXTRUDE_D))
+holder = holder.union(make_wedge_xy(shelf_cut_w/2, shelf_cut_y + H_SHELF_GAP, -WEDGE_SHELF, -WEDGE_SHELF, EXTRUDE_D))
+
+# ティッシュスペースの内角4箇所
+holder = holder.union(make_wedge_xy(-tissue_cut_w/2, tissue_cut_y + H_TISSUE_GAP, WEDGE_S, -WEDGE_S, EXTRUDE_D))
+holder = holder.union(make_wedge_xy(tissue_cut_w/2, tissue_cut_y + H_TISSUE_GAP, -WEDGE_S, -WEDGE_S, EXTRUDE_D))
+holder = holder.union(make_wedge_xy(-tissue_cut_w/2, tissue_cut_y, WEDGE_S, WEDGE_S, EXTRUDE_D))
+holder = holder.union(make_wedge_xy(tissue_cut_w/2, tissue_cut_y, -WEDGE_S, WEDGE_S, EXTRUDE_D))
 
 # 4. ティッシュ抜け落ち防止のストッパー（背面底の小さな突起）
 STOPPER_H = 2.0
-holder = holder.union(cq.Workplane("XY").box(LEDGE_W, STOPPER_H, 2.5, centered=(False, False, False)).translate((-(W/2)+WALL_T, WALL_T, WALL_T+EXTRUDE_D-2.5)))
-holder = holder.union(cq.Workplane("XY").box(LEDGE_W, STOPPER_H, 2.5, centered=(False, False, False)).translate(((W/2)-WALL_T-LEDGE_W, WALL_T, WALL_T+EXTRUDE_D-2.5)))
+holder = holder.union(cq.Workplane("XY").box(LEDGE_W, STOPPER_H, 2.5, centered=(False, False, False)).translate((-tissue_cut_w/2, WALL_T, WALL_T+EXTRUDE_D-2.5)))
+holder = holder.union(cq.Workplane("XY").box(LEDGE_W, STOPPER_H, 2.5, centered=(False, False, False)).translate((tissue_cut_w/2-LEDGE_W, WALL_T, WALL_T+EXTRUDE_D-2.5)))
 
 # 5. 面取り (デザインおよび挿入しやすさのため)
-# 前面（フラット面）の四隅を面取りしてソリッドかつソフトな印象に
 try:
-    # 面取りサイズは1.5mm (WALL_T=5mmより十分小さい)
+    # 前面（フラット面）の四隅を角を落としてソリッドかつソフトな印象に
     holder = holder.edges("<Z").chamfer(1.5)
 except Exception as e:
     print(f"Front chamfer minor error (ignored): {e}")
 
-# 棚板挿入部（奥側）のリード角。スッと入るように大きめに。
 try:
-    holder = holder.edges(cq.selectors.NearestToPointSelector((0, TOTAL_H - WALL_T, WALL_T+EXTRUDE_D))).chamfer(2.5)
-    holder = holder.edges(cq.selectors.NearestToPointSelector((0, WALL_T + H_TISSUE_GAP + WALL_T, WALL_T+EXTRUDE_D))).chamfer(2.5)
+    # 棚板挿入部（背面の奥側）のリード角。スッと入るように大きめに。
+    holder = holder.edges(cq.selectors.NearestToPointSelector((0, shelf_cut_y, WALL_T+EXTRUDE_D))).chamfer(2.5)
+    holder = holder.edges(cq.selectors.NearestToPointSelector((0, shelf_cut_y + H_SHELF_GAP, WALL_T+EXTRUDE_D))).chamfer(2.5)
 except Exception as e:
     print(f"Shelf lead-in chamfer error: {e}")
 
-# ティッシュ挿入部（背面の奥側下部）のリード角
 try:
-    holder = holder.edges(cq.selectors.NearestToPointSelector((-(W/2)+WALL_T+LEDGE_W, 0, WALL_T+EXTRUDE_D))).chamfer(2.0)
-    holder = holder.edges(cq.selectors.NearestToPointSelector(((W/2)-WALL_T-LEDGE_W, 0, WALL_T+EXTRUDE_D))).chamfer(2.0)
+    # ティッシュ挿入部のリード角（底面のレールの内側のエッジ）
+    holder = holder.edges(cq.selectors.NearestToPointSelector((-bottom_cut_w/2, WALL_T, WALL_T+EXTRUDE_D))).chamfer(2.0)
+    holder = holder.edges(cq.selectors.NearestToPointSelector((bottom_cut_w/2, WALL_T, WALL_T+EXTRUDE_D))).chamfer(2.0)
 except Exception as e:
     print(f"Tissue lead-in chamfer error: {e}")
 
@@ -117,5 +120,4 @@ output_file = os.path.abspath(os.path.join(os.path.dirname(__file__), 'under_she
 cq.exporters.export(holder, output_file)
 print(f"Successfully generated 3D model: {output_file}")
 
-if 'show_object' in globals():
-    show_object(holder, name='under_shelf_tissue_holder')
+show_object(holder, name='under_shelf_tissue_holder')
