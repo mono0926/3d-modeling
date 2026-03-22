@@ -63,8 +63,8 @@ case = case.cut(
 )
 
 # 3. Top Opening (天面の取り出し用スリット)
-# 改良案: 80mm x 32mm の角丸長方形のスリット
-SLIT_L = 80.0
+# 改良案: 90mm x 32mm の角丸長方形のスリット
+SLIT_L = 90.0
 SLIT_W = 32.0
 # Sketchを使用して角丸長方形を作成してから押し出しカット
 slit_sketch = (
@@ -89,17 +89,33 @@ case = case.cut(
     .translate((-OUTER_L/2 + WALL_T/2, 0, WALL_T))
 )
 
-# 5. Internal Refining (内部の面取り)
+# 5. Internal Refining (内部・天面の仕上げ)
 try:
-    # 印刷を助けるための内部の面取り（ブリッジの開始点を補強）
-    # 天面の縁（内壁の上端）を選択して面取り
-    # ここではBoxSelectorのみを使用して安全に選択
+    # A. 内部の面取り（ブリッジの印刷性向上）
     case = case.edges(cq.selectors.BoxSelector(
         (-INNER_L/2 - 0.5, -INNER_W/2 - 0.5, WALL_T + INNER_H - 0.2), 
         (INNER_L/2 + 0.5, INNER_W/2 + 0.5, WALL_T + INNER_H + 0.2)
     )).chamfer(0.8)
+
+    # B. 天面スリットの縁（上面側）を丸める - 手触りとティッシュの滑りを改善
+    # Z=TOTAL_H にあり、スリットの範囲内にあるエッジをターゲット
+    case = case.edges(cq.selectors.AndSelector(
+        cq.selectors.DirectionSelector((0,0,1)),
+        cq.selectors.BoxSelector(
+            (-SLIT_L/2 - 2, -SLIT_W/2 - 2, TOTAL_H - 0.1),
+            (SLIT_L/2 + 2, SLIT_W/2 + 2, TOTAL_H + 0.1)
+        )
+    )).fillet(1.0)
+
+    # C. 側面の挿入口の縁を丸める - パックの挿入をスムーズに
+    # X=-OUTER_L/2 付近の入り口エッジ
+    case = case.edges(cq.selectors.BoxSelector(
+        (-OUTER_L/2 - 1, -INNER_W/2 - 1, WALL_T - 1),
+        (-OUTER_L/2 + 1, INNER_W/2 + 1, WALL_T + INNER_H + 1)
+    )).fillet(1.0)
+
 except Exception as e:
-    print(f"Internal chamfer error (skipping): {e}")
+    print(f"Final refining error (skipping): {e}")
 
 # 出力とプレビュー
 script_dir = os.path.dirname(__file__)
