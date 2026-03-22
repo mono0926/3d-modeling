@@ -9,23 +9,25 @@ from ocp_vscode import show_object
     - 上部にティッシュを保持するための「リップ（返し）」を設ける。
     - 短辺側の一方からティッシュをスライドして挿入する。
     - 最新の3Dプリンター（Bambu Lab P2S 等）での出力を想定。
-    - サポート材を最小限にするため、リップ部分には内側に面取り（Chamfer）を適用。
+    - 内側の細部（垂直・底面）までフィレットを施したプレミアム仕様。
 
 推奨フィラメント:
-    - PLA / PETG
+    - PETG (推奨) / PLA
     - 実用性と造形の見栄えから、マット系のフィラメントを推奨。
 
 推奨スライサー設定:
+    - 壁 (Wall loops): 3 (推奨。強度と表面品質を両立可能)
     - インフィル (Infill): 15% (Gyroid)
-    - 壁 (Wall loops): 2-3
-    - サポート (Supports): 基本不要（内側の面取りによりブリッジ/オーバーハングを許容範囲に収める設計）
-    - 印刷方向: 底面（Z=0）を下にして配置。
+    - ブリッジ (Bridging): 縦置きにより内側のブリッジは不要になりました。
+    - サポート (Supports): 不要
+    - 印刷方向: 挿入口の反対側（底面）を下にして立たせて配置（推奨）。
+    - 接着 (Adhesion): 倒れ防止のため「ブリム（Brim）」の使用を強く推奨。
 
 印刷統計（予想）:
-    - pocket_tissue_case.step: 印刷時間 約45分、フィラメント使用量 約25g
+    - pocket_tissue_case.step: 印刷時間 約50分、フィラメント使用量 約28g
 
 履歴とプロンプト経緯:
-    - 詳細は同ディレクトリ spacing.md を参照。
+    - 詳細は同ディレクトリの history.md を参照。
 """
 
 # 定数パラメータ (単位: mm)
@@ -62,10 +64,8 @@ case = case.cut(
 )
 
 # --- ステップ4: 内側の仕上げ ---
-# 垂直エッジ (R2.0) と 底面エッジ (R1.0)
 try:
-    # 垂直方向の範囲を制限した BoxSelector で、内側の垂直4隅のみを狙い撃ち
-    # Z範囲を [WALL_T + 0.1, WALL_T + INNER_H - 0.1] にすることで水平エッジを除外
+    # 内側の垂直4隅 (R2.0)
     case = case.edges(cq.selectors.BoxSelector(
         (-INNER_L/2 - 0.1, -INNER_W/2 - 0.1, WALL_T + 0.1),
         (INNER_L/2 + 0.1, INNER_W/2 + 0.1, WALL_T + INNER_H - 0.1)
@@ -75,7 +75,7 @@ except Exception as e:
     print(f"  [ ] Internal vertical fillets failed: {e}")
 
 try:
-    # 内部の底面エッジ
+    # 内部の底面エッジ (R1.0)
     case = case.edges(cq.selectors.BoxSelector(
         (-INNER_L/2 - 0.1, -INNER_W/2 - 0.1, WALL_T - 0.1),
         (INNER_L/2 + 0.1, INNER_W/2 + 0.1, WALL_T + 0.1)
@@ -85,7 +85,7 @@ except Exception as e:
     print(f"  [ ] Internal bottom fillets failed: {e}")
 
 try:
-    # 内部天面の面取り（ブリッジ向上 / 0.8mm）
+    # 内部天面の面取り（0.8mm）
     case = case.edges(cq.selectors.BoxSelector(
         (-INNER_L/2 - 0.5, -INNER_W/2 - 0.5, WALL_T + INNER_H - 0.2), 
         (INNER_L/2 + 0.5, INNER_W/2 + 0.5, WALL_T + INNER_H + 0.2)
@@ -119,7 +119,6 @@ case = case.cut(
 
 # --- ステップ6: 各開口部自体の仕上げ ---
 try:
-    # 天面スリット
     case = case.edges(cq.selectors.BoxSelector(
         (-SLIT_L/2 - 0.5, -SLIT_W/2 - 0.5, TOTAL_H - 0.1),
         (SLIT_L/2 + 0.5, SLIT_W/2 + 0.5, TOTAL_H + 0.1)
@@ -129,7 +128,6 @@ except Exception as e:
     print(f"  [ ] Slit edge chamfer failed: {e}")
 
 try:
-    # 挿入口
     case = case.edges(cq.selectors.BoxSelector(
         (-OUTER_L/2 - 0.1, -slot_w/2 - 0.1, WALL_T - 0.1),
         (-OUTER_L/2 + 0.1,  slot_w/2 + 0.1, WALL_T + INNER_H + 0.1)
@@ -137,6 +135,16 @@ try:
     print("  [x] Slot entrance chamfer applied.")
 except Exception as e:
     print(f"  [ ] Slot entrance chamfer failed: {e}")
+
+# --- ステップ7: 最終的な向きの調整（縦置き化） ---
+# ユーザー提案に従い、挿入口の反対側を下にして立たせる状態にする
+# Y軸を中心に-90度回転させ、Z軸方向に持ち上げて底(Z=0)に合わせる
+try:
+    case = case.rotate((0,0,0), (0,1,0), -90)
+    case = case.translate((0, 0, OUTER_L/2))
+    print("  [x] Rotated to vertical orientation (stable end on bed).")
+except Exception as e:
+    print(f"  [ ] Rotation failed: {e}")
 
 # 出力とプレビュー
 script_dir = os.path.dirname(__file__)
