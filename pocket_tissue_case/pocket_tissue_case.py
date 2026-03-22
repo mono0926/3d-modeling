@@ -90,36 +90,43 @@ case = case.cut(
 )
 
 # 5. Internal Refining (内部・天面の仕上げ)
-# 修正案: セレクターエラーを回避するため、単純な BoxSelector のみを使用して確実にエッジを選択
+# 修正案: 幾何学的エラーを避けるため、フィレットの代わりに面取り (Chamfer) を採用し、半径を 0.5mm に抑える
+print("Applying final refinements...")
+
+# A. 内部の面に面取り（ブリッジの印刷性向上）
 try:
-    # A. 内部の面取り（ブリッジの印刷性向上）
     case = case.edges(cq.selectors.BoxSelector(
         (-INNER_L/2 - 0.5, -INNER_W/2 - 0.5, WALL_T + INNER_H - 0.2), 
         (INNER_L/2 + 0.5, INNER_W/2 + 0.5, WALL_T + INNER_H + 0.2)
     )).chamfer(0.8)
+    print("  [x] Internal lip chamfer applied.")
 except Exception as e:
-    print(f"Internal chamfer error (skipping): {e}")
+    print(f"  [ ] Internal lip chamfer failed: {e}")
 
+# B. 天面スリットの縁（上面側）を面取り - 取り出しの滑りを改善
 try:
-    # B. 天面スリットの縁（上面側）を丸める - 手触りとティッシュの滑りを改善
-    # スリットの範囲 (SLIT_L x SLIT_W) を少しだけ外側に広げたボックスで選択
+    # Z=TOTAL_H にあり、スリット周囲にあるエッジをターゲット
+    # 範囲をスリット寸法 (90x32) よりわずかに広く (91x33) 設定
+    # DirectionSelector は特定の形状のエッジで 'getAngle' エラーを起こすため BoxSelector のみを使用
     case = case.edges(cq.selectors.BoxSelector(
-        (-SLIT_L/2 - 0.1, -SLIT_W/2 - 0.1, TOTAL_H - 0.1),
-        (SLIT_L/2 + 0.1, SLIT_W/2 + 0.1, TOTAL_H + 0.1)
-    )).fillet(1.0)
+        (-SLIT_L/2 - 0.5, -SLIT_W/2 - 0.5, TOTAL_H - 0.1),
+        (SLIT_L/2 + 0.5, SLIT_W/2 + 0.5, TOTAL_H + 0.1)
+    )).chamfer(0.5)
+    print("  [x] Slit edge chamfer applied.")
 except Exception as e:
-    print(f"Slit fillet error (skipping): {e}")
+    print(f"  [ ] Slit edge chamfer failed: {e}")
 
+# C. 側面の挿入口の縁を面取り - パックの挿入をスムーズに
 try:
-    # C. 側面の挿入口の縁を丸める - パックの挿入をスムーズに
-    # X=-OUTER_L/2 (入り口面) の Z=WALL_T から Z=WALL_T+INNER_H の範囲にある垂直エッジ
-    # ここではBoxSelectorで範囲内の垂直方向のエッジをターゲット
+    # X=-OUTER_L/2 の挿入口（コの字型）のみを狙い撃ち
+    # 挿入口の幅は slot_w (70mm)
     case = case.edges(cq.selectors.BoxSelector(
         (-OUTER_L/2 - 0.1, -slot_w/2 - 0.1, WALL_T - 0.1),
         (-OUTER_L/2 + 0.1,  slot_w/2 + 0.1, WALL_T + INNER_H + 0.1)
-    )).fillet(1.0)
+    )).chamfer(0.5)
+    print("  [x] Slot entrance chamfer applied.")
 except Exception as e:
-    print(f"Slot entrance fillet error (skipping): {e}")
+    print(f"  [ ] Slot entrance chamfer failed: {e}")
 
 # 出力とプレビュー
 script_dir = os.path.dirname(__file__)
