@@ -61,32 +61,42 @@ case = case.cut(
     .translate((0, 0, WALL_T))
 )
 
-# 3. Top Opening (上部の取り出し口)
-# リップを残して中央をカット
-opening_l = INNER_L - LIP_W * 2
-opening_w = INNER_W - LIP_W * 2
+# 3. Top Opening (天面の取り出し用スリット)
+# 改良案: 80mm x 32mm の角丸長方形のスリット
+SLIT_L = 80.0
+SLIT_W = 32.0
+# Sketchを使用して角丸長方形を作成してから押し出しカット
+slit_sketch = (
+    cq.Sketch()
+    .rect(SLIT_L, SLIT_W)
+    .vertices()
+    .fillet(8.0)
+)
 case = case.cut(
     cq.Workplane("XY")
-    .box(opening_l, opening_w, LIP_T + 2, centered=(True, True, False))
+    .placeSketch(slit_sketch)
+    .extrude(LIP_T + 10)
     .translate((0, 0, WALL_T + INNER_H))
 )
 
-# 4. Side Insertion Slot (側面のスライド挿入部)
-# 短辺側の一方をカットして入り口を作る
+# 4. Side Insertion Slot (側面のスライド挿入口)
+# 改良案: 左右 4mm ずつ段差（壁）を残すように幅を制限
+slot_w = INNER_W - 8.0 # 左右4mmずつ = 8mm減少
 case = case.cut(
     cq.Workplane("XY")
-    .box(WALL_T + 2, INNER_W, INNER_H, centered=(True, True, False))
+    .box(WALL_T + 5, slot_w, INNER_H, centered=(True, True, False))
     .translate((-OUTER_L/2 + WALL_T/2, 0, WALL_T))
 )
 
 # 5. Internal Refining (内部の面取り)
 try:
     # 印刷を助けるための内部の面取り（ブリッジの開始点を補強）
-    # リップ（天井）の内側エッジを選択 (BoxSelectorは (min_xyz), (max_xyz) のタプル形式)
+    # 天面の縁（内壁の上端）を選択して面取り
+    # ここではBoxSelectorのみを使用して安全に選択
     case = case.edges(cq.selectors.BoxSelector(
-        (-INNER_L/2 + 0.1, -INNER_W/2 + 0.1, WALL_T + INNER_H - 0.1), 
-        (INNER_L/2 - 0.1, INNER_W/2 - 0.1, WALL_T + INNER_H + 0.1)
-    )).chamfer(1.0)
+        (-INNER_L/2 - 0.5, -INNER_W/2 - 0.5, WALL_T + INNER_H - 0.2), 
+        (INNER_L/2 + 0.5, INNER_W/2 + 0.5, WALL_T + INNER_H + 0.2)
+    )).chamfer(0.8)
 except Exception as e:
     print(f"Internal chamfer error (skipping): {e}")
 
