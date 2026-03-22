@@ -55,9 +55,10 @@ except Exception as e:
 
 # 2. Hollow Out (内部のくり抜き)
 # 内部のティッシュスペースをカット
+# IMPORTANT: ここで高さを出しすぎると天面まで突き抜けてしまうので、INNER_Hに留める
 case = case.cut(
     cq.Workplane("XY")
-    .box(INNER_L, INNER_W, INNER_H + 10, centered=(True, True, False))
+    .box(INNER_L, INNER_W, INNER_H, centered=(True, True, False))
     .translate((0, 0, WALL_T))
 )
 
