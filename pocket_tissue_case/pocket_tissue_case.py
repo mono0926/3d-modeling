@@ -90,32 +90,36 @@ case = case.cut(
 )
 
 # 5. Internal Refining (内部・天面の仕上げ)
+# 修正案: セレクターエラーを回避するため、単純な BoxSelector のみを使用して確実にエッジを選択
 try:
     # A. 内部の面取り（ブリッジの印刷性向上）
     case = case.edges(cq.selectors.BoxSelector(
         (-INNER_L/2 - 0.5, -INNER_W/2 - 0.5, WALL_T + INNER_H - 0.2), 
         (INNER_L/2 + 0.5, INNER_W/2 + 0.5, WALL_T + INNER_H + 0.2)
     )).chamfer(0.8)
-
-    # B. 天面スリットの縁（上面側）を丸める - 手触りとティッシュの滑りを改善
-    # Z=TOTAL_H にあり、スリットの範囲内にあるエッジをターゲット
-    case = case.edges(cq.selectors.AndSelector(
-        cq.selectors.DirectionSelector((0,0,1)),
-        cq.selectors.BoxSelector(
-            (-SLIT_L/2 - 2, -SLIT_W/2 - 2, TOTAL_H - 0.1),
-            (SLIT_L/2 + 2, SLIT_W/2 + 2, TOTAL_H + 0.1)
-        )
-    )).fillet(1.0)
-
-    # C. 側面の挿入口の縁を丸める - パックの挿入をスムーズに
-    # X=-OUTER_L/2 付近の入り口エッジ
-    case = case.edges(cq.selectors.BoxSelector(
-        (-OUTER_L/2 - 1, -INNER_W/2 - 1, WALL_T - 1),
-        (-OUTER_L/2 + 1, INNER_W/2 + 1, WALL_T + INNER_H + 1)
-    )).fillet(1.0)
-
 except Exception as e:
-    print(f"Final refining error (skipping): {e}")
+    print(f"Internal chamfer error (skipping): {e}")
+
+try:
+    # B. 天面スリットの縁（上面側）を丸める - 手触りとティッシュの滑りを改善
+    # スリットの範囲 (SLIT_L x SLIT_W) を少しだけ外側に広げたボックスで選択
+    case = case.edges(cq.selectors.BoxSelector(
+        (-SLIT_L/2 - 0.1, -SLIT_W/2 - 0.1, TOTAL_H - 0.1),
+        (SLIT_L/2 + 0.1, SLIT_W/2 + 0.1, TOTAL_H + 0.1)
+    )).fillet(1.0)
+except Exception as e:
+    print(f"Slit fillet error (skipping): {e}")
+
+try:
+    # C. 側面の挿入口の縁を丸める - パックの挿入をスムーズに
+    # X=-OUTER_L/2 (入り口面) の Z=WALL_T から Z=WALL_T+INNER_H の範囲にある垂直エッジ
+    # ここではBoxSelectorで範囲内の垂直方向のエッジをターゲット
+    case = case.edges(cq.selectors.BoxSelector(
+        (-OUTER_L/2 - 0.1, -slot_w/2 - 0.1, WALL_T - 0.1),
+        (-OUTER_L/2 + 0.1,  slot_w/2 + 0.1, WALL_T + INNER_H + 0.1)
+    )).fillet(1.0)
+except Exception as e:
+    print(f"Slot entrance fillet error (skipping): {e}")
 
 # 出力とプレビュー
 script_dir = os.path.dirname(__file__)
