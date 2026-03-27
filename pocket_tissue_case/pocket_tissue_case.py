@@ -31,12 +31,12 @@ from ocp_vscode import show_object
 """
 
 # 定数パラメータ (単位: mm)
-INNER_L = 110.0      # 内部 長さ
-INNER_W = 78.0       # 内部 幅
-INNER_H = 13.0       # 内部 高さ
-WALL_T = 2.0         # 壁の厚み
+INNER_L = 102.0      # 内部 長さ
+INNER_W = 72.0       # 内部 幅
+INNER_H = 12.0       # 内部 高さ
+WALL_T = 1.2         # 壁の厚み
 LIP_W = 5.0          # 上部のリップ（返し）の幅
-LIP_T = 1.5          # リップの厚み
+LIP_T = 1.2          # リップの厚み
 
 # 算出値
 OUTER_L = INNER_L + WALL_T * 2
@@ -87,7 +87,7 @@ except Exception as e:
 try:
     # 内部天面の面取り（0.8mm）
     case = case.edges(cq.selectors.BoxSelector(
-        (-INNER_L/2 - 0.5, -INNER_W/2 - 0.5, WALL_T + INNER_H - 0.2), 
+        (-INNER_L/2 - 0.5, -INNER_W/2 - 0.5, WALL_T + INNER_H - 0.2),
         (INNER_L/2 + 0.5, INNER_W/2 + 0.5, WALL_T + INNER_H + 0.2)
     )).chamfer(0.8)
     print("  [x] Internal lip chamfer applied.")
@@ -110,7 +110,7 @@ case = case.cut(
     .translate((0, 0, WALL_T + INNER_H))
 )
 
-slot_w = INNER_W - 8.0 
+slot_w = INNER_W - 8.0
 case = case.cut(
     cq.Workplane("XY")
     .box(WALL_T + 5, slot_w, INNER_H, centered=(True, True, False))
