@@ -108,10 +108,13 @@ def create_plate(colors):
         else:
             texts_compound = texts_compound.fuse(t.val())
             
+    # Assemblyを利用して色を分ける
+    assy = cq.Assembly()
+    assy.add(plate, name="Base", color=cq.Color(0.9, 0.9, 0.9, 1.0)) # 少しグレー寄りの白の方が見やすい
     if texts_compound is not None:
-        plate = plate.union(texts_compound)
+        assy.add(texts_compound, name="Text", color=cq.Color(0.1, 0.1, 0.1, 1.0)) # 黒
         
-    return plate
+    return assy
 
 # ocp_vscodeがインポート可能かチェック（プレビュー用）
 try:
@@ -122,20 +125,21 @@ except ImportError:
 
 # 各プレートの生成とエクスポート
 output_dir = os.path.dirname(os.path.abspath(__file__))
+main_assy = cq.Assembly()
 
-plates = []
 for idx, color_set in enumerate(COLOR_SETS):
     print(f"Generating Plate {idx + 1}...")
-    plate = create_plate(color_set)
-    plates.append(plate)
+    assy = create_plate(color_set)
     
     # STEPファイルの出力
     step_filename = os.path.join(output_dir, f"acrylic_marker_palette_{idx + 1}.step")
-    cq.exporters.export(plate, step_filename)
+    assy.save(step_filename, "STEP")
     print(f"Exported {step_filename}")
+    
+    # プレビュー用メインアセンブリに追加
+    offset_y = -idx * (PLATE_SIZE + 10)
+    main_assy.add(assy, name=f"Plate_{idx+1}", loc=cq.Location((0, offset_y, 0)))
 
 # プレビュー
 if has_ocp:
-    for idx, plate in enumerate(plates):
-        offset_y = -idx * (PLATE_SIZE + 10)
-        show_object(plate.translate((0, offset_y, 0)), name=f"Plate_{idx+1}")
+    show_object(main_assy, name="Acrylic_Marker_Palette_Sets")
