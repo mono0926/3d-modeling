@@ -5,32 +5,35 @@ import os
 OUTER_DIAMETER = 29.3  # ユーザー測定の付属ノズル外径
 RADIUS_OUTER = OUTER_DIAMETER / 2.0
 BASE_THICKNESS = 2.0   # ベースプレートの厚さ
-# ねじをZ=0から作成し、ベースプレートと完全に交差させる
 TOTAL_HEIGHT = 14.0    # ねじ全体の高さ（ベースプレート埋め込み分2mmを含む）
 THREAD_HEIGHT = 10.0   # ねじ山を切る高さ（Z=0からZ=10.0まで）
 PLATE_WIDTH = 120.0
 PLATE_DEPTH = 40.0
 
-def create_screw(pitch):
+def create_screw(pitch, overlap=0.2):
     # ねじ山の高さ (0.6 * pitch)
     thread_depth = 0.6 * pitch
     r_base = RADIUS_OUTER - thread_depth
     w_base = 0.8 * pitch  # 底辺幅（隣接するねじ山との間に少し隙間を空ける）
 
     # 1. ベース円柱とガイド用テーパーの作成
-    # 高さを TOTAL_HEIGHT にし、上面エッジを大きく面取りして導入ガイドにする
-    cyl = cq.Workplane("XY").cylinder(height=TOTAL_HEIGHT, radius=r_base, centered=(True, True, False))
+    # Z=0 から TOTAL_HEIGHT までの円柱にするため、centered=True で作ってからZ方向に移動
+    cyl = cq.Workplane("XY").cylinder(height=TOTAL_HEIGHT, radius=r_base, centered=(True, True, True))
+    cyl = cyl.translate((0, 0, TOTAL_HEIGHT / 2.0))
     cyl = cyl.edges(">Z").chamfer(1.5)
 
     # 2. らせんねじ山の作成
-    # Z=0 から Z=THREAD_HEIGHT までらせんを作成
-    path = cq.Wire.makeHelix(pitch=pitch, height=THREAD_HEIGHT, radius=r_base)
+    # 重なりを持たせるため、らせんの半径を overlap 分だけ内側にめり込ませる
+    r_helix = r_base - overlap
 
-    # XZ平面に三角形の断面を配置
+    # Z=0 から Z=THREAD_HEIGHT までらせんを作成
+    path = cq.Wire.makeHelix(pitch=pitch, height=THREAD_HEIGHT, radius=r_helix)
+
+    # XZ平面に三角形の断面を配置（めり込ませるため r_helix から RADIUS_OUTER まで描く）
     profile = (cq.Workplane("XZ")
-               .moveTo(r_base, -w_base / 2)
+               .moveTo(r_helix, -w_base / 2)
                .lineTo(RADIUS_OUTER, 0)
-               .lineTo(r_base, w_base / 2)
+               .lineTo(r_helix, w_base / 2)
                .close())
 
     # らせんパスに沿ってスイープ
