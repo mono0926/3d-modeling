@@ -34,10 +34,10 @@ INSERT_DEPTH = 4.4       # 差し込み口の深さ (実測)
 SOCKET_WALL = 2.1         # ソケット部の肉厚 (内径は SOCKET_DIAMETER - 2*SOCKET_WALL)
 
 # フランジ部（これ以上深く刺さらないようにする出っ張り）
-FLANGE_OD = 34.0          # フランジの外径（本体に突き当てるためソケット径より一回り大きく）
-# 印刷時にサポートなしで出力できるよう、広がり角度を45度に設計。
-# 半径の広がり分と同じ高さを確保することで、傾斜角45度を実現
-FLANGE_HEIGHT = (FLANGE_OD - SOCKET_DIAMETER) / 2.0  # 約 2.225mm
+FLANGE_OD = SOCKET_DIAMETER + 2.0  # フランジの外径（片側1.0mmの段差で十分なストッパーとして機能）
+# 3Dプリント時にサポートなしで印刷できるよう、広がり角度を45度に設計。
+# 半径の広がり分（1.0mm）と同じ高さを確保することで、傾斜角45度を実現
+FLANGE_HEIGHT = (FLANGE_OD - SOCKET_DIAMETER) / 2.0  # 1.0mm
 
 # 中間部（絞り部）
 TRANSITION_HEIGHT = 12.0  # フランジ上端からPTFEソケットへ絞り込む高さ
