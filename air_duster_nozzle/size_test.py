@@ -2,9 +2,9 @@ import cadquery as cq
 import os
 
 # ==================== パラメータ定義 ====================
-BASE_THICKNESS = 2.0   # ベースプレートの厚さ
+BASE_THICKNESS = 1.2   # ベースプレートの厚さ（極薄化）
 INSERT_DEPTH = 4.4     # ユーザー測定の差し込み口の深さ
-TOTAL_HEIGHT = BASE_THICKNESS + INSERT_DEPTH # 円柱全体の高さ (6.4mm)
+TOTAL_HEIGHT = BASE_THICKNESS + INSERT_DEPTH # 円柱全体の高さ (5.6mm)
 SOCKET_WALL = 2.1      # 本番ノズルと同一の肉厚
 PLATE_WIDTH = 80.0
 PLATE_DEPTH = 45.0
@@ -13,7 +13,7 @@ def create_hollow_cylinder(diameter):
     r_outer = diameter / 2.0
     r_inner = (diameter - 2.0 * SOCKET_WALL) / 2.0
     
-    # 1. 外側円筒 (centered=True で作ってからZ方向に移動)
+    # 1. 外側円筒
     outer = cq.Workplane("XY").cylinder(height=TOTAL_HEIGHT, radius=r_outer, centered=(True, True, True))
     outer = outer.translate((0, 0, TOTAL_HEIGHT / 2.0))
     
@@ -36,7 +36,6 @@ cyl_295 = create_hollow_cylinder(29.5)
 cyl_296 = create_hollow_cylinder(29.6)
 
 # プレートに配置して結合 (Z=0 から配置して完全に交差させる)
-# 配置間隔は 30mm (中心は -15.0, 15.0)
 result = (plate
           .union(cyl_295.translate((-15.0, 0, 0)))
           .union(cyl_296.translate((15.0, 0, 0)))
@@ -51,7 +50,7 @@ inner_cut_296 = cq.Workplane("XY").cylinder(height=BASE_THICKNESS + 0.2, radius=
 
 result = result.cut(inner_cut_295).cut(inner_cut_296)
 
-# 識別用のマーク（深さ1mmのデボス穴）を一括で彫る
+# 識別用のマーク（1.0mm角の貫通穴）を一括で開ける
 # 29.5mm (x=-15.0) -> 1個
 # 29.6mm (x= 15.0) -> 2個
 points = [
@@ -63,8 +62,8 @@ result = (result
           .faces(">Z")
           .workplane()
           .pushPoints(points)
-          .rect(1.5, 1.5)
-          .cutBlind(-1.0)) # 上面から下方向へ1mmカット
+          .rect(1.0, 1.0)
+          .cutThruAll())
 
 # OCP CAD Viewerでプレビュー
 try:
