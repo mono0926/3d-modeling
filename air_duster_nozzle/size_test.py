@@ -3,7 +3,8 @@ import os
 
 # パラメータ
 BASE_THICKNESS = 2.0   # ベースプレートの厚さ
-TOTAL_HEIGHT = 17.0    # テストシリンダー全体の高さ（ベースプレート埋め込み分2mmを含む、露出高15mm）
+INSERT_DEPTH = 4.4     # ユーザー測定の差し込み口の深さ
+TOTAL_HEIGHT = BASE_THICKNESS + INSERT_DEPTH # 円柱全体の高さ (6.4mm)
 PLATE_WIDTH = 150.0
 PLATE_DEPTH = 45.0
 
@@ -13,8 +14,8 @@ def create_cylinder(diameter):
     cyl = cq.Workplane("XY").cylinder(height=TOTAL_HEIGHT, radius=radius, centered=(True, True, True))
     cyl = cyl.translate((0, 0, TOTAL_HEIGHT / 2.0))
     
-    # 差し込みやすくするために上端を1.0mm面取り
-    cyl = cyl.edges(">Z").chamfer(1.0)
+    # 差し込み口が浅いため、接触面積を確保しつつ導入しやすくするために面取りを0.5mmに抑える
+    cyl = cyl.edges(">Z").chamfer(0.5)
     return cyl
 
 # プレートの作成（Z=0からZ=BASE_THICKNESSまで）
@@ -27,7 +28,6 @@ cyl_293 = create_cylinder(29.3)
 cyl_294 = create_cylinder(29.4)
 
 # プレートに配置して結合 (Z=0 から配置して完全に交差させる)
-# 配置間隔は 35mm (中心は -52.5, -17.5, 17.5, 52.5)
 result = (plate
           .union(cyl_291.translate((-52.5, 0, 0)))
           .union(cyl_292.translate((-17.5, 0, 0)))
@@ -36,10 +36,6 @@ result = (plate
          )
 
 # 識別用のマーク（深さ1mmのデボス穴）を一括で彫る
-# 29.1mm (x=-52.5) -> 1個
-# 29.2mm (x=-17.5) -> 2個
-# 29.3mm (x= 17.5) -> 3個
-# 29.4mm (x= 52.5) -> 4個
 points = [
     (-52.5, -14),                       # 29.1用 (1個)
     (-19.5, -14), (-15.5, -14),         # 29.2用 (2個)
