@@ -40,7 +40,7 @@ FLANGE_OD = SOCKET_DIAMETER + 2.0  # フランジの外径（片側1.0mmの段�
 FLANGE_HEIGHT = (FLANGE_OD - SOCKET_DIAMETER) / 2.0  # 1.0mm
 
 # 中間部（絞り部）
-TRANSITION_HEIGHT = 24.0  # 絞り部の高さ (流体力学的な圧力損失を低減するため、12.0mmから24.0mmに延長)
+TRANSITION_HEIGHT = 42.0  # 絞り部の高さ (収縮半角を流体力学的に理想的な15度に設定するため、42.0mmに延長)
 
 # PTFEチューブ側（圧入ソケット部）
 PTFE_INSERT_DEPTH = 15.0  # PTFEチューブを差し込む深さ
