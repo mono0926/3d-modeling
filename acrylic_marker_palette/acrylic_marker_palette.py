@@ -3,11 +3,11 @@ import os
 
 """
 設計要件:
-    - Arrtxアクリルマーカー60A（60色セット）用の色見本パレット。
-    - 200mm x 120mm x 1.2mm の板を1枚作成。
-        - 10列×6行のグリッド構成（画像2枚目の色ラベルと同じ並び）。
-        - スペース効率を意識して無駄に大きくなりすぎないように配置。
-    - 各色には、実際に塗るための凹み（16x10mm、深さ0.4mm）と、少し浮き出た色名のテキスト（高さ0.6mm）を配置。
+    - Arrtxアクリルマーカー64色用の色見本パレット。
+    - 120mm x 120mm x 1.2mm の板を4枚作成。
+        - 印刷時間・フィラメント節約のため、厚みを2.0mmから1.2mmに変更。凹み底の厚みは0.8mm（4レイヤー）確保されており強度は十分。
+    - 1枚あたり16色（4列×4行）を配置。
+    - 各色には、実際に塗るための凹み（24x14mm、深さ0.4mm）と、少し浮き出た色名のテキスト（高さ0.6mm）を配置。
     - ユーザーの手間を省くため、ベースとテキストを別部品とする「アセンブリ（Assembly）」としてSTEP出力。
         - Bambu Studio 読み込み時に自動でマルチパーツ認識され、黒色フィラメントを手軽に割り当て可能。
 
@@ -23,56 +23,67 @@ import os
     - パージ量 (Flushing Volumes): 今回はZ方向で「白→黒」の1回しか切り替えが発生しない上、黒が圧倒的に勝ちやすいため、マルチプライヤはデフォルトの 1.00 または 0.5 等に下げても全く問題なく綺麗に発色する。
 
 印刷統計（予想）:
-    - プレート（200x120mm）1枚: 印刷時間 約70-80分、フィラメント使用量 約33g
+    - 1枚あたり: 印刷時間 約45分、フィラメント使用量 約20g
 
 履歴とプロンプト経緯:
     - 詳細は同ディレクトリの history.md を参照。
 """
 
-PLATE_WIDTH = 200.0
-PLATE_HEIGHT = 120.0
+PLATE_SIZE = 120.0
 PLATE_THICKNESS = 1.2
-CELL_SPACING = 20.0
-RECESS_WIDTH = 16.0
-RECESS_HEIGHT = 10.0
+CELL_SIZE = 30.0
+RECESS_WIDTH = 24.0
+RECESS_HEIGHT = 14.0
 RECESS_DEPTH = 0.4
 TEXT_HEIGHT = 0.6
-FONT_SIZE = 4.0
+FONT_SIZE = 6.0
 
-# Arrtx 60A COLORS (10列 x 6行 = 60色)
-COLOR_SET = [
-    # 1行目
-    "00", "C02", "02", "03", "08", "10", "C14", "C17", "17", "18",
-    # 2行目
-    "C19", "19", "20", "C21", "21", "24", "25", "26", "28", "30",
-    # 3行目
-    "32", "35", "38", "41", "42", "44", "45", "46", "47", "49",
-    # 4行目
-    "50", "C51", "C52", "C53", "55", "56", "57", "59", "C60", "C61",
-    # 5行目
-    "67", "70", "71", "74", "76", "80", "90", "91", "92", "98",
-    # 6行目
-    "F05", "F11", "F22", "F33", "F55", "F66", "J4", "J10", "J30", "J35"
+# 4セットのカラー定義
+COLOR_SETS = [
+    [
+        "A0", "A1", "A2", "A3",
+        "A4", "A5", "A7", "A8",
+        "A9", "A13", "A14", "A15",
+        "A17", "A20", "A21", "A30"
+    ],
+    [
+        "A33", "A34", "A35", "A40",
+        "A45", "A46", "A49", "A50",
+        "A51", "A52", "A54", "A55",
+        "A56", "A57", "A58", "A59"
+    ],
+    [
+        "A60", "A65", "A66", "A67",
+        "A68", "A69c", "A69", "A70",
+        "A71", "A72", "A73", "A75",
+        "A83", "A84", "A85", "A86"
+    ],
+    [
+        "A89", "A90", "A91", "A95",
+        "A97", "A99", "A103", "A111",
+        "A115", "A118", "A120", "A140",
+        "A150", "A160", "A190", "A200"
+    ]
 ]
 
-# 10x6 のセルの中心座標を計算
+# セル（4x4）の中心座標を計算
 locs = []
-for row in range(6):
-    for col in range(10):
-        # 200mm(W) x 120mm(H) の板の中心が(0,0)の場合、各セルの中心を求める
-        x = -90.0 + col * CELL_SPACING
-        y = 50.0 - row * CELL_SPACING
+for row in range(4):
+    for col in range(4):
+        # 120mmの板の中心が(0,0)の場合、各セルの中心を求める
+        x = -45.0 + col * 30.0
+        y = 45.0 - row * 30.0
         locs.append((x, y))
 
 def create_plate(colors):
     # ベースの板を作成（Z=0からPLATE_THICKNESSまで）
-    plate = cq.Workplane("XY").rect(PLATE_WIDTH, PLATE_HEIGHT).extrude(PLATE_THICKNESS)
+    plate = cq.Workplane("XY").rect(PLATE_SIZE, PLATE_SIZE).extrude(PLATE_THICKNESS)
 
     # 角を少し丸める（フィレット）
-    plate = plate.edges("|Z").fillet(3.0)
+    plate = plate.edges("|Z").fillet(2.0)
 
-    # 凹みエリアの座標（セル中心からY方向に少し上にずらす）
-    recess_locs = [(x, y + 3.0) for x, y in locs]
+    # 凹みエリアの座標（セル中心からY方向に少しずらす）
+    recess_locs = [(x, y + 2.0) for x, y in locs]
 
     # トップ面から凹みをカット
     top_plane = cq.Workplane("XY").workplane(offset=PLATE_THICKNESS)
@@ -85,7 +96,7 @@ def create_plate(colors):
         x, y = locs[i]
         # テキストは凹みの左端に合わせ、下部に配置
         text_x = x - (RECESS_WIDTH / 2.0)
-        text_y = y - 6.0  # 微調整：凹みの下
+        text_y = y - 9.0  # 微調整：凹みの下
 
         # distance は押し出しの高さ
         t = cq.Workplane("XY").workplane(offset=PLATE_THICKNESS).center(text_x, text_y).text(
@@ -116,17 +127,23 @@ try:
 except ImportError:
     has_ocp = False
 
-# プレートの生成とエクスポート
+# 各プレートの生成とエクスポート
 output_dir = os.path.dirname(os.path.abspath(__file__))
+main_assy = cq.Assembly()
 
-print("Generating Acrylic Marker Palette...")
-assy = create_plate(COLOR_SET)
+for idx, color_set in enumerate(COLOR_SETS):
+    print(f"Generating Plate {idx + 1}...")
+    assy = create_plate(color_set)
 
-# STEPファイルの出力
-step_filename = os.path.join(output_dir, "acrylic_marker_palette.step")
-assy.save(step_filename, "STEP")
-print(f"Exported {step_filename}")
+    # STEPファイルの出力
+    step_filename = os.path.join(output_dir, f"acrylic_marker_palette_{idx + 1}.step")
+    assy.save(step_filename, "STEP")
+    print(f"Exported {step_filename}")
+
+    # プレビュー用メインアセンブリに追加
+    offset_y = -idx * (PLATE_SIZE + 10)
+    main_assy.add(assy, name=f"Plate_{idx+1}", loc=cq.Location((0, offset_y, 0)))
 
 # プレビュー
 if has_ocp:
-    show_object(assy, name="Acrylic_Marker_Palette_Arrtx_60A")
+    show_object(main_assy, name="Acrylic_Marker_Palette_Sets")
