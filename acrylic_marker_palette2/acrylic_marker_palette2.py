@@ -33,8 +33,8 @@ PLATE_WIDTH = 200.0
 PLATE_HEIGHT = 120.0
 PLATE_THICKNESS = 1.2
 CELL_SPACING = 20.0
-RECESS_WIDTH = 16.0
-RECESS_HEIGHT = 10.0
+RECESS_WIDTH = 12.0
+RECESS_HEIGHT = 12.0
 RECESS_DEPTH = 0.4
 TEXT_HEIGHT = 0.6
 FONT_SIZE = 4.0
@@ -72,7 +72,7 @@ def create_plate(colors):
     plate = plate.edges("|Z").fillet(3.0)
 
     # 凹みエリアの座標（セル中心からY方向に少し上にずらす）
-    recess_locs = [(x, y + 3.0) for x, y in locs]
+    recess_locs = [(x, y + 2.0) for x, y in locs]
 
     # トップ面から凹みをカット
     top_plane = cq.Workplane("XY").workplane(offset=PLATE_THICKNESS)
@@ -83,16 +83,16 @@ def create_plate(colors):
     texts_compound = None
     for i, color_name in enumerate(colors):
         x, y = locs[i]
-        # テキストは凹みの左端に合わせ、下部に配置
-        text_x = x - (RECESS_WIDTH / 2.0)
-        text_y = y - 6.0  # 微調整：凹みの下
+        # テキストはセル中心のX軸に合わせ（センター配置）、下部に配置
+        text_x = x
+        text_y = y - 7.0  # 微調整：凹みの下
 
         # distance は押し出しの高さ
         t = cq.Workplane("XY").workplane(offset=PLATE_THICKNESS).center(text_x, text_y).text(
             txt=color_name,
             fontsize=FONT_SIZE,
             distance=TEXT_HEIGHT,
-            halign="left",
+            halign="center",
             valign="center",
             font="Arial"
         )
