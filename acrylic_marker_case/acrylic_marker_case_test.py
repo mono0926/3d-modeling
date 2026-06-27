@@ -43,7 +43,7 @@ CLIP_BLOCK_W = 16.0
 BASE_T = 2.5
 GROOVE_H = 3.5
 WALL_Z = 16.5
-WALL_T = 6.0
+WALL_T = 7.0
 
 PALETTE_L = 16.0
 CLEARANCE_L = 2.0
@@ -149,8 +149,8 @@ def create_case(pen_numbers):
                 texts_compound = texts_compound.fuse(t.val())
 
     # 4. マグネット穴と位置合わせピン
-    MAGNET_D = 5.2
-    MAGNET_H = 2.2
+    MAGNET_D = 6.1
+    MAGNET_H = 3.1
 
     hole_centers = [
         ( INNER_W/2 + WALL_T/2,  INNER_L/2 + WALL_T/2),
