@@ -3,11 +3,11 @@ import os
 
 """
 設計要件:
-    - 13mm径、長さ151mmのアクリルマーカーを6本収納。
+    - 13mm径、長さ151mmのアクリルマーカーを収納。
     - パレット（色見本用窪み）と色番号のテキスト（高さ0.6mm）を両端に配置。
     - 中央にPETG向けの適度なしなりを持たせたスナップフィット（Cクリップ）を配置。
-    - 2つのケースを重ねて12本用携帯ケースになる（スタッキング設計）。
-    - 各ケース（1と2）で異なる色番号のテキストを出力するため、アセンブリとして2種類のSTEPを生成。
+    - 2つのケースを重ねて携帯ケースになる（スタッキング設計）。
+    - 各ケース（1と2）とテスト用（1本分）のアセンブリとしてSTEPを生成。
     - Bambu Studioでマルチパーツとして認識され、文字のみを黒に設定可能。
 
 推奨フィラメント:
@@ -29,7 +29,6 @@ import os
 # --- Parameters ---
 PEN_D = 13.0
 PEN_L = 151.0
-N_PENS = 6
 PITCH = 18.0
 
 PEN_CLEARANCE = 0.6
@@ -49,10 +48,7 @@ PALETTE_L = 16.0
 CLEARANCE_L = 2.0
 TOTAL_PEN_L = PEN_L + CLEARANCE_L
 INNER_L = TOTAL_PEN_L + 2 * PALETTE_L
-INNER_W = N_PENS * PITCH
-
 TOTAL_L = INNER_L + 2 * WALL_T
-TOTAL_W = INNER_W + 2 * WALL_T
 
 GROOVE_TOP_Z = BASE_T + GROOVE_H
 PEN_Z = BASE_T + GROOVE_D / 2.0
@@ -61,25 +57,28 @@ CLIP_BLOCK_H = PEN_Z + 4.0 - GROOVE_TOP_Z
 TEXT_HEIGHT = 0.6
 FONT_SIZE = 4.0
 
-# 12本のペンの色番号 (1本につき両側2色)
-PEN_DATA = [
-    # Case 1 (1本目〜6本目)
-    [("47", "20"), ("30", "50"), ("63", "129"), ("23", "45"), ("25", "145"), ("10", "43")],
-    # Case 2 (7本目〜12本目)
-    [("27", "158"), ("48", "29"), ("36", "46"), ("38", "39"), ("99", "35"), ("132", "64")]
-]
+# 出力するケースのバリエーション
+CASES = {
+    "1": [("47", "20"), ("30", "50"), ("63", "129"), ("23", "45"), ("25", "145"), ("10", "43")],
+    "2": [("27", "158"), ("48", "29"), ("36", "46"), ("38", "39"), ("99", "35"), ("132", "64")],
+    "test": [("47", "20")]
+}
 
 def create_case(pen_numbers):
+    n_pens = len(pen_numbers)
+    inner_w = n_pens * PITCH
+    total_w = inner_w + 2 * WALL_T
+
     # 1. 外形ベース
-    sk = cq.Sketch().rect(TOTAL_W, TOTAL_L).vertices().fillet(4.0)
+    sk = cq.Sketch().rect(total_w, TOTAL_L).vertices().fillet(4.0)
     body = cq.Workplane("XY").placeSketch(sk).extrude(WALL_Z)
 
     # 2. 内側のくり抜き（壁の形成）
-    inner_sk = cq.Sketch().rect(INNER_W, INNER_L).vertices().fillet(2.0)
+    inner_sk = cq.Sketch().rect(inner_w, INNER_L).vertices().fillet(2.0)
     pocket = cq.Workplane("XY", origin=(0, 0, GROOVE_TOP_Z)).placeSketch(inner_sk).extrude(WALL_Z - GROOVE_TOP_Z)
     body = body.cut(pocket)
 
-    xs = [(i - (N_PENS - 1) / 2.0) * PITCH for i in range(N_PENS)]
+    xs = [(i - (n_pens - 1) / 2.0) * PITCH for i in range(n_pens)]
     
     texts_compound = None
 
@@ -156,10 +155,10 @@ def create_case(pen_numbers):
     MAGNET_H = 3.1
 
     hole_centers = [
-        ( INNER_W/2 + WALL_T/2,  INNER_L/2 + WALL_T/2),
-        (-INNER_W/2 - WALL_T/2,  INNER_L/2 + WALL_T/2),
-        ( INNER_W/2 + WALL_T/2, -INNER_L/2 - WALL_T/2),
-        (-INNER_W/2 - WALL_T/2, -INNER_L/2 - WALL_T/2),
+        ( inner_w/2 + WALL_T/2,  INNER_L/2 + WALL_T/2),
+        (-inner_w/2 - WALL_T/2,  INNER_L/2 + WALL_T/2),
+        ( inner_w/2 + WALL_T/2, -INNER_L/2 - WALL_T/2),
+        (-inner_w/2 - WALL_T/2, -INNER_L/2 - WALL_T/2),
     ]
 
     for hx, hy in hole_centers:
@@ -170,12 +169,12 @@ def create_case(pen_numbers):
     pin_y_offsets = [INNER_L / 4.0, -INNER_L / 4.0]
     for py in pin_y_offsets:
         # 左側の壁にピン
-        pin = cq.Workplane("XY", origin=(-(INNER_W/2 + WALL_T/2), py, WALL_Z)).circle(1.5).extrude(2.0)
+        pin = cq.Workplane("XY", origin=(-(inner_w/2 + WALL_T/2), py, WALL_Z)).circle(1.5).extrude(2.0)
         pin = pin.edges(">Z").chamfer(0.5)
         body = body.union(pin)
         
         # 右側の壁に穴
-        hole = cq.Workplane("XY", origin=(INNER_W/2 + WALL_T/2, py, WALL_Z)).circle(1.7).extrude(-2.5)
+        hole = cq.Workplane("XY", origin=(inner_w/2 + WALL_T/2, py, WALL_Z)).circle(1.7).extrude(-2.5)
         body = body.cut(hole)
 
     # 5. 外周底面のフィレット (手触り向上)
@@ -187,7 +186,7 @@ def create_case(pen_numbers):
     if texts_compound is not None:
         assy.add(texts_compound, name="Text", color=cq.Color(0.1, 0.1, 0.1, 1.0))
 
-    return assy
+    return assy, total_w
 
 # プレートの生成とエクスポート
 out_dir = os.path.dirname(__file__)
@@ -199,18 +198,20 @@ except ImportError:
     has_ocp = False
 
 main_assy = cq.Assembly()
+current_x = 0.0
 
-for case_idx, pen_numbers in enumerate(PEN_DATA):
-    print(f"Generating Case {case_idx + 1}...")
-    assy = create_case(pen_numbers)
+for case_name, pen_numbers in CASES.items():
+    print(f"Generating Case {case_name}...")
+    assy, total_w = create_case(pen_numbers)
     
     # AssemblyごとSTEPファイルに出力
-    step_path = os.path.join(out_dir, f"acrylic_marker_case_{case_idx + 1}.step")
+    step_path = os.path.join(out_dir, f"acrylic_marker_case_{case_name}.step")
     assy.save(step_path, "STEP")
     print(f"Exported {step_path}")
     
     # プレビュー用にX方向にずらして配置
-    main_assy.add(assy, loc=cq.Location(cq.Vector((TOTAL_W + 10) * case_idx, 0, 0)), name=f"Case_{case_idx + 1}")
+    main_assy.add(assy, loc=cq.Location(cq.Vector(current_x, 0, 0)), name=f"Case_{case_name}")
+    current_x += total_w + 10.0
 
 if has_ocp:
     show(main_assy)
