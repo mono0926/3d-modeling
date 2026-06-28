@@ -62,7 +62,7 @@ def register_japanese_font():
 register_japanese_font()
 
 # --- 設計パラメーター ---
-PLATE_WIDTH = 180.0
+PLATE_WIDTH = 174.0
 PLATE_HEIGHT = 70.0
 PLATE_THICKNESS = 1.6
 PLATE_CORNER_RADIUS = 3.0
