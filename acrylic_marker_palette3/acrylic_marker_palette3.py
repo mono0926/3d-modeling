@@ -40,14 +40,14 @@ def register_japanese_font():
         "/System/Library/Fonts/ヒラギノ角ゴシック W3.ttc",
         "/System/Library/Fonts/Supplemental/Arial Unicode.ttf"
     ]
-    
+
     font_path = None
     for p in candidates:
         nfd_path = unicodedata.normalize('NFD', p)
         if os.path.exists(nfd_path):
             font_path = nfd_path
             break
-            
+
     if font_path:
         mgr = Font_FontMgr.GetInstance_s()
         system_font = Font_SystemFont(TCollection_AsciiString("CustomJapanese"))
@@ -62,8 +62,8 @@ def register_japanese_font():
 register_japanese_font()
 
 # --- 設計パラメーター ---
-PLATE_WIDTH = 220.0
-PLATE_HEIGHT = 110.0
+PLATE_WIDTH = 180.0
+PLATE_HEIGHT = 70.0
 PLATE_THICKNESS = 1.6
 PLATE_CORNER_RADIUS = 3.0
 
@@ -73,14 +73,14 @@ RECESS_HEIGHT = 12.0
 RECESS_DEPTH = 0.4
 
 # セル配置設定
-CELL_SPACING_X = 32.0
+CELL_SPACING_X = 28.0
 CELL_COLS = 6
 
 # セクションごとのY座標
-BASIC_HEADER_Y = 38.0
-BASIC_CELL_Y = 22.0
-METALLIC_HEADER_Y = -12.0
-METALLIC_CELL_Y = -28.0
+BASIC_HEADER_Y = 28.0
+BASIC_CELL_Y = 15.0
+METALLIC_HEADER_Y = -6.0
+METALLIC_CELL_Y = -19.0
 
 # テキスト設定
 FONT_SIZE_LABEL = 6.0  # セクション見出しのフォントサイズ

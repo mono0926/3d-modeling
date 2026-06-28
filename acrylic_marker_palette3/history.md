@@ -1,6 +1,9 @@
 # 履歴とプロンプト経緯
 
 ## 2026-06-28
+- **余白の最小限化**:
+  - パレットの無駄な余白を省くため、全体寸法を `220.0x110.0mm` から `180.0x70.0mm` に縮小。
+  - セクション見出しとセルのY座標を最適化（`BASIC_HEADER_Y = 28.0`, `BASIC_CELL_Y = 15.0`, `METALLIC_HEADER_Y = -6.0`, `METALLIC_CELL_Y = -19.0`）し、各要素の間隔を詰めて引き締まったレイアウトに変更。
 - **豆腐文字対策 (CJKフォント登録)**:
   - Conda環境内のOCP (Open Cascade) のフォントマネージャが日本語フォントを検出できず、日本語文字が四角（豆腐文字）になる問題を修正。
   - PythonのOCP API (`Font_FontMgr`, `Font_SystemFont`) を使い、Macのシステムフォントパス（`/System/Library/Fonts/` 以下のヒラギノ角ゴシック、または `/System/Library/Fonts/Supplemental/` 以下の Arial Unicode）を動的に検出して登録するロジックを実装。
