@@ -1,5 +1,8 @@
 import cadquery as cq
 import os
+import unicodedata
+from OCP.Font import Font_SystemFont, Font_FontMgr, Font_FontAspect
+from OCP.TCollection import TCollection_AsciiString
 
 """
 設計要件:
@@ -9,7 +12,7 @@ import os
         - 各行の上部にセクション見出し（"BASIC", "METALLIC"）を浮き彫りで配置。
     - 各色には、実際に塗るための凹み（12x12mm、深さ0.4mm）と、少し浮き出た日本語色名のテキスト（高さ0.6mm）を配置。
     - ユーザーの手間を省くため、ベースとテキストを別部品とする「アセンブリ（Assembly）」としてSTEP出力。
-        - Bambu Studio 読み込み時に自動でマルチパーツ認識され、黒色フィラメントを手軽に割り当て可能。
+        - Bambu Studio 読み込み時に自动でマルチパーツ認識され、黒色フィラメントを手軽に割り当て可能。
 
 推奨フィラメント:
     - ベース: PLA Basic (White) など、インクの発色が分かりやすい白色系。
@@ -28,6 +31,35 @@ import os
 履歴とプロンプト経緯:
     - 詳細は同ディレクトリの history.md を参照。
 """
+
+# --- 日本語フォントの登録 ---
+# OCP (Open Cascade) が日本語フォントを検出できるように、システムフォントを明示的に登録します。
+def register_japanese_font():
+    candidates = [
+        "/System/Library/Fonts/ヒラギノ角ゴシック W6.ttc",
+        "/System/Library/Fonts/ヒラギノ角ゴシック W3.ttc",
+        "/System/Library/Fonts/Supplemental/Arial Unicode.ttf"
+    ]
+    
+    font_path = None
+    for p in candidates:
+        nfd_path = unicodedata.normalize('NFD', p)
+        if os.path.exists(nfd_path):
+            font_path = nfd_path
+            break
+            
+    if font_path:
+        mgr = Font_FontMgr.GetInstance_s()
+        system_font = Font_SystemFont(TCollection_AsciiString("CustomJapanese"))
+        system_font.SetFontPath(Font_FontAspect.Font_FA_Regular, TCollection_AsciiString(font_path))
+        system_font.SetFontPath(Font_FontAspect.Font_FA_Bold, TCollection_AsciiString(font_path))
+        mgr.RegisterFont(system_font, True)
+        print(f"Registered custom font: CustomJapanese from {font_path}")
+    else:
+        print("Warning: No Japanese font found in system paths. CJK characters might render as squares.")
+
+# 実行時にフォントを登録
+register_japanese_font()
 
 # --- 設計パラメーター ---
 PLATE_WIDTH = 220.0
@@ -54,7 +86,7 @@ METALLIC_CELL_Y = -28.0
 FONT_SIZE_LABEL = 6.0  # セクション見出しのフォントサイズ
 FONT_SIZE_COLOR = 3.2  # 色名のフォントサイズ
 TEXT_HEIGHT = 0.6      # 浮き出し高さ
-FONT_NAME = "Hiragino Kaku Gothic ProN"  # 日本語フォント
+FONT_NAME = "CustomJapanese"  # 登録したフォント名を使用
 
 # 色名定義
 BASIC_COLORS = [
