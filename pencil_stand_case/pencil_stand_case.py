@@ -37,8 +37,8 @@ PENCIL_DIAMETER = 7.4
 # 穴の寸法と配置
 HOLE_DIAMETER = 8.5
 HOLE_DEPTH = 75.0  # ベースに挿さる深さ
-COLUMNS = 6
-ROWS = 2
+COLUMNS = 4
+ROWS = 3
 PITCH_X = 10.5
 PITCH_Y = 10.5
 
@@ -91,17 +91,17 @@ def create_base():
         .box(BASE_WIDTH, BASE_DEPTH, BASE_BODY_HEIGHT)
         .edges("|Z").fillet(BASE_FILLET_R)
     )
-    
+
     # 2. リップ部（キャップが被さる細い部分）
     lip = (
         cq.Workplane("XY").workplane(offset=BASE_BODY_HEIGHT/2)
         .box(LIP_WIDTH, LIP_DEPTH, LIP_HEIGHT, centered=(True, True, False))
         .edges("|Z").fillet(LIP_FILLET_R)
     )
-    
+
     # リップ部と結合
     base = base_body.union(lip)
-    
+
     # 3. 鉛筆用の穴を開ける
     # 穴の座標リストを生成
     pts = []
@@ -110,24 +110,24 @@ def create_base():
     for c in range(COLUMNS):
         for r in range(ROWS):
             pts.append((start_x + c * PITCH_X, start_y + r * PITCH_Y))
-            
+
     # 上面から穴を掘る
     base = (
         base.faces(">Z").workplane()
         .pushPoints(pts)
         .hole(HOLE_DIAMETER, HOLE_DEPTH)
     )
-    
+
     # 4. 面取り（キャップが入りやすいようにリップの上端を面取り）
     # リップ部の上面外周エッジを取得して面取り
     base = base.edges(">Z and %LINE").chamfer(0.8)
-    
+
     # 底面の面取り
     base = base.edges("<Z").chamfer(1.0)
-    
+
     # Z軸方向の位置を調整して、底面がZ=0になるようにする
     base = base.translate((0, 0, BASE_BODY_HEIGHT/2))
-    
+
     return base
 
 # ==========================================
@@ -140,29 +140,29 @@ def create_cap():
         .box(CAP_WIDTH, CAP_DEPTH, CAP_TOTAL_HEIGHT)
         .edges("|Z").fillet(CAP_FILLET_R)
     )
-    
+
     # 2. 内側をくり抜くための形状を作成
     inner_width = LIP_WIDTH + 2 * LIP_CLEARANCE
     inner_depth = LIP_DEPTH + 2 * LIP_CLEARANCE
     inner_fillet = LIP_FILLET_R + LIP_CLEARANCE
-    
+
     inner_box = (
         cq.Workplane("XY")
         .box(inner_width, inner_depth, CAP_INNER_HEIGHT, centered=(True, True, False))
         .edges("|Z").fillet(inner_fillet)
         .translate((0, 0, -CAP_TOTAL_HEIGHT/2))
     )
-    
+
     # くり抜く
     cap = cap.cut(inner_box)
-    
+
     # 3. 面取り（ベースに入りやすいように開口部の内側エッジを面取り）
     # 底面の内側エッジを選択して面取り
     cap = cap.faces("<Z").edges("%LINE").chamfer(0.8)
-    
+
     # 天面の外周面取り
     cap = cap.faces(">Z").edges("%LINE").chamfer(1.0)
-    
+
     # 底面がZ=0になるように調整
     cap = cap.translate((0, 0, CAP_TOTAL_HEIGHT/2))
     return cap
@@ -179,18 +179,18 @@ def create_test_fit():
         .edges(">Z").chamfer(0.8)
         .translate((0, 40, 5)) # 少しY方向にずらす
     )
-    
+
     # キャップ側の下部のみ（高さ10mm）
     cap_inner_w = LIP_WIDTH + 2 * LIP_CLEARANCE
     cap_inner_d = LIP_DEPTH + 2 * LIP_CLEARANCE
     cap_inner_r = LIP_FILLET_R + LIP_CLEARANCE
-    
+
     test_cap_inner = (
         cq.Workplane("XY")
         .box(cap_inner_w, cap_inner_d, 20.0) # 貫通させるため長めに
         .edges("|Z").fillet(cap_inner_r)
     )
-    
+
     test_cap = (
         cq.Workplane("XY")
         .box(CAP_WIDTH, CAP_DEPTH, 10.0)
@@ -200,7 +200,7 @@ def create_test_fit():
         .faces(">Z").edges("%LINE").chamfer(0.8)
         .translate((0, -40, 5)) # 反対にずらす
     )
-    
+
     return test_base, test_cap
 
 # ==========================================
@@ -211,16 +211,15 @@ cap = create_cap()
 test_base, test_cap = create_test_fit()
 
 # VSCode等でのプレビュー用
-if "show_object" in locals() or "show_object" in globals():
-    try:
-        from ocp_vscode import show_object
-        show_object(base, name="Base", options={"color": (150, 150, 150), "alpha": 0.0})
-        # キャップはZ方向に浮かせて表示
-        show_object(cap.translate((0, 0, BASE_TOTAL_HEIGHT + 20)), name="Cap", options={"color": (100, 150, 200), "alpha": 0.3})
-        show_object(test_base, name="Test_Base")
-        show_object(test_cap, name="Test_Cap")
-    except Exception as e:
-        print("ocp_vscode is not available:", e)
+try:
+    from ocp_vscode import show_object
+    show_object(base, name="Base", options={"color": (150, 150, 150), "alpha": 0.0})
+    # キャップはZ方向に浮かせて表示
+    show_object(cap.translate((0, 0, BASE_TOTAL_HEIGHT + 20)), name="Cap", options={"color": (100, 150, 200), "alpha": 0.3})
+    show_object(test_base, name="Test_Base")
+    show_object(test_cap, name="Test_Cap")
+except Exception as e:
+    print("ocp_vscode is not available:", e)
 
 # Stepファイルの出力
 out_dir = os.path.dirname(os.path.abspath(__file__))
