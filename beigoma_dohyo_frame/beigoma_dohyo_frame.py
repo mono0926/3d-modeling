@@ -11,8 +11,8 @@ import math
     - 位置合わせを容易にするため、0度端面にジョイントピン（オス）、90度端面にジョイント穴（メス）を配置（クリアランス0.2mm）。
 
 推奨フィラメント:
-    - PLA Basic (強度と印刷しやすさのバランスが良い)
-    - PETG (屋外使用や耐衝撃性をより重視する場合。接着強度の確保のため少し調整が必要な場合があります)
+    - PETG (屋外使用や耐衝撃性を重視した本設計の前提フィラメント)
+    - PLA Basic (代用可能ですが、嵌合が少し緩くなる可能性があります)
 
 推奨スライサー設定 (Bambu Studio):
     - インフィル (Infill): 15% 程度 (Grid または Gyroid)
@@ -44,7 +44,7 @@ PIN_LENGTH = 10.0     # ピンの長さ (押し出し長さ) (mm)
 CHAMFER_VAL = 1.0     # ピン先端の面取り量 (mm)
 
 # ジョイント穴（クリアランス込）寸法
-CLEARANCE = 0.2       # ジョイントクリアランス (mm)
+CLEARANCE = 0.3       # ジョイントクリアランス (mm) - PETGの粘性と収縮を考慮し広めに設定
 HOLE_WIDTH = PIN_WIDTH + 2 * CLEARANCE
 HOLE_HEIGHT = PIN_HEIGHT + 2 * CLEARANCE
 HOLE_LENGTH = PIN_LENGTH + CLEARANCE
