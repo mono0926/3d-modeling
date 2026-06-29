@@ -148,8 +148,8 @@ def create_palette():
             return compound.fuse(t.val())
 
     # セクション見出しの追加
-    texts_compound = add_text_to_compound(texts_compound, "BASIC", 0.0, BASIC_HEADER_Y, FONT_SIZE_LABEL, FONT_NAME, TEXT_HEIGHT)
-    texts_compound = add_text_to_compound(texts_compound, "METALLIC", 0.0, METALLIC_HEADER_Y, FONT_SIZE_LABEL, FONT_NAME, TEXT_HEIGHT)
+    texts_compound = add_text_to_compound(texts_compound, "Basic", 0.0, BASIC_HEADER_Y, FONT_SIZE_LABEL, FONT_NAME, TEXT_HEIGHT)
+    texts_compound = add_text_to_compound(texts_compound, "Metallic", 0.0, METALLIC_HEADER_Y, FONT_SIZE_LABEL, FONT_NAME, TEXT_HEIGHT)
 
     # BASICの色名を追加
     for i, color_name in enumerate(BASIC_COLORS):
