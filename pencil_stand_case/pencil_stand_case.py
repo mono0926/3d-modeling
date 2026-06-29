@@ -64,7 +64,7 @@ RAIL_Z_OFFSET = 0.5       # トレイ上面からレール溝上面までの距�
 # スライドフタの設計寸法
 LID_THICKNESS = 2.0       # フタの基本厚み
 LID_LENGTH = 181.8        # フタの長さ（奥壁の手前まで）
-# レールの底同士 of 幅 (120.9 - 1.2 * 2 = 118.5mm) に対するクリアランス考慮
+# レールの底同士の幅 (120.9 - 1.2 * 2 = 118.5mm) に対するクリアランス考慮
 LID_WIDTH = 118.2         # フタの最大幅
 LID_RAIL_RIB_WIDTH = 1.4  # レールに入る耳の幅
 LID_BODY_WIDTH = LID_WIDTH - LID_RAIL_RIB_WIDTH * 2  # 中央ボディ幅: 115.4mm
@@ -117,21 +117,29 @@ def build_tray():
     )
     tray = tray.cut(left_rail).cut(right_rail)
     
-    # 4. スタンド用の背面スロットを斜めにカット
-    # 奥の壁(WALL_BACK)の中央付近に配置
+    # 【改善】手前の壁（Y = 0 〜 WALL_FRONT）のレール上部を切り欠く
+    # これにより、入り口が開放されてフタを上から滑り込ませやすくなり、どこから入れるか一目で分かります。
+    front_cut = cq.Solid.makeBox(
+        TRA_WIDTH + 2.0,
+        WALL_FRONT,
+        TRA_HEIGHT - z_rail_start + 1.0,
+        cq.Vector(-TRA_WIDTH/2 - 1.0, 0, z_rail_start)
+    )
+    tray = tray.cut(front_cut)
+    
+    # 4. スタンド用の背面スロットを斜めにカット（上面への突き抜けを防止）
     slot_y_center = TRA_LENGTH - (WALL_BACK / 2)
-    # カッターを作成 (X軸を中心に回転させて斜めにする)
-    # 深さ方向にはみ出す大きさで作成し、位置調整する
+    # カッターの高さをスロット深さ分に制限し、上面に貫通しないようにします
     cutter = cq.Solid.makeBox(
         STAND_SLOT_WIDTH,
         STAND_SLOT_THICKNESS,
-        20.0,
+        STAND_SLOT_DEPTH + 1.0,  # 底面をきれいに抜くための微小余剰
         cq.Vector(-STAND_SLOT_WIDTH/2, -STAND_SLOT_THICKNESS/2, 0)
     )
     # X軸周りにSLOT_ANGLE (25度) 回転。Yのプラス方向（奥側）に傾く
     cutter = cutter.rotate(cq.Vector(0, 0, 0), cq.Vector(1, 0, 0), SLOT_ANGLE)
-    # 底面Z=0より少し下(-1.0mm)から差し込んでカット
-    cutter = cutter.translate(cq.Vector(0, slot_y_center, -1.0))
+    # 底面Z=0より少し下(-0.5mm)から差し込んでカット
+    cutter = cutter.translate(cq.Vector(0, slot_y_center, -0.5))
     tray = tray.cut(cutter)
     
     # 5. スナップフィット用の半球突起を追加
