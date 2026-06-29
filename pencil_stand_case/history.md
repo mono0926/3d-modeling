@@ -1,5 +1,12 @@
 # History
 
+## 2026-06-29: 穴径のパラメトリック設計化 (HOLE_DIAMETER = PENCIL_DIAMETER + PENCIL_CLEARANCE)
+*   **変更内容**: `HOLE_DIAMETER = 8.5` のマジックナンバーでの指定を廃止。鉛筆の最大径 `PENCIL_DIAMETER` (7.4mm) にクリアランス `PENCIL_CLEARANCE` (0.6mm) を加算して動的に計算するように変更。
+*   **効果**: 穴径は 8.0mm となり、7.4mm の鉛筆に対してガタツキが少なく、かつスムーズに出し入れできるサイズに最適化された。
+
+**プロンプト**:
+> @[/Users/mono/Git/3d-modeling/pencil_stand_case/pencil_stand_case.py:L38] PENCIL_DIAMETERの値を参照するべきでは？また、ノギスで測って7.4mmの直径にぴったり収まるのは分かった。
+
 ## 2026-06-29: フィット感の調整 (LIP_CLEARANCE を 0.05 に変更)
 *   **変更内容**: テスト出力でキャップが容易にすり抜けてしまったため、`LIP_CLEARANCE` を `0.15` から `0.05` に狭め、フリクション（摩擦）が効くように調整。
 *   **理由**: Bambu P2Sなどの高精度プリンタでは、0.15mmのクリアランスだと広すぎて固定されないため。

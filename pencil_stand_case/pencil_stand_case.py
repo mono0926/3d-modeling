@@ -35,7 +35,8 @@ PENCIL_LENGTH = 175.0
 PENCIL_DIAMETER = 7.4
 
 # 穴の寸法と配置
-HOLE_DIAMETER = 8.5
+PENCIL_CLEARANCE = 0.6  # 3Dプリントの収縮と抜き差しのスムーズさを考慮した余裕分（直径）
+HOLE_DIAMETER = PENCIL_DIAMETER + PENCIL_CLEARANCE  # 穴の直径（8.0mm）
 HOLE_DEPTH = 75.0  # ベースに挿さる深さ
 COLUMNS = 4
 ROWS = 3
