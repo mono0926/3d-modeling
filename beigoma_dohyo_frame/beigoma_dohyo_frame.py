@@ -106,40 +106,38 @@ frame = frame.cut(groove_tool)
 # -----------------
 # ジョイントピン（オス）の実装 (Y=0面)
 # -----------------
-# Y=0面（0度端面）を選択して、-Y方向（面法線の外側）にピンを押し出します。
-# 選択した面（Y=0平面）はグローバルでYが最小なので、セレクター "<Y" で選択できます。
-# 面の中心からのZオフセットを計算 (ローカルのY方向がグローバルのZ方向に対応)
-pin_z_local = PIN_Z_GLOBAL - (HEIGHT / 2.0)
+# Y=0面の中心 (X=232.0, Y=0, Z=10.0) から -Y 方向に伸びるピンを直方体として作成します。
+pin_center_x = (R_IN + R_OUT) / 2.0
+pin_center_y = -PIN_LENGTH / 2.0
+pin_center_z = PIN_Z_GLOBAL
 
-frame = (
-    frame.faces("<Y")
-    .workplane()
-    # 指定したZ位置に移動し、PIN_WIDTH (X方向) x PIN_HEIGHT (Z方向) の矩形を描く
-    .moveTo(0, pin_z_local)
-    .rect(PIN_WIDTH, PIN_HEIGHT)
-    # 外向きに PIN_LENGTH 押し出す
-    .extrude(PIN_LENGTH)
+pin = (
+    cq.Workplane("XY")
+    .box(PIN_WIDTH, PIN_LENGTH, PIN_HEIGHT, centered=(True, True, True))
+    .translate((pin_center_x, pin_center_y, pin_center_z))
 )
+# ピンの先端面（Yが最小の面）を選択して面取り
+pin = pin.faces("<Y").edges().chamfer(CHAMFER_VAL)
 
-# 押し出したピンの先端を面取りします。
-# 押し出したことにより、グローバルでYが最も小さい面がピンの先端面になります。
-# 再度 "<Y" セレクターで先端面を選び、そのエッジを面取りします。
-frame = frame.faces("<Y").edges().chamfer(CHAMFER_VAL)
+# メインフレームに結合
+frame = frame.union(pin)
 
 # -----------------
 # ジョイント穴（メス）の実装 (X=0面)
 # -----------------
-# X=0面（90度端面）を選択して、内側に穴を掘ります。
-# この面はグローバルでXが最小なので、セレクター "<X" で選択できます。
-# 選択した面を基準にした作業平面から、cutBlind() を使って内側（-Xの逆方向、つまり+X方向）に穴を掘ります。
-frame = (
-    frame.faces("<X")
-    .workplane()
-    # 指定したZ位置に移動し、HOLE_WIDTH (Y方向) x HOLE_HEIGHT (Z方向) の矩形を描く
-    .moveTo(0, pin_z_local)
-    .rect(HOLE_WIDTH, HOLE_HEIGHT)
-    .cutBlind(-HOLE_LENGTH)
+# X=0面の中心 (X=0, Y=232.0, Z=10.0) から内側（+X方向）に掘る穴（ツールボディ）を作成します。
+hole_center_x = HOLE_LENGTH / 2.0
+hole_center_y = (R_IN + R_OUT) / 2.0
+hole_center_z = PIN_Z_GLOBAL
+
+hole_tool = (
+    cq.Workplane("XY")
+    .box(HOLE_LENGTH, HOLE_WIDTH, HOLE_HEIGHT, centered=(True, True, True))
+    .translate((hole_center_x, hole_center_y, hole_center_z))
 )
+
+# メインフレームからカット
+frame = frame.cut(hole_tool)
 
 # -----------------
 # プレビューと出力
