@@ -21,7 +21,7 @@ import math
     - サポート (Support): 不要 (紐用の溝はブリッジ可能、ジョイントピンも面取りが施されており、サポートなしで印刷可能です)
 
 印刷統計（予想）:
-    - beigoma_dohyo_frame.step: 印刷時間 約2〜3時間 (1パーツあたり)、フィラメント使用量 約80g (1パーツあたり)
+    - beigoma_dohyo_frame.step: 印刷時間 約6〜8時間 (1パーツあたり)、フィラメント使用量 約350g (1パーツあたり)
 
 履歴とプロンプト経緯:
     - 詳細は同ディレクトリの history.md を参照。
@@ -31,17 +31,17 @@ import math
 # フレーム寸法
 R_OUT = 240.0         # 外径半径 (mm)
 R_IN = 224.0          # 内径半径 (mm)
-HEIGHT = 15.0         # フレーム高さ (mm)
+HEIGHT = 40.0         # フレーム高さ (mm) - 直接床に置いてシートがたわんでも接地しない高さを確保
 
 # 紐用溝寸法
 GROOVE_WIDTH = 6.0    # 溝の幅 (mm)
 GROOVE_DEPTH = 3.0    # 溝の深さ (mm)
 
 # ジョイント（ピン）寸法
-PIN_WIDTH = 6.0       # ピンの幅 (X方向) (mm)
-PIN_HEIGHT = 6.0      # ピンの高さ (Z方向) (mm)
-PIN_LENGTH = 10.0     # ピンの長さ (押し出し長さ) (mm)
-CHAMFER_VAL = 1.0     # ピン先端の面取り量 (mm)
+PIN_WIDTH = 8.0       # ピンの幅 (X方向) (mm)
+PIN_HEIGHT = 10.0     # ピンの高さ (Z方向) (mm)
+PIN_LENGTH = 12.0     # ピンの長さ (押し出し長さ) (mm)
+CHAMFER_VAL = 1.5     # ピン先端の面取り量 (mm)
 
 # ジョイント穴（クリアランス込）寸法
 CLEARANCE = 0.3       # ジョイントクリアランス (mm) - PETGの粘性と収縮を考慮し広めに設定
