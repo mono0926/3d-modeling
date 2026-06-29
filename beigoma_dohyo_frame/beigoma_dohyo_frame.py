@@ -21,27 +21,29 @@ import math
     - サポート (Support): 不要 (紐用の溝はブリッジ可能、ジョイントピンも面取りが施されており、サポートなしで印刷可能です)
 
 印刷統計（予想）:
-    - beigoma_dohyo_frame.step: 印刷時間 約6〜8時間 (1パーツあたり)、フィラメント使用量 約350g (1パーツあたり)
+    - beigoma_dohyo_frame.step: 印刷時間 約4〜5時間 (1パーツあたり)、フィラメント使用量 約220g (1パーツあたり)
 
 履歴とプロンプト経緯:
-    - 詳細は同ディレクトリの history.md を参照。
+    - 詳細は同ディレクトリの history.md を参照.
 """
 
 # --- 設計パラメーター ---
 # フレーム寸法
 R_OUT = 240.0         # 外径半径 (mm)
 R_IN = 224.0          # 内径半径 (mm)
-HEIGHT = 40.0         # フレーム高さ (mm) - 直接床に置いてシートがたわんでも接地しない高さを確保
+HEIGHT = 30.0         # フレーム高さ (mm) - 溝を上部に寄せることで30mm高でも十分なたわみ空間を確保
 
 # 紐用溝寸法
 GROOVE_WIDTH = 6.0    # 溝の幅 (mm)
 GROOVE_DEPTH = 3.0    # 溝の深さ (mm)
+GROOVE_TOP_OFFSET = 4.0 # フレーム上端から溝上端までの距離 (mm)
 
 # ジョイント（ピン）寸法
 PIN_WIDTH = 8.0       # ピンの幅 (X方向) (mm)
-PIN_HEIGHT = 10.0     # ピンの高さ (Z方向) (mm)
-PIN_LENGTH = 12.0     # ピンの長さ (押し出し長さ) (mm)
-CHAMFER_VAL = 1.5     # ピン先端の面取り量 (mm)
+PIN_HEIGHT = 6.0      # ピンの高さ (Z方向) (mm) - 溝との干渉を避けるため6mmに設定
+PIN_LENGTH = 10.0     # ピンの長さ (押し出し長さ) (mm)
+CHAMFER_VAL = 1.0     # ピン先端の面取り量 (mm)
+PIN_Z_GLOBAL = 10.0   # ピンの中心のZ座標 (mm) - 溝との干渉を避けて下側に配置
 
 # ジョイント穴（クリアランス込）寸法
 CLEARANCE = 0.3       # ジョイントクリアランス (mm) - PETGの粘性と収縮を考慮し広めに設定
@@ -77,9 +79,9 @@ frame = (
 # -----------------
 # 外周紐用溝のカット
 # -----------------
-# 外径 R_OUT から内側に GROOVE_DEPTH Dunk 削る1/4円筒形状を作り、メインフレームから引きます。
-# 溝は高さ方向の中央に配置されます。
-groove_z_offset = (HEIGHT - GROOVE_WIDTH) / 2.0
+# 外径 R_OUT から内側に GROOVE_DEPTH 削る1/4円筒形状を作り、メインフレームから引きます。
+# 溝は上端から GROOVE_TOP_OFFSET 下がった位置に配置されます。
+groove_z_offset = HEIGHT - GROOVE_WIDTH - GROOVE_TOP_OFFSET
 r_groove_inner = R_OUT - GROOVE_DEPTH
 
 # 溝用円弧 (確実にはみ出すように外側は R_OUT + 1mm とします)
@@ -106,10 +108,14 @@ frame = frame.cut(groove_tool)
 # -----------------
 # Y=0面（0度端面）を選択して、-Y方向（面法線の外側）にピンを押し出します。
 # 選択した面（Y=0平面）はグローバルでYが最小なので、セレクター "<Y" で選択できます。
+# 面の中心からのZオフセットを計算 (ローカルのY方向がグローバルのZ方向に対応)
+pin_z_local = PIN_Z_GLOBAL - (HEIGHT / 2.0)
+
 frame = (
     frame.faces("<Y")
     .workplane()
-    # 面の中心を基準に、PIN_WIDTH (X方向) x PIN_HEIGHT (Z方向) の矩形を描く
+    # 指定したZ位置に移動し、PIN_WIDTH (X方向) x PIN_HEIGHT (Z方向) の矩形を描く
+    .moveTo(0, pin_z_local)
     .rect(PIN_WIDTH, PIN_HEIGHT)
     # 外向きに PIN_LENGTH 押し出す
     .extrude(PIN_LENGTH)
@@ -129,6 +135,8 @@ frame = frame.faces("<Y").edges().chamfer(CHAMFER_VAL)
 frame = (
     frame.faces("<X")
     .workplane()
+    # 指定したZ位置に移動し、HOLE_WIDTH (Y方向) x HOLE_HEIGHT (Z方向) の矩形を描く
+    .moveTo(0, pin_z_local)
     .rect(HOLE_WIDTH, HOLE_HEIGHT)
     .cutBlind(-HOLE_LENGTH)
 )
