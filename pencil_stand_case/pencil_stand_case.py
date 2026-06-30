@@ -44,9 +44,9 @@ PITCH_X = 10.5
 PITCH_Y = 10.5
 
 # 構造の寸法
-WALL_THICKNESS = 2.0
-BASE_BOTTOM_THICKNESS = 2.0
-CAP_TOP_THICKNESS = 2.0
+WALL_THICKNESS = 1.2
+BASE_BOTTOM_THICKNESS = 1.2
+CAP_TOP_THICKNESS = 1.2
 LIP_HEIGHT = 10.0  # ベースの上部に設ける、キャップと重なる段差の高さ
 
 # スリップフィットのクリアランス (片側)
