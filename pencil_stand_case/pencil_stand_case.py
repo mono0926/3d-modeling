@@ -121,10 +121,10 @@ def create_base():
 
     # 4. 面取り（キャップが入りやすいようにリップの上端を面取り）
     # リップ部の上面外周エッジを取得して面取り
-    base = base.edges(">Z and %LINE").chamfer(0.8)
+    base = base.edges(">Z and %LINE").chamfer(0.4)
 
     # 底面の面取り
-    base = base.edges("<Z").chamfer(1.0)
+    base = base.edges("<Z").chamfer(0.5)
 
     # Z軸方向の位置を調整して、底面がZ=0になるようにする
     base = base.translate((0, 0, BASE_BODY_HEIGHT/2))
@@ -159,10 +159,10 @@ def create_cap():
 
     # 3. 面取り（ベースに入りやすいように開口部の内側エッジを面取り）
     # 底面の内側エッジを選択して面取り
-    cap = cap.faces("<Z").edges("%LINE").chamfer(0.8)
+    cap = cap.faces("<Z").edges("%LINE").chamfer(0.3)
 
     # 天面の外周面取り
-    cap = cap.faces(">Z").edges("%LINE").chamfer(1.0)
+    cap = cap.faces(">Z").edges("%LINE").chamfer(0.5)
 
     # 底面がZ=0になるように調整
     cap = cap.translate((0, 0, CAP_TOTAL_HEIGHT/2))
@@ -177,7 +177,7 @@ def create_test_fit():
         cq.Workplane("XY")
         .box(LIP_WIDTH, LIP_DEPTH, 10.0)
         .edges("|Z").fillet(LIP_FILLET_R)
-        .edges(">Z").chamfer(0.8)
+        .edges(">Z").chamfer(0.4)
         .translate((0, 40, 5)) # 少しY方向にずらす
     )
 
@@ -197,8 +197,8 @@ def create_test_fit():
         .box(CAP_WIDTH, CAP_DEPTH, 10.0)
         .edges("|Z").fillet(CAP_FILLET_R)
         .cut(test_cap_inner)
-        .faces("<Z").edges("%LINE").chamfer(0.8)
-        .faces(">Z").edges("%LINE").chamfer(0.8)
+        .faces("<Z").edges("%LINE").chamfer(0.3)
+        .faces(">Z").edges("%LINE").chamfer(0.3)
         .translate((0, -40, 5)) # 反対にずらす
     )
 
