@@ -4,7 +4,7 @@ from ocp_vscode import show_object
 
 """
 設計要件:
-    - 多肉植物用の鉢（底面外径68mm）に最適な受け皿。
+    - 多肉植物用の鉢に最適な受け皿（デフォルト底面外径68mm）。
     - 室内使用を想定した水漏れ防止機能。
     - 鉢底の通気性を考慮したリブ構造。
     - サポートなしで印刷可能な形状。
@@ -20,7 +20,7 @@ from ocp_vscode import show_object
     - 壁ジェネレーター (Wall generator): Arachne (壁の隙間を埋めるのに有効)
 
 印刷統計（予想）:
-    - pot_saucer_68mm: 印刷時間 約45分、フィラメント使用量 約25g
+    - pot_saucer: 印刷時間 約45分、フィラメント使用量 約25g
 
 履歴とプロンプト経緯:
     - 詳細は同ディレクトリの history.md を参照。
@@ -37,7 +37,7 @@ RIB_HEIGHT = 1.2            # 底面リブの高さ
 FILLET_RADIUS = 1.5         # 外側の角の丸み
 
 # 出力パスの設定
-OUTPUT_FILENAME = "pot_saucer_68mm.step"
+OUTPUT_FILENAME = "pot_saucer.step"
 current_dir = os.path.dirname(__file__)
 output_path = os.path.join(current_dir, OUTPUT_FILENAME)
 
