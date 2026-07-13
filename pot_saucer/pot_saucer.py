@@ -1,4 +1,5 @@
 from build123d import *
+from build123d import SortBy, export_step
 import os
 from ocp_vscode import show_object
 
