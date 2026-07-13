@@ -56,17 +56,17 @@ def create_saucer():
             Cylinder(radius=INNER_DIAMETER / 2, height=HEIGHT - BOTTOM_THICKNESS, align=(Align.CENTER, Align.CENTER, Align.MIN), mode=Mode.SUBTRACT)
 
         # 底面のリブ（通気・水はけ用）
-        with BuildSketch(Location((0, 0, BOTTOM_THICKNESS))):
-            for r in rib_radii:
+        for r in rib_radii:
+            with BuildSketch(Location((0, 0, BOTTOM_THICKNESS))):
                 Circle(radius=r)
                 Circle(radius=r - rib_width, mode=Mode.SUBTRACT)
-        extrude(amount=RIB_HEIGHT)
+            extrude(amount=RIB_HEIGHT)
 
         # 仕上げ: 角を丸める
         # 外側底面のエッジ
         bottom_outer_edge = saucer.edges().filter_by(GeomType.CIRCLE).group_by(Axis.Z)[0].sort_by(SortBy.RADIUS)[-1]
         fillet(bottom_outer_edge, radius=FILLET_RADIUS)
-        
+
         # 外側上端のエッジ
         top_outer_edge = saucer.edges().filter_by(GeomType.CIRCLE).group_by(Axis.Z)[-1].sort_by(SortBy.RADIUS)[-1]
         fillet(top_outer_edge, radius=0.5)
