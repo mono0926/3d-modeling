@@ -144,7 +144,7 @@ def generate_card(name_text: str, tel_text: str, ice_text: str, qr_data: str):
     QR_CENTER_X = -CARD_WIDTH / 2.0 + side_margin + (QR_TOTAL_SIZE / 2.0)
     QR_RIGHT_X = QR_CENTER_X + (QR_TOTAL_SIZE / 2.0)
     TEXT_START_X = QR_RIGHT_X + ELEMENT_MARGIN
-    MAX_TEXT_WIDTH = CARD_WIDTH / 2.0 - 4.5 - TEXT_START_X  # 右端手前4.5mmまでの最大可用幅
+    MAX_TEXT_WIDTH = CARD_WIDTH / 2.0 - 4.5 - TEXT_START_X
 
     # --- 4. QRコードのソリッド化 ---
     qr_points = []
@@ -193,7 +193,7 @@ def generate_card(name_text: str, tel_text: str, ice_text: str, qr_data: str):
     emboss_part.label = "CardEmboss"
     emboss_part.color = Color("black")
 
-    # 全体を Compound としてまとめる
+    # 全体を Compound としてまとめる (Bambu Studio / AMS 全自動マルチカラー認識用)
     card_compound = Compound(label="ThinBusinessCard", children=[card_base, emboss_part])
     return card_compound
 
@@ -231,7 +231,7 @@ def main():
     output_path = os.path.join(current_dir, "thin_business_card.step")
 
     export_step(card_compound, output_path)
-    print(f"build123d (センタリング配置・0.50mm極薄) モデルを出力しました: {output_path}")
+    print(f"build123d (AMS全自動対応・0.50mm極薄) モデルを出力しました: {output_path}")
     print(f"  [名]: {name_text}")
     print(f"  [TEL]: {tel_text}")
     print(f"  [緊急]: {ice_text}")

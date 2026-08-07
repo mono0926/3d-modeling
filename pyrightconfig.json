@@ -1,0 +1,7 @@
+{
+    "venvPath": "/opt/homebrew/Caskroom/miniforge/base/envs",
+    "venv": "cq-conda-env",
+    "extraPaths": [
+        "/opt/homebrew/Caskroom/miniforge/base/envs/cq-conda-env/lib/python3.11/site-packages"
+    ]
+}

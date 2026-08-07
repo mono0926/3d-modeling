@@ -15,3 +15,5 @@ venv/
 # Editor
 .vscode/
 .idea/
+
+.agents/skills/
