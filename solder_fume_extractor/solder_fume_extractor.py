@@ -5,34 +5,28 @@ from ocp_vscode import show_object
 """
 設計要件:
     - ポータブル扇風機（φ103.5mm x 40.2mm）と活性炭フィルター（130x130x10mm）を組み合わせた卓上ハンダ吸煙器ホルダー。
-    - 吸引型（手前フィルター -> 中央ファンネル気室 -> 奥ファン -> 後方排気）でファンブレードのヤニ汚れを防止。
+    - ユーザーの手描き図に基づいた堅牢な一体型ボックス＆ファンネル構造。
     - フィルター部 (130x130x10mm):
         - 上部からスライドインで着脱・交換可能なガイドスロット。
-        - 吸引時にフィルターが巻き込まれない背面サポートグリッド（高通気性クロスリブ）。
-        - 前面脱落防止用の保持リップ。
+        - 吸引時にフィルターが巻き込まれない強固な背面サポートグリッド（格子壁）。
+        - 前面脱落防止用の保持枠（120x120mm 吸気開口）。
     - ファンホルダー部 (φ103.5mm, 厚さ40.2mm):
-        - 上部が開放されたU字型クレードルドックにより、ファン本体を上からストンとスライドイン可能。
-        - 首元のスイッチ部（11.5mm）を完全に露出させ、装着したまま操作可能なワイドU字スリット。
-        - 奥側の抜け止めストッパー（内径92.8mm開口で排気抵抗最小）。
-    - 外観・構造デザイン:
-        - 前面四角枠から背面円筒へと流麗にシェイプし、大幅な軽量化と印刷時間短縮を実現。
-        - 卓上で前後に倒れない安定した低重心ワイドフラットベース。
-    - 3Dプリント最適化 (Bambu Lab P2S):
-        - 底面配置でサポート材不要。
+        - 直径φ105mmの円筒ホルダーでファン全周を確実にホールド。
+        - 天面に幅38mmのスリットを設け、持ち手・スイッチ（11.5mm露出）が上に突き出る構造。
+        - ファンネルとの境界に段差ストッパーを設け、ファンが前方に落ち込まない。
+    - テーパー気室（ファンネル）:
+        - 124x124mmのフィルター面からφ105mmのファン吸気口へとスムーズに絞るテーパー構造。
+    - 卓上安定性:
+        - 幅広でフラットな安定底面ベース。
 
 推奨フィラメント:
-    - PETG (耐熱性・耐薬品性・対衝撃性に優れ、ハンダ作業に最適)
-    - PLA (一般的な用途で高精度・手軽に印刷可能)
+    - PETG または PLA
 
 推奨スライサー設定:
     - 壁ループ (Wall Loops): 3〜4回
-    - 底面/天面レイヤー (Top/Bottom Shell Layers): 4〜5層
+    - 底面/天面レイヤー: 4〜5層
     - インフィル: 15% (Gyroid または Grid)
-    - 壁ジェネレーター (Wall generator): Arachne
-    - サポート: なし（Support: None）
-
-印刷統計（予想）:
-    - solder_fume_extractor: 印刷時間 約2時間20分、フィラメント使用量 約125g
+    - サポート: なし（底面配置でサポート不要）
 
 履歴とプロンプト経緯:
     - 詳細は同ディレクトリの history.md を参照。
@@ -42,54 +36,50 @@ from ocp_vscode import show_object
 # パラメーター定義 (mm)
 # ==========================================
 
-# フィルター仕様
+# フィルター寸法
 FILTER_W = 130.0
 FILTER_H = 130.0
 FILTER_T = 10.0
-FILTER_CLEARANCE_W = 2.0      # 左右クリアランス (計 +2.0mm -> 132.0mm)
-FILTER_CLEARANCE_T = 1.2      # 厚みクリアランス (+1.2mm -> 11.2mm)
+FILTER_CLEARANCE_W = 2.0      # 左右クリアランス (スロット幅 132.0mm)
+FILTER_CLEARANCE_T = 1.2      # 厚みクリアランス (スロット厚 11.2mm)
 
 SLOT_W = FILTER_W + FILTER_CLEARANCE_W   # 132.0mm
 SLOT_T = FILTER_T + FILTER_CLEARANCE_T   # 11.2mm
 SLOT_H = FILTER_H                        # 130.0mm
 
-# ポータブル扇風機仕様
+# ポータブル扇風機寸法
 FAN_DIA = 103.5
 FAN_THICK = 40.2
-FAN_SWITCH_LEN = 11.5         # ファン端面からスイッチまでの長さ
-FAN_CLEARANCE_DIA = 1.3       # 直径クリアランス (+1.3mm -> 104.8mm)
-FAN_CLEARANCE_THICK = 0.8     # 厚みクリアランス (+0.8mm -> 41.0mm)
+FAN_CLEARANCE_DIA = 1.5       # 直径クリアランス (ホルダー内径 105.0mm)
+FAN_CLEARANCE_THICK = 0.8     # 厚みクリアランス (ホルダー深さ 41.0mm)
 
-HOLDER_INNER_DIA = FAN_DIA + FAN_CLEARANCE_DIA       # 104.8mm
+HOLDER_INNER_DIA = FAN_DIA + FAN_CLEARANCE_DIA       # 105.0mm
 HOLDER_DEPTH = FAN_THICK + FAN_CLEARANCE_THICK       # 41.0mm
-FAN_STOPPER_LIP = 6.0         # ファン背面ストッパー幅 (排気開口径 92.8mm)
-FAN_NECK_SLIT_W = 42.0        # スイッチ・持ち手露出スリット幅
+FAN_STOPPER_LIP = 5.0         # ファン前方の段差ストッパー幅 (内径 95.0mm)
+FAN_HANDLE_SLIT_W = 38.0      # 持ち手用上部スリット幅
 
 # 基本構造・肉厚
-WALL_T = 2.8                  # 基本外壁厚
-BASE_BOTTOM_T = 3.2           # 底面ベース厚
-FRONT_LIP_W = 5.5             # 前面フィルター押さえ枠幅 (開口 121x121mm)
-FRONT_WALL_T = 2.4            # 前面枠の厚み
-GRID_T = 2.2                  # フィルター背面グリッド厚
+WALL_T = 3.0                  # 基本外壁厚
+BASE_BOTTOM_T = 4.0           # 底面ベース厚
+FRONT_LIP_W = 5.0             # 前面フィルター押さえ枠幅 (開口 122x122mm)
+FRONT_WALL_T = 2.5            # 前面枠の厚み
+GRID_T = 2.5                  # フィルター背面グリッド厚
 CHAMBER_LEN = 16.0            # テーパー気室（ファンネル）長さ
 CORNER_RADIUS = 3.0           # 外枠角丸半径
 
 # 外形寸法計算
-CENTER_Z = BASE_BOTTOM_T + (SLOT_H / 2.0)   # 3.2 + 65.0 = 68.2mm
-TOTAL_HEIGHT = BASE_BOTTOM_T + SLOT_H + 2.0  # 135.2mm
-FRONT_OUTER_W = SLOT_W + (WALL_T * 2)        # 137.6mm
+BOX_W = SLOT_W + (WALL_T * 2)                       # 132 + 6 = 138.0mm
+BOX_H = BASE_BOTTOM_T + SLOT_H + WALL_T             # 4 + 130 + 3 = 137.0mm
+CENTER_Z = BASE_BOTTOM_T + (SLOT_H / 2.0)           # 4.0 + 65.0 = 69.0mm
 
 # Y軸方向の各ゾーン境界 (原点 Y=0 はフィルター前面外側)
 Y_FRONT = 0.0
-Y_SLOT_START = FRONT_WALL_T                         # 2.4
-Y_SLOT_END = Y_SLOT_START + SLOT_T                 # 2.4 + 11.2 = 13.6
-Y_GRID_END = Y_SLOT_END + GRID_T                   # 13.6 + 2.2 = 15.8
-Y_CHAMBER_END = Y_GRID_END + CHAMBER_LEN           # 15.8 + 16.0 = 31.8
-Y_HOLDER_END = Y_CHAMBER_END + HOLDER_DEPTH        # 31.8 + 41.0 = 72.8
-Y_BACK = Y_HOLDER_END + WALL_T                     # 72.8 + 2.8 = 75.6
-TOTAL_DEPTH = Y_BACK
-
-HOLDER_OUTER_DIA = HOLDER_INNER_DIA + (WALL_T * 2) # 104.8 + 5.6 = 110.4mm
+Y_SLOT_START = FRONT_WALL_T                         # 2.5mm
+Y_SLOT_END = Y_SLOT_START + SLOT_T                 # 2.5 + 11.2 = 13.7mm
+Y_GRID_END = Y_SLOT_END + GRID_T                   # 13.7 + 2.5 = 16.2mm
+Y_CHAMBER_END = Y_GRID_END + CHAMBER_LEN           # 16.2 + 16.0 = 32.2mm
+Y_HOLDER_END = Y_CHAMBER_END + HOLDER_DEPTH        # 32.2 + 41.0 = 73.2mm
+TOTAL_DEPTH = Y_HOLDER_END
 
 # 出力パスの設定
 OUTPUT_FILENAME = "solder_fume_extractor.step"
@@ -100,43 +90,33 @@ output_path = os.path.join(current_dir, OUTPUT_FILENAME)
 def create_solder_fume_extractor():
     with BuildPart() as model:
         # ----------------------------------------------------
-        # 1. 外形メインソリッド
-        # 前面四角セクション (Y=0 から Y=Y_GRID_END まで)
+        # 1. 外形メインブロック (一体型ソリッド)
         # ----------------------------------------------------
-        with BuildSketch(Plane(origin=(0, 0, CENTER_Z), z_dir=(0, 1, 0))):
-            Rectangle(FRONT_OUTER_W, TOTAL_HEIGHT)
+        # 前面から背面まで安定した直方体ベース
+        with BuildSketch(Plane.XY):
+            Rectangle(BOX_W, TOTAL_DEPTH)
             fillet(vertices(), radius=CORNER_RADIUS)
-        extrude(amount=Y_GRID_END)
+        extrude(amount=BOX_H)
+        # 中心合わせ: X=0, Y=0〜TOTAL_DEPTH, Z=0〜BOX_H
+        # 現在のSketchはXY中心原点なので、位置を調整
+        # Boxプリミティブで正確に配置
+    
+    # 完全に明示的な位置で再構築
+    with BuildPart() as model:
+        # メインソリッド
+        with Locations((0, TOTAL_DEPTH / 2.0, BOX_H / 2.0)):
+            Box(BOX_W, TOTAL_DEPTH, BOX_H)
 
-        # テーパー部外形ロフト (Y_GRID_END から Y_CHAMBER_END まで)
-        with BuildSketch(Plane(origin=(0, Y_GRID_END, CENTER_Z), z_dir=(0, 1, 0))) as s_outer_start:
-            Rectangle(FRONT_OUTER_W, TOTAL_HEIGHT)
-            fillet(vertices(), radius=CORNER_RADIUS)
-        with BuildSketch(Plane(origin=(0, Y_CHAMBER_END, CENTER_Z), z_dir=(0, 1, 0))) as s_outer_end:
-            Circle(radius=HOLDER_OUTER_DIA / 2.0)
-            with Locations((0, -(CENTER_Z - BASE_BOTTOM_T) / 2.0)):
-                Rectangle(HOLDER_OUTER_DIA, CENTER_Z - BASE_BOTTOM_T)
-        loft()
-
-        # ファンホルダー部外形 (Y_CHAMBER_END から Y_BACK まで)
-        with BuildSketch(Plane(origin=(0, Y_CHAMBER_END, CENTER_Z), z_dir=(0, 1, 0))):
-            Circle(radius=HOLDER_OUTER_DIA / 2.0)
-            with Locations((0, -(CENTER_Z - BASE_BOTTOM_T) / 2.0)):
-                Rectangle(HOLDER_OUTER_DIA, CENTER_Z - BASE_BOTTOM_T)
-        extrude(amount=Y_BACK - Y_CHAMBER_END)
-
-        # 安定用ワイドベース（底面の足）
-        base_w = FRONT_OUTER_W
-        base_d = TOTAL_DEPTH
-        with Locations((0, base_d / 2.0, BASE_BOTTOM_T / 2.0)):
-            Box(base_w, base_d, BASE_BOTTOM_T, align=(Align.CENTER, Align.CENTER, Align.CENTER), mode=Mode.ADD)
+        # 外側の縦4エッジを角丸に
+        v_edges = model.edges().filter_by(Axis.Z)
+        fillet(v_edges, radius=CORNER_RADIUS)
 
         # ----------------------------------------------------
-        # 2. 前面フィルター吸気開口（吸気窓）
+        # 2. 前面フィルター吸気開口（吸気窓 122 x 122mm）
         # ----------------------------------------------------
-        front_win_w = SLOT_W - (FRONT_LIP_W * 2)  # 121mm
-        front_win_h = SLOT_H - FRONT_LIP_W        # 124.5mm
-        with Locations((0, -1.0, CENTER_Z + (FRONT_LIP_W / 2.0))):
+        front_win_w = SLOT_W - (FRONT_LIP_W * 2)  # 122mm
+        front_win_h = SLOT_H - (FRONT_LIP_W * 2)  # 120mm
+        with Locations((0, -1.0, CENTER_Z)):
             Box(
                 front_win_w,
                 FRONT_WALL_T + 2.0,
@@ -152,87 +132,100 @@ def create_solder_fume_extractor():
             Box(
                 SLOT_W,
                 SLOT_T,
-                TOTAL_HEIGHT + 10.0,
+                BOX_H + 5.0,
                 align=(Align.CENTER, Align.MIN, Align.MIN),
                 mode=Mode.SUBTRACT
             )
 
         # ----------------------------------------------------
-        # 4. フィルター吸い込み防止グリッド（格子リブ）
+        # 4. フィルター背面サポートグリッド（格子壁）
+        # Y_SLOT_END から Y_GRID_END (厚さ 2.5mm)
         # ----------------------------------------------------
         grid_area_w = SLOT_W - 6.0   # 126mm
         grid_area_h = SLOT_H - 6.0   # 124mm
-        rib_w = 2.0
+        rib_w = 2.5
+        grid_pitch = 16.0
 
-        # グリッド開口のベースくり抜き
-        with BuildSketch(Plane(origin=(0, Y_SLOT_END, CENTER_Z), z_dir=(0, 1, 0))):
-            Rectangle(grid_area_w, grid_area_h)
-        extrude(amount=GRID_T + 0.1, mode=Mode.SUBTRACT)
+        # まずグリッド領域を開口
+        with Locations((0, Y_SLOT_END, CENTER_Z)):
+            with BuildSketch(Plane(origin=(0, 0, 0), z_dir=(0, 1, 0))):
+                Rectangle(grid_area_w, grid_area_h)
+            extrude(amount=GRID_T, mode=Mode.SUBTRACT)
 
-        # 縦リブ
-        num_v = int(grid_area_w / 18.0)
+        # 縦リブの追加
+        num_v = int(grid_area_w / grid_pitch)
         for i in range(-num_v // 2 + 1, num_v // 2 + 1):
-            with Locations((i * 18.0, Y_SLOT_END + (GRID_T / 2.0), CENTER_Z)):
+            with Locations((i * grid_pitch, Y_SLOT_END + (GRID_T / 2.0), CENTER_Z)):
                 Box(rib_w, GRID_T, grid_area_h, align=(Align.CENTER, Align.CENTER, Align.CENTER), mode=Mode.ADD)
 
-        # 横リブ
-        num_h = int(grid_area_h / 18.0)
+        # 横リブの追加
+        num_h = int(grid_area_h / grid_pitch)
         for j in range(-num_h // 2 + 1, num_h // 2 + 1):
-            with Locations((0, Y_SLOT_END + (GRID_T / 2.0), CENTER_Z + (j * 18.0))):
+            with Locations((0, Y_SLOT_END + (GRID_T / 2.0), CENTER_Z + (j * grid_pitch))):
                 Box(grid_area_w, GRID_T, rib_w, align=(Align.CENTER, Align.CENTER, Align.CENTER), mode=Mode.ADD)
 
         # ----------------------------------------------------
-        # 5. テーパー気室（ファンネル）内部ロフト
+        # 5. テーパー気室（ファンネル）
+        # グリッド開口 (126x124mm) -> ファン吸気口 (φ95mm ストッパー開口)
         # ----------------------------------------------------
-        with BuildSketch(Plane(origin=(0, Y_GRID_END, CENTER_Z), z_dir=(0, 1, 0))) as sk_inner_start:
-            Rectangle(grid_area_w, grid_area_h)
-        with BuildSketch(Plane(origin=(0, Y_CHAMBER_END, CENTER_Z), z_dir=(0, 1, 0))) as sk_inner_end:
-            Circle(radius=HOLDER_INNER_DIA / 2.0)
+        funnel_front_w = grid_area_w
+        funnel_front_h = grid_area_h
+        funnel_back_dia = HOLDER_INNER_DIA - (FAN_STOPPER_LIP * 2)  # 95.0mm
+
+        with BuildSketch(Plane(origin=(0, Y_GRID_END, CENTER_Z), z_dir=(0, 1, 0))) as sk_f_start:
+            Rectangle(funnel_front_w, funnel_front_h)
+        with BuildSketch(Plane(origin=(0, Y_CHAMBER_END, CENTER_Z), z_dir=(0, 1, 0))) as sk_f_end:
+            Circle(radius=funnel_back_dia / 2.0)
         loft(mode=Mode.SUBTRACT)
 
         # ----------------------------------------------------
-        # 6. ファンホルダー円筒空洞
+        # 6. ファンホルダー円筒空洞 (完全なφ105mm円筒)
+        # Y_CHAMBER_END から 背面 (Y_HOLDER_END) まで
         # ----------------------------------------------------
         with Locations((0, Y_CHAMBER_END, CENTER_Z)):
             with BuildSketch(Plane(origin=(0, 0, 0), z_dir=(0, 1, 0))):
                 Circle(radius=HOLDER_INNER_DIA / 2.0)
-            extrude(amount=HOLDER_DEPTH, mode=Mode.SUBTRACT)
+            extrude(amount=HOLDER_DEPTH + 5.0, mode=Mode.SUBTRACT)
 
         # ----------------------------------------------------
-        # 7. ファン背面排気口＆抜け止めストッパー
+        # 7. 持ち手・スイッチ用上部スリット (鍵穴状スリット)
+        # ファンホルダー部のみ、天面からファン中心まで抜く
         # ----------------------------------------------------
-        stopper_dia = HOLDER_INNER_DIA - (FAN_STOPPER_LIP * 2)  # 92.8mm
-        with Locations((0, Y_HOLDER_END, CENTER_Z)):
-            with BuildSketch(Plane(origin=(0, 0, 0), z_dir=(0, 1, 0))):
-                Circle(radius=stopper_dia / 2.0)
-            extrude(amount=WALL_T + 5.0, mode=Mode.SUBTRACT)
+        slit_y_start = Y_CHAMBER_END - 2.0
+        slit_y_len = (Y_HOLDER_END - slit_y_start) + 5.0
+        slit_height = BOX_H - CENTER_Z + 5.0
 
-        # ----------------------------------------------------
-        # 8. ファン上部スライドイン開口（U字クレードルドック）
-        # ----------------------------------------------------
-        holder_top_cut_w = HOLDER_INNER_DIA
-        holder_top_cut_len = (Y_BACK - Y_CHAMBER_END) + 2.0
-        with Locations((0, Y_CHAMBER_END - 0.5, CENTER_Z)):
+        with Locations((0, slit_y_start, CENTER_Z)):
             Box(
-                holder_top_cut_w,
-                holder_top_cut_len,
-                TOTAL_HEIGHT,
-                align=(Align.CENTER, Align.MIN, Align.MIN),
-                mode=Mode.SUBTRACT
-            )
-
-        # ----------------------------------------------------
-        # 9. 持ち手・スイッチ露出用U字スリット (ファンネル部上部)
-        # ----------------------------------------------------
-        slit_y_len = (Y_CHAMBER_END - Y_SLOT_END) + 1.0
-        with Locations((0, Y_SLOT_END, CENTER_Z - 5.0)):
-            Box(
-                FAN_NECK_SLIT_W,
+                FAN_HANDLE_SLIT_W,
                 slit_y_len,
-                TOTAL_HEIGHT,
+                slit_height,
                 align=(Align.CENTER, Align.MIN, Align.MIN),
                 mode=Mode.SUBTRACT
             )
+
+        # ----------------------------------------------------
+        # 8. 仕上げ面取り（フィルター挿入口＆ファン挿入口ガイド）
+        # ----------------------------------------------------
+        # フィルター挿入口
+        filter_inlet_edges = model.edges().filter_by(
+            lambda e: e.center().Z > (BOX_H - 1.0) and abs(e.center().X) < (SLOT_W / 2.0) and e.center().Y < Y_GRID_END
+        )
+        if filter_inlet_edges:
+            try:
+                chamfer(filter_inlet_edges, length=1.0)
+            except Exception:
+                pass
+
+        # ファンホルダー背面開口エッジ
+        fan_inlet_edges = model.edges().filter_by(
+            lambda e: e.center().Y > (Y_HOLDER_END - 1.0) and abs(e.center().X) < (HOLDER_INNER_DIA / 2.0 + 2.0)
+        )
+        if fan_inlet_edges:
+            try:
+                chamfer(fan_inlet_edges, length=1.2)
+            except Exception:
+                pass
 
     return model.part
 
