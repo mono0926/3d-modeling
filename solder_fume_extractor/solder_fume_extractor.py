@@ -8,7 +8,7 @@ from ocp_vscode import show_object
     - ユーザーの手描き図に基づいた堅牢な一体型ボックス＆ファンネル構造。
     - フィルター部 (130x130x10mm):
         - 上部からスライドインで着脱・交換可能なガイドスロット。
-        - 吸引時にフィルターが巻き込まれない強固な背面サポートグリッド（格子窓アレイ）。
+        - 吸引時にフィルターが巻き込まれない強固な背面サポートグリッド（7x7 格子窓アレイ）。
         - 前面脱落防止用の保持枠（122x120mm 吸気開口）。
     - ファンホルダー部 (φ103.5mm, 厚さ40.2mm):
         - 直径φ105.0mmの円筒ホルダーでファン全周を確実にホールド。
@@ -74,17 +74,17 @@ CHAMBER_LEN = 16.0            # テーパー気室（ファンネル）長さ
 CORNER_RADIUS = 3.0           # 外枠角丸半径
 
 # 外形寸法計算
-BOX_W = SLOT_W + (WALL_T * 2)                       # 138.0mm
-BOX_H = BASE_BOTTOM_T + SLOT_H + WALL_T             # 137.0mm
-CENTER_Z = BASE_BOTTOM_T + (SLOT_H / 2.0)           # 69.0mm
+BOX_W = SLOT_W + (WALL_T * 2)                       # 132 + 6 = 138.0mm
+BOX_H = BASE_BOTTOM_T + SLOT_H + WALL_T             # 4 + 130 + 3 = 137.0mm
+CENTER_Z = BASE_BOTTOM_T + (SLOT_H / 2.0)           # 4.0 + 65.0 = 69.0mm
 
 # Y軸方向の各ゾーン境界 (原点 Y=0 はフィルター前面外側)
 Y_FRONT = 0.0
 Y_SLOT_START = FRONT_WALL_T                         # 2.5mm
-Y_SLOT_END = Y_SLOT_START + SLOT_T                 # 13.7mm
-Y_GRID_END = Y_SLOT_END + GRID_T                   # 16.2mm
-Y_CHAMBER_END = Y_GRID_END + CHAMBER_LEN           # 32.2mm
-Y_BACK = Y_CHAMBER_END + HOLDER_DEPTH              # 73.2mm
+Y_SLOT_END = Y_SLOT_START + SLOT_T                 # 2.5 + 11.2 = 13.7mm
+Y_GRID_END = Y_SLOT_END + GRID_T                   # 13.7 + 2.5 = 16.2mm
+Y_CHAMBER_END = Y_GRID_END + CHAMBER_LEN           # 16.2 + 16.0 = 32.2mm
+Y_BACK = Y_CHAMBER_END + HOLDER_DEPTH              # 32.2 + 41.0 = 73.2mm
 TOTAL_DEPTH = Y_BACK
 
 # 出力パスの設定
@@ -159,8 +159,8 @@ def create_solder_fume_extractor():
         # Y_GRID_END (16.2mm) -> Y_CHAMBER_END (32.2mm)
         # 四角 (122x120mm) -> 円 (φ95.0mm)
         # ----------------------------------------------------
-        p_f_start = Plane(origin=(0, Y_GRID_END, CENTER_Z), x_dir=(1, 0, 0), z_dir=(0, 0, 1))
-        p_f_end = Plane(origin=(0, Y_CHAMBER_END, CENTER_Z), x_dir=(1, 0, 0), z_dir=(0, 0, 1))
+        p_f_start = Plane(origin=(0, Y_GRID_END, CENTER_Z), x_dir=(1, 0, 0), y_dir=(0, 0, 1))
+        p_f_end = Plane(origin=(0, Y_CHAMBER_END, CENTER_Z), x_dir=(1, 0, 0), y_dir=(0, 0, 1))
         with BuildSketch(p_f_start) as sk1:
             Rectangle(122.0, 120.0)
         with BuildSketch(p_f_end) as sk2:
@@ -169,9 +169,10 @@ def create_solder_fume_extractor():
 
         # ----------------------------------------------------
         # 6. ファンホルダー円筒空洞 (完全なφ105.0mm円筒)
-        # Y_CHAMBER_END (32.2mm) から 背面 (Y_BACK = 73.2mm) へ貫通
+        # Y_CHAMBER_END (32.2mm) から 背面 (Y_BACK = 73.2mm) へ奥(+Y)方向に貫通
+        # Rotation(-90, 0, 0) で円柱の高さベクトルを +Y 方向に向ける
         # ----------------------------------------------------
-        with Locations(Location((0, Y_CHAMBER_END - 0.1, CENTER_Z), (90, 0, 0))):
+        with Locations(Location((0, Y_CHAMBER_END - 0.1, CENTER_Z), (-90, 0, 0))):
             Cylinder(
                 radius=HOLDER_INNER_DIA / 2.0,
                 height=HOLDER_DEPTH + 1.0,
