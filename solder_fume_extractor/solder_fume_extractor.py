@@ -8,20 +8,21 @@ from ocp_vscode import show_object
     - ユーザーの手描き図に基づいた堅牢な一体型ボックス＆ファンネル構造。
     - フィルター部 (130x130x10mm):
         - 上部からスライドインで着脱・交換可能なガイドスロット。
-        - 吸引時にフィルターが巻き込まれない強固な背面サポートグリッド（7x7 格子窓アレイ）。
-        - 前面脱落防止用の保持枠（122x120mm 吸気開口）。
+        - 前面脱落防止枠（122x120mm 吸気開口）および背面の受座段差でフィルターを確実にホールド。
+        - 部品側の網（グリッド）を廃止し、ファン内蔵ガードを活用することで通気抵抗ゼロ・最大吸引力を実現。
     - ファンホルダー部 (φ103.5mm, 厚さ40.2mm):
         - 直径φ105.0mmの円筒ホルダーでファン全周を確実にホールド。
         - 天面に幅38.0mmのスリットを設け、持ち手・スイッチ（11.5mm露出）が上に突き出る鍵穴状ドック。
         - ファンネルとの境界に段差ストッパー（φ95.0mm開口）を設け、ファンが前方に落ち込まない。
     - テーパー気室（ファンネル）:
-        - 122x120mmのフィルター面からφ95mmのファン吸気口へとスムーズに絞るテーパー構造。
+        - 122x120mmのフィルター受座面からφ95mmのファン吸気口へとスムーズに絞るストレート気室。
     - 卓上安定性:
-        - 幅広でフラットな安定底面ベース (138 x 73.2mm)。
+        - 幅広でフラットな安定底面ベース (138 x 72.7mm)。
     - 3Dプリント最適化 (Bambu Lab P2S):
         - 底面配置でサポート材完全不要。
 
 推奨フィラメント:
+    - PETG-CF (マットで高級感のある外観、反り防止・高寸法精度により最適)
     - PETG または PLA
 
 推奨スライサー設定:
@@ -32,7 +33,7 @@ from ocp_vscode import show_object
     - 壁ジェネレーター: Arachne
 
 印刷統計（予想）:
-    - solder_fume_extractor: 印刷時間 約2時間40分、フィラメント使用量 約145g
+    - solder_fume_extractor: 印刷時間 約2時間00分、フィラメント使用量 約125g
 
 履歴とプロンプト経緯:
     - 詳細は同ディレクトリの history.md を参照。
@@ -69,8 +70,7 @@ WALL_T = 3.0                  # 基本外壁厚
 BASE_BOTTOM_T = 4.0           # 底面ベース厚
 FRONT_LIP_W = 5.0             # 前面フィルター押さえ枠幅 (開口 122x120mm)
 FRONT_WALL_T = 2.5            # 前面枠の厚み
-GRID_T = 2.5                  # フィルター背面グリッド厚
-CHAMBER_LEN = 16.0            # テーパー気室（ファンネル）長さ
+CHAMBER_LEN = 18.0            # テーパー気室（ファンネル）長さ
 CORNER_RADIUS = 3.0           # 外枠角丸半径
 
 # 外形寸法計算
@@ -82,9 +82,8 @@ CENTER_Z = BASE_BOTTOM_T + (SLOT_H / 2.0)           # 4.0 + 65.0 = 69.0mm
 Y_FRONT = 0.0
 Y_SLOT_START = FRONT_WALL_T                         # 2.5mm
 Y_SLOT_END = Y_SLOT_START + SLOT_T                 # 2.5 + 11.2 = 13.7mm
-Y_GRID_END = Y_SLOT_END + GRID_T                   # 13.7 + 2.5 = 16.2mm
-Y_CHAMBER_END = Y_GRID_END + CHAMBER_LEN           # 16.2 + 16.0 = 32.2mm
-Y_BACK = Y_CHAMBER_END + HOLDER_DEPTH              # 32.2 + 41.0 = 73.2mm
+Y_CHAMBER_END = Y_SLOT_END + CHAMBER_LEN           # 13.7 + 18.0 = 31.7mm
+Y_BACK = Y_CHAMBER_END + HOLDER_DEPTH              # 31.7 + 41.0 = 72.7mm
 TOTAL_DEPTH = Y_BACK
 
 # 出力パスの設定
@@ -96,7 +95,7 @@ output_path = os.path.join(current_dir, OUTPUT_FILENAME)
 def create_solder_fume_extractor():
     with BuildPart() as model:
         # ----------------------------------------------------
-        # 1. 外形メインブロック (X: [-69, +69], Y: [0, 73.2], Z: [0, 137])
+        # 1. 外形メインブロック (X: [-69, +69], Y: [0, 72.7], Z: [0, 137])
         # ----------------------------------------------------
         with Locations((0, TOTAL_DEPTH / 2.0, BOX_H / 2.0)):
             Box(BOX_W, TOTAL_DEPTH, BOX_H)
@@ -135,31 +134,11 @@ def create_solder_fume_extractor():
             )
 
         # ----------------------------------------------------
-        # 4. フィルター背面サポートグリッド（格子窓アレイ）
-        # Y_SLOT_END (13.7mm) から Y_GRID_END (16.2mm) の壁に格子穴を開ける
+        # 4. テーパー気室（ファンネル）
+        # Y_SLOT_END (13.7mm) -> Y_CHAMBER_END (31.7mm)
+        # フィルター受座開口 (122x120mm) -> 円 (φ95.0mm)
         # ----------------------------------------------------
-        hole_size = 13.5
-        bar_w = 2.5
-        pitch = hole_size + bar_w  # 16.0mm
-        cols = 7
-        rows = 7
-        for r in range(-(rows // 2), rows // 2 + 1):
-            for c in range(-(cols // 2), cols // 2 + 1):
-                with Locations((c * pitch, Y_SLOT_END - 0.1, CENTER_Z + (r * pitch))):
-                    Box(
-                        hole_size,
-                        GRID_T + 0.2,
-                        hole_size,
-                        align=(Align.CENTER, Align.MIN, Align.CENTER),
-                        mode=Mode.SUBTRACT
-                    )
-
-        # ----------------------------------------------------
-        # 5. テーパー気室（ファンネル）
-        # Y_GRID_END (16.2mm) -> Y_CHAMBER_END (32.2mm)
-        # 四角 (122x120mm) -> 円 (φ95.0mm)
-        # ----------------------------------------------------
-        p_f_start = Plane(origin=(0, Y_GRID_END, CENTER_Z), x_dir=(1, 0, 0), y_dir=(0, 0, 1))
+        p_f_start = Plane(origin=(0, Y_SLOT_END, CENTER_Z), x_dir=(1, 0, 0), y_dir=(0, 0, 1))
         p_f_end = Plane(origin=(0, Y_CHAMBER_END, CENTER_Z), x_dir=(1, 0, 0), y_dir=(0, 0, 1))
         with BuildSketch(p_f_start) as sk1:
             Rectangle(122.0, 120.0)
@@ -168,9 +147,8 @@ def create_solder_fume_extractor():
         loft(mode=Mode.SUBTRACT)
 
         # ----------------------------------------------------
-        # 6. ファンホルダー円筒空洞 (完全なφ105.0mm円筒)
-        # Y_CHAMBER_END (32.2mm) から 背面 (Y_BACK = 73.2mm) へ奥(+Y)方向に貫通
-        # Rotation(-90, 0, 0) で円柱の高さベクトルを +Y 方向に向ける
+        # 5. ファンホルダー円筒空洞 (完全なφ105.0mm円筒)
+        # Y_CHAMBER_END (31.7mm) から 背面 (Y_BACK = 72.7mm) へ奥(+Y)方向に貫通
         # ----------------------------------------------------
         with Locations(Location((0, Y_CHAMBER_END - 0.1, CENTER_Z), (-90, 0, 0))):
             Cylinder(
@@ -181,7 +159,7 @@ def create_solder_fume_extractor():
             )
 
         # ----------------------------------------------------
-        # 7. 持ち手・スイッチ用上部スリット (鍵穴型)
+        # 6. 持ち手・スイッチ用上部スリット (鍵穴型)
         # ファンホルダー部 (Y_CHAMBER_END〜Y_BACK) の真上を天面までくり抜く
         # ----------------------------------------------------
         with Locations((0, Y_CHAMBER_END - 0.1, CENTER_Z)):
@@ -197,7 +175,7 @@ def create_solder_fume_extractor():
 
 
 if __name__ == "__main__":
-    print("Creating solder fume extractor model...")
+    print("Creating solder fume extractor model (no-grid high-airflow design)...")
     result = create_solder_fume_extractor()
 
     print(f"Exporting to {output_path}...")
