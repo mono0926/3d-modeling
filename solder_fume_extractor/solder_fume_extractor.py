@@ -26,14 +26,14 @@ from ocp_vscode import show_object
     - PETG または PLA
 
 推奨スライサー設定:
-    - 壁ループ (Wall Loops): 3〜4回
-    - 底面/天面レイヤー: 4〜5層
-    - インフィル: 15% (Gyroid または Grid)
+    - 壁ループ (Wall Loops): 2回 (0.6mmノズル) / 3〜4回 (0.4mmノズル)
+    - 底面/天面レイヤー: 3層 (0.6mmノズル) / 4〜5層 (0.4mmノズル)
+    - インフィル: 10〜15% (Gyroid または Grid)
     - サポート: なし（None）
     - 壁ジェネレーター: Arachne
 
 印刷統計（予想）:
-    - solder_fume_extractor: 印刷時間 約2時間00分、フィラメント使用量 約125g
+    - solder_fume_extractor: 印刷時間 約2時間00分、フィラメント使用量 約125g (0.4mmノズル時) / 約170g (0.6mmノズル時)
 
 履歴とプロンプト経緯:
     - 詳細は同ディレクトリの history.md を参照。
@@ -149,11 +149,12 @@ def create_solder_fume_extractor():
         # ----------------------------------------------------
         # 5. ファンホルダー円筒空洞 (完全なφ105.0mm円筒)
         # Y_CHAMBER_END (31.7mm) から 背面 (Y_BACK = 72.7mm) へ奥(+Y)方向に貫通
+        # 食い込みオーバーラップを排除し、完全な直角ストッパー段差面を形成
         # ----------------------------------------------------
-        with Locations(Location((0, Y_CHAMBER_END - 0.1, CENTER_Z), (-90, 0, 0))):
+        with Locations(Location((0, Y_CHAMBER_END, CENTER_Z), (-90, 0, 0))):
             Cylinder(
                 radius=HOLDER_INNER_DIA / 2.0,
-                height=HOLDER_DEPTH + 1.0,
+                height=HOLDER_DEPTH + 2.0,
                 align=(Align.CENTER, Align.CENTER, Align.MIN),
                 mode=Mode.SUBTRACT
             )
@@ -162,10 +163,10 @@ def create_solder_fume_extractor():
         # 6. 持ち手・スイッチ用上部スリット (鍵穴型)
         # ファンホルダー部 (Y_CHAMBER_END〜Y_BACK) の真上を天面までくり抜く
         # ----------------------------------------------------
-        with Locations((0, Y_CHAMBER_END - 0.1, CENTER_Z)):
+        with Locations((0, Y_CHAMBER_END, CENTER_Z)):
             Box(
                 FAN_HANDLE_SLIT_W,
-                HOLDER_DEPTH + 1.0,
+                HOLDER_DEPTH + 2.0,
                 BOX_H - CENTER_Z + 1.0,
                 align=(Align.CENTER, Align.MIN, Align.MIN),
                 mode=Mode.SUBTRACT
@@ -175,7 +176,7 @@ def create_solder_fume_extractor():
 
 
 if __name__ == "__main__":
-    print("Creating solder fume extractor model (no-grid high-airflow design)...")
+    print("Creating solder fume extractor model (refined stopper step)...")
     result = create_solder_fume_extractor()
 
     print(f"Exporting to {output_path}...")
