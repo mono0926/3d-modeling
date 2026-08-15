@@ -8,6 +8,7 @@ from ocp_vscode import show_object
     - ユーザーの手描き図に基づいた堅牢な一体型ボックス＆ファンネル構造。
     - フィルター部 (130x130x10mm):
         - 上部からスライドインで着脱・交換可能なガイドスロット。
+        - 底面に「指押し出し用イジェクトホール（28x9mm角丸）」を新設し、下から指で押し上げて簡単にフィルターを交換可能。
         - 前面脱落防止枠（122x120mm 吸気開口）および背面の受座段差でフィルターを確実にホールド。
         - 部品側の網（グリッド）を廃止し、ファン内蔵ガードを活用することで通気抵抗ゼロ・最大吸引力を実現。
     - ファンホルダー部 (φ103.5mm, 厚さ40.2mm):
@@ -53,6 +54,11 @@ FILTER_CLEARANCE_T = 1.2      # 厚みクリアランス (スロット厚 11.2mm
 SLOT_W = FILTER_W + FILTER_CLEARANCE_W   # 132.0mm
 SLOT_T = FILTER_T + FILTER_CLEARANCE_T   # 11.2mm
 SLOT_H = FILTER_H                        # 130.0mm
+
+# 底面フィルターイジェクトホール（指押し穴）
+EJECT_HOLE_W = 28.0           # 押し出し穴の幅
+EJECT_HOLE_D = 8.5            # 押し出し穴の奥行き
+EJECT_HOLE_R = 4.0            # 押し出し穴の角丸半径
 
 # ポータブル扇風機寸法
 FAN_DIA = 103.5
@@ -134,6 +140,17 @@ def create_solder_fume_extractor():
             )
 
         # ----------------------------------------------------
+        # 3.5 底面フィルター指押し出し穴（イジェクトホール）
+        # フィルター交換時に下から指で押し上げて取り出しやすくする
+        # ----------------------------------------------------
+        eject_center_y = Y_SLOT_START + (SLOT_T / 2.0)
+        with BuildSketch(Plane.XY):
+            with Locations((0, eject_center_y)):
+                Rectangle(EJECT_HOLE_W, EJECT_HOLE_D)
+                fillet(vertices(), radius=EJECT_HOLE_R)
+        extrude(amount=BASE_BOTTOM_T + 0.5, mode=Mode.SUBTRACT)
+
+        # ----------------------------------------------------
         # 4. テーパー気室（ファンネル）
         # Y_SLOT_END (13.7mm) -> Y_CHAMBER_END (31.7mm)
         # フィルター受座開口 (122x120mm) -> 円 (φ95.0mm)
@@ -149,7 +166,6 @@ def create_solder_fume_extractor():
         # ----------------------------------------------------
         # 5. ファンホルダー円筒空洞 (完全なφ105.0mm円筒)
         # Y_CHAMBER_END (31.7mm) から 背面 (Y_BACK = 72.7mm) へ奥(+Y)方向に貫通
-        # 食い込みオーバーラップを排除し、完全な直角ストッパー段差面を形成
         # ----------------------------------------------------
         with Locations(Location((0, Y_CHAMBER_END, CENTER_Z), (-90, 0, 0))):
             Cylinder(
@@ -176,7 +192,7 @@ def create_solder_fume_extractor():
 
 
 if __name__ == "__main__":
-    print("Creating solder fume extractor model (refined stopper step)...")
+    print("Creating solder fume extractor model (with bottom finger eject hole)...")
     result = create_solder_fume_extractor()
 
     print(f"Exporting to {output_path}...")
