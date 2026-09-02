@@ -46,7 +46,7 @@ FONT_SIZE = 18.0          # テキストサイズ [mm]（幅 約75mm, 高さ 約
 # プレート寸法
 PLATE_WIDTH = 80.0        # 幅 [mm]（布80mmより少し大きく）
 PLATE_HEIGHT = 25.0       # 高さ [mm]（テキスト高さ17mm + 上下余白各4mm）
-PLATE_THICKNESS = 1.2     # 厚さ [mm]（薄い平面。布にあてやすい）
+PLATE_THICKNESS = 0.4     # 厚さ [mm]（薄い平面。布にあてやすい）
 
 # 角丸（取り扱いやすさのため）
 CORNER_RADIUS = 2.0       # [mm]
