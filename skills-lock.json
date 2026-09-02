@@ -5,78 +5,78 @@
       "source": "earthtojake/text-to-cad",
       "sourceType": "github",
       "skillPath": "skills/bambu-labs/SKILL.md",
-      "computedHash": "dc0f17b8af9d10455cd1bf4f296ba6d09c7311dc26c1da85cbebe996eb59b374",
-      "skillFolderHash": "83be3e78c8efaf42f5affd5352c60c76183aee07"
+      "computedHash": "861127b67aca5e095cf84b4f9c7df4171704aa2f0fefbb6299eec84a55b95194",
+      "skillFolderHash": "88cf73423c11128680be3cdd1f0e1d9cdebf7cb9"
     },
     "cad": {
       "source": "earthtojake/text-to-cad",
       "sourceType": "github",
       "skillPath": "skills/cad/SKILL.md",
-      "computedHash": "11b81c860d67293af7fb271408c18d2a1b59e13060f342e7e2f7ac45dd8b8bed",
-      "skillFolderHash": "83731c2ce56d12828b62111b3fdccf384c15eded"
+      "computedHash": "c3760b716bac080608bfd0745f8c1c502c747272cb075e2cc87d118e6ac420bb",
+      "skillFolderHash": "dc5bc9bd4d7b0cd8d8a29bec41a480e520bc94e4"
     },
     "cad-viewer": {
       "source": "earthtojake/text-to-cad",
       "sourceType": "github",
       "skillPath": "skills/cad-viewer/SKILL.md",
-      "computedHash": "c11b7b2b966dcc302a19ded96a5262f857f2bd47690ff30fc1ab5fdec1ad9c67",
-      "skillFolderHash": "7e90ef988bbe33dbec612d4dd052f1cb94792800"
+      "computedHash": "1642b02c1913e98200c5e732e5de99c7d3a2525e2da747aef2380cdfea9dd728",
+      "skillFolderHash": "b5c7b6176c3e9f485e8e1420a83d07f323bd7694"
     },
     "dxf": {
       "source": "earthtojake/text-to-cad",
       "sourceType": "github",
       "skillPath": "skills/dxf/SKILL.md",
-      "computedHash": "da451998dcd097922b63d3f404a5622b5d8d74a63189bc01e0996dafd3ac390f",
-      "skillFolderHash": "4de18d017fcc263cde5b35806125a25dff96f277"
+      "computedHash": "ddf272a5ccacecc3a8240af1de7d79d43b0b64543f1ae5a5f7e2c8d6f78ef6a7",
+      "skillFolderHash": "6202ba8880fe4ba51901d7b473d5a51171dd9ab5"
     },
     "gcode": {
       "source": "earthtojake/text-to-cad",
       "sourceType": "github",
       "skillPath": "skills/gcode/SKILL.md",
-      "computedHash": "2937a7b84ccfdc953a37c474fb528a8454ae4de4f01753099b1c406e4ea59fcf",
-      "skillFolderHash": "4fb50592577d7c6012d4a5d6128cf602d5feade9"
+      "computedHash": "237701957f7c8c89f2f8a68986232108481adf55d014816f7c71e634699f7331",
+      "skillFolderHash": "90b3627600f6f93dcbd6425718fcf83ff79d14c9"
     },
     "implicit-cad": {
       "source": "earthtojake/text-to-cad",
       "sourceType": "github",
       "skillPath": "skills/implicit-cad/SKILL.md",
-      "computedHash": "9c5d77597d622e6afba287794babe69e96af0e1abe41bfeb3af6c2a283ceec56",
-      "skillFolderHash": "98cf8b52ea6cbac5ee027a3c849fc09b17dd125d"
+      "computedHash": "0c3f4c4171524a6be53a2d932549c2b66c43e31affd2710224c2cecf64733da8",
+      "skillFolderHash": "cc862c0e42a5424e9429bd722a1d9f87c540ece7"
     },
     "sdf": {
       "source": "earthtojake/text-to-cad",
       "sourceType": "github",
       "skillPath": "skills/sdf/SKILL.md",
-      "computedHash": "3386684b09717a9dea915c318e44dfd2e9c2b7e96f3d9d8d7c7711d0bffc8d7c",
-      "skillFolderHash": "932a11b028fb57ed9e75ea95a88c0f1dc909a1c7"
+      "computedHash": "e2265202b5cce589f6b5fab1c3b5362d2fbe83d060a33c3d7540ad11aa799319",
+      "skillFolderHash": "360e1d3e4b09bfb68224fdd0118d706cea2961f1"
     },
     "sendcutsend": {
       "source": "earthtojake/text-to-cad",
       "sourceType": "github",
       "skillPath": "skills/sendcutsend/SKILL.md",
-      "computedHash": "6fdda67a581041666b36e36e58877b7b0dd9ecd77a24f36e68a09a767c538225",
-      "skillFolderHash": "3c7e21f4ccded88032012ecb274c754d743f23a3"
+      "computedHash": "a0ffc824ea84f2ed50191fa6247d8baefd4b4baf7ec0bf85f929a9a2d803acd2",
+      "skillFolderHash": "fc077c44e55aa1372780b1b46792725427e2d34f"
     },
     "srdf": {
       "source": "earthtojake/text-to-cad",
       "sourceType": "github",
       "skillPath": "skills/srdf/SKILL.md",
-      "computedHash": "6fe9408657763446311d4832c15687a0cee82c6149e7cd750bf8bc6017133184",
-      "skillFolderHash": "3a6cad20df9b6bb0c356d3e66aebba0e0aec81dd"
+      "computedHash": "87a678890d5f92639b21d9d4878a6d3cbe704c0a1cb121d2692cacbbfab114a6",
+      "skillFolderHash": "cf4f8bee70a3bb2db19830ee629a6289f6b75991"
     },
     "step-parts": {
       "source": "earthtojake/text-to-cad",
       "sourceType": "github",
       "skillPath": "skills/step-parts/SKILL.md",
-      "computedHash": "6e915d1d1e1b2da6d5fae2dd412371b6d500145816da2ae203eed1b5ad6eacfc",
-      "skillFolderHash": "7d16452bab62bfd5c997ddab333f9b23de6700c4"
+      "computedHash": "5f657a04fc0454f746274c21b44faf48b0466b081e9b740e30cd5db3dc4fa401",
+      "skillFolderHash": "d8b526ae2ba76808335603e214f6858ae3a28257"
     },
     "urdf": {
       "source": "earthtojake/text-to-cad",
       "sourceType": "github",
       "skillPath": "skills/urdf/SKILL.md",
-      "computedHash": "cd622804cc8ea837bd7232b18a5b93b858b3203546995f884dbdc170da7d366c",
-      "skillFolderHash": "b51dc006eb00921d68f76b654222dc19705e825b"
+      "computedHash": "9f8756dbd3b7bc93718493beb689d5b6afb7373ff31610b3533d8a1eb70c3917",
+      "skillFolderHash": "e0180a7635ee292cb0122dc0e1a9d5c3249924d4"
     },
     "bambu-studio-ai": {
       "source": "heyixuan2/bambu-studio-ai",
