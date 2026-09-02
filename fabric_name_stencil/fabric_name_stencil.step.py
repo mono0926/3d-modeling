@@ -39,7 +39,7 @@ from build123d import *
 # ============================================================
 
 # フォント設定
-FONT_PATH = "/System/Library/Fonts/ヒラギノ角ゴシック W4.ttc"
+FONT_PATH = "/System/Library/Fonts/ヒラギノ角ゴシック W6.ttc"
 TEXT_STR = "おなまえ"
 FONT_SIZE = 18.0          # テキストサイズ [mm]（幅 約75mm, 高さ 約17mm）
 
