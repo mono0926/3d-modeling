@@ -11,29 +11,33 @@ from ocp_vscode import show_object
     - スライド溝の上部を45°テーパー（額縁風ベベル）とすることで、FDM印刷時のオーバーハング垂れ下がりを防止（完全サポートフリー）。
     - 手前開口部には垂直落とし込み式のエンドキャップ（抜け止めバー）を配置し、縦置き展示でもアクリルが滑落せず、微細害虫の侵入を遮断する全周密閉構造。
     - 手前壁・奥壁・左右壁の全周が底面から強固に立ち上がり、エンドキャップ装着時は外壁が全周ツライチになる洗練された外観。
+    - 0.6mmタングステンノズルおよびPETG-CFの押し出し特性に完全最適化した公差設計。
     - 将来的に 200mm × 200mm 等の大型アクリルプレートにも数値を変更するだけで対応可能な完全パラメトリック設計。
 
 推奨フィラメント:
     - Bambu PETG-CF 黒 (Black)
     - 理由: 優れた高剛性・低熱収縮率（PLA同等）、積層痕が目立たない高級感のあるマットブラックな質感。
+    - ノズル: 0.6mm タングステンノズル（または硬化鋼ノズル）
+      ※カーボンファイバーによる耐摩耗性を担保し、目詰まりリスクをゼロ化。層間密着強度も大幅向上。
 
-推奨スライサー設定 (Bambu Studio):
-    - ノズル径: 0.4mm
-    - レイヤー高さ: 0.20mm Standard
-    - 壁ループ (Wall Loops): 4 (剛性と気密性を確保)
-    - トップ/ボトムシェルレイヤー: 5層
+推奨スライサー設定 (Bambu Studio - 0.6mmノズル向け):
+    - ノズル径: 0.6mm
+    - レイヤー高さ: 0.24mm〜0.28mm Standard (0.24mm推奨)
+    - 壁ループ (Wall Loops): 3〜4 (線幅約0.62mm × 3〜4周で外壁3.0mmを強固に充填)
+    - トップ/ボトムシェルレイヤー: 4〜5層
     - インフィル: 15%〜20% (Gyroid)
     - サポート: なし (None / 45°テーパー設計により完全サポートフリー)
     - シーム位置 (Seam): 背面（Back）または整列（Aligned）
 
-印刷統計（予想）:
-    - case_body: 印刷時間 約2時間40分、フィラメント使用量 約125g
-    - end_cap: 印刷時間 約8分、フィラメント使用量 約4g
+印刷統計（予想 - 0.6mmノズル / 0.24mmレイヤー）:
+    - case_body: 印刷時間 約1時間15分〜1時間30分（0.4mm比で約50%短縮！）、フィラメント使用量 約125g
+    - end_cap: 印刷時間 約5分、フィラメント使用量 約4g
 
 パラメーター変更ガイド:
     - アクリル板の実寸測定は必須です。ロットや切り出しにより厚み（4.8〜5.2mm）や外寸に誤差がある場合、
       以下の定数 `ACRYLIC_WIDTH`, `ACRYLIC_LENGTH`, `ACRYLIC_THICKNESS` を実測値に合わせて更新してください。
-    - スライドが硬い場合は `SLIDE_CLEARANCE_XY` や `SLIDE_CLEARANCE_Z` を 0.05mm 単位で広げてください。
+    - 0.6mmノズルでは太い線幅による内角R（約0.35mm）や押し出し交差を考慮し、クリアランスを広めに調整しています。
+      （0.4mmノズルに戻す場合は `SLIDE_CLEARANCE_XY = 0.30`, `SLIDE_CLEARANCE_Z = 0.25`, `FIT_CLEARANCE = 0.15` を推奨）
     - 将来の20cm×20cm化時は `ACRYLIC_WIDTH = 200.0`, `ACRYLIC_LENGTH = 200.0` に変更するだけで自動スケールします。
 
 履歴とプロンプト経緯:
@@ -54,19 +58,20 @@ BOARD_THICKNESS = 5.0       # 底面発泡ボード（ペフ板）厚み
 SPECIMEN_DEPTH = 40.0       # 標本有効深さ（ボード上面〜アクリル下面）
 
 # --- ケース基本構造 ---
-WALL_THICKNESS = 3.0        # ケース外壁の厚み
+WALL_THICKNESS = 3.0        # ケース外壁の厚み (0.6mmノズルで約5本分の線幅)
 BOTTOM_THICKNESS = 2.5      # 底面ベースの厚み
 RAIL_ENGAGEMENT = 2.5       # レールのかかり代（左右・奥の溝の深さ）
 RAIL_LIP_THICKNESS = 2.5    # レール天井庇の厚み（Z方向）
 
-# --- クリアランス（公差） ---
-SLIDE_CLEARANCE_XY = 0.3    # 幅方向クリアランス (片側 0.15mm)
-SLIDE_CLEARANCE_Z = 0.25    # 厚み方向クリアランス (溝高さ = 5.25mm)
-FIT_CLEARANCE = 0.15        # エンドキャップ等の垂直嵌合クリアランス
+# --- クリアランス（公差: 0.6mmノズル最適化値） ---
+# 0.6mmノズルの内角R（約0.35mm）や押し出し幅を考慮したスムーズなスライド設定
+SLIDE_CLEARANCE_XY = 0.45   # 幅方向クリアランス (片側約 0.225mm)
+SLIDE_CLEARANCE_Z = 0.35    # 厚み方向クリアランス (溝高さ = 5.35mm)
+FIT_CLEARANCE = 0.20        # エンドキャップ等の垂直嵌合クリアランス
 
 # --- エンドキャップ（抜け止めバー） ---
 CAP_GUIDE_DEPTH = 1.5       # 左右壁への食い込み深さ（リブ幅）
-CAP_GUIDE_WIDTH = 2.0       # ガイド溝のY方向幅
+CAP_GUIDE_WIDTH = 2.4       # ガイド溝のY方向幅 (0.6mm × 4パスで綺麗に埋まる)
 NOTCH_WIDTH = 14.0          # 取り外し用指がかりノッチの幅
 NOTCH_DEPTH = 1.2           # ノッチの深さ
 
@@ -75,34 +80,34 @@ NOTCH_DEPTH = 1.2           # ノッチの深さ
 # ==============================================================================
 
 # アクリルが入るスロット寸法
-SLOT_W = ACRYLIC_WIDTH + SLIDE_CLEARANCE_XY        # 76.3mm
-SLOT_L = ACRYLIC_LENGTH + (SLIDE_CLEARANCE_XY / 2)  # 127.15mm
-SLOT_H = ACRYLIC_THICKNESS + SLIDE_CLEARANCE_Z      # 5.25mm
+SLOT_W = ACRYLIC_WIDTH + SLIDE_CLEARANCE_XY        # 76.45mm
+SLOT_L = ACRYLIC_LENGTH + (SLIDE_CLEARANCE_XY / 2)  # 127.225mm
+SLOT_H = ACRYLIC_THICKNESS + SLIDE_CLEARANCE_Z      # 5.35mm
 
 # 標本・ボード空間の内寸（開口部）
-INNER_W = SLOT_W - 2 * RAIL_ENGAGEMENT              # 71.3mm
-INNER_L = SLOT_L - RAIL_ENGAGEMENT                  # 124.65mm
+INNER_W = SLOT_W - 2 * RAIL_ENGAGEMENT              # 71.45mm
+INNER_L = SLOT_L - RAIL_ENGAGEMENT                  # 124.725mm
 INNER_H = BOARD_THICKNESS + SPECIMEN_DEPTH          # 45.0mm
 
 # ケース全体の総外寸
-TOTAL_W = SLOT_W + 2 * WALL_THICKNESS               # 82.3mm
-TOTAL_L = WALL_THICKNESS + SLOT_L + WALL_THICKNESS  # 133.15mm
-TOTAL_H = BOTTOM_THICKNESS + INNER_H + SLOT_H + RAIL_LIP_THICKNESS  # 55.25mm
+TOTAL_W = SLOT_W + 2 * WALL_THICKNESS               # 82.45mm
+TOTAL_L = WALL_THICKNESS + SLOT_L + WALL_THICKNESS  # 133.225mm
+TOTAL_H = BOTTOM_THICKNESS + INNER_H + SLOT_H + RAIL_LIP_THICKNESS  # 55.35mm
 
 # 各高さ基準 (Z座標)
 Z_BOTTOM = 0.0
 Z_INNER_FLOOR = BOTTOM_THICKNESS                    # 2.5mm
 Z_ACRYLIC_BOTTOM = Z_INNER_FLOOR + INNER_H          # 47.5mm (アクリル受け棚面)
-Z_ACRYLIC_TOP = Z_ACRYLIC_BOTTOM + SLOT_H           # 52.75mm (アクリル上面)
-Z_TOP = TOTAL_H                                     # 55.25mm (ケース天面)
+Z_ACRYLIC_TOP = Z_ACRYLIC_BOTTOM + SLOT_H           # 52.85mm (アクリル上面)
+Z_TOP = TOTAL_H                                     # 55.35mm (ケース天面)
 
 # Y方向の各基準位置
 Y_FRONT_OUTER = 0.0                                 # 手前外壁端面
 Y_FRONT_INNER = WALL_THICKNESS                      # 手前内壁面 (アクリル前端)
 Y_ACRYLIC_START = Y_FRONT_INNER                     # 3.0mm
-Y_ACRYLIC_END = Y_ACRYLIC_START + SLOT_L            # 130.15mm (奥突き当て面)
-Y_BACK_INNER = Y_ACRYLIC_END - RAIL_ENGAGEMENT      # 127.65mm (奥内壁面)
-Y_BACK_OUTER = TOTAL_L                              # 133.15mm (奥外壁端面)
+Y_ACRYLIC_END = Y_ACRYLIC_START + SLOT_L            # 130.225mm (奥突き当て面)
+Y_BACK_INNER = Y_ACRYLIC_END - RAIL_ENGAGEMENT      # 127.725mm (奥内壁面)
+Y_BACK_OUTER = TOTAL_L                              # 133.225mm (奥外壁端面)
 
 
 def build_case_body() -> Part:
@@ -194,7 +199,6 @@ def build_case_body() -> Part:
         extrude(sk_back.sketch, amount=SLOT_W + 2.0, mode=Mode.SUBTRACT)
 
         # 6. エンドキャップ用の垂直ガイド溝（左右壁の内側）
-        # 手前内壁 (Y = Y_FRONT_INNER) の直前位置に垂直な溝を左右壁に掘る
         guide_y = Y_FRONT_INNER / 2
         for side in [-1, 1]:
             with Locations((side * (SLOT_W / 2), guide_y, Z_ACRYLIC_BOTTOM)):
@@ -212,7 +216,6 @@ def build_case_body() -> Part:
             e for e in vertical_edges
             if abs(abs(e.center().X) - TOTAL_W / 2) < 0.2
         ]
-        # 奥の角および手前の角
         if outer_corners:
             fillet(outer_corners, radius=2.0)
 
@@ -271,7 +274,7 @@ def build_end_cap() -> Part:
 # 実行とエクスポート
 # ==============================================================================
 if __name__ == "__main__":
-    print("Building specimen case prototype...")
+    print("Building specimen case prototype (Optimized for 0.6mm Tungsten Nozzle)...")
     case_body = build_case_body()
     end_cap = build_end_cap()
 
