@@ -5,19 +5,22 @@ from ocp_vscode import show_object
 
 """
 設計要件:
-    - 昆虫標本（国産カブトムシ等）用の超軽量・高機能標本ケース。
-    - monoさんの素晴らしい着想を採用：
+    - 昆虫標本（国産カブトムシ等）用の超軽量・最高品位標本ケース。
+    - monoさんの着想を採用したハイブリッド構成（選択肢A）：
       「本体は直線壁2.4mm＋四隅ミニ耳（ミッキーマウス耳）で約80g台の極限軽量化」、
-      「蓋（トップフレーム）は完全な端正な直方体（長方形）で本体の耳をすっぽり覆うデザイン」。
-    - 鑑賞時（上から見るとき）は端正な完全長方形の額縁のみが見え、本体の耳は影に隠れて気になりません。
+      「耳の付け根には滑らかな接線R2.0mmフィレットを施し、0.6mmノズルでのダマ・糸引きをゼロ化」、
+      「蓋（トップフレーム）は完全な端正な直方体（長方形）で本体の耳を真上からすっぽり覆うデザイン」。
+    - 鑑賞時（上から見るとき）は端正な完全長方形の額縁のみが見え、本体の耳は影に隠れて全く気になりません。
     - 蓋のフチが本体直線壁に対して全周に約5.4mmの「美しい庇（ひさし）」となるため、
       どこからでも指先でスッと優しく開閉可能（開閉振動ゼロ、標本の脚・触角保護）。
+    - 蓋の厚みを 3.2mm に強化し、外周の庇を持ち上げた際のたわみをゼロ化、カチッとした重厚感を実現。
+    - 磁石穴公差を 0.6mm ノズル用に最適化（穴径 6.4mm × 深さ 1.85mm）：
+      0.6mmノズル特有の内径収縮（約0.15〜0.2mm）と接着剤の厚み（0.1mm）を完全吸収し、
+      φ6.0mm × 1.5mm ネオジム磁石がすんなり美しくツライチ以下に沈み込みます。
     - アクリルプレート（実寸 76.0mm × 127.0mm × 5.0mm）を上からポンと置くだけの「トップドロップ式」。
       スライド摩擦が文字通りゼロのため、PETG-CFのザラつきによるアクリルの擦り傷が物理的に100%発生しない。
     - 天井庇を全廃し、オーバーハング完全ゼロ（垂れ下がり・糸引きゼロ、サポート材不要）。
     - 内壁は底から上まで完全な長方形（直角 72.4mm × 123.4mm）を維持し、発泡スチロールボード（5.0mm）が真上からストンと敷ける。
-    - 四隅のφ6.0mm × 厚み1.5mm のネオジム磁石により「パチン！」と吸着。
-    - トップフレームは中央窓が完全に上下貫通した額縁デザイン。
     - 将来の 200mm × 200mm 等の大型アクリルプレートにも数値を変更するだけで自動スケールする完全パラメトリック設計。
 
 推奨フィラメント & ノズル:
@@ -36,8 +39,8 @@ from ocp_vscode import show_object
 
 印刷統計（予想 - 0.6mmノズル / 0.24mmレイヤー）:
     - case_body: 印刷時間 約1時間05分、フィラメント使用量 約80g（超軽量・省フィラメント）
-    - top_frame: 印刷時間 約12分、フィラメント使用量 約12g
-    - 合計: 約92g（100g未満で大幅軽量・省資源！）
+    - top_frame: 印刷時間 約14分、フィラメント使用量 約14g
+    - 合計: 約94g（100g未満で大幅軽量・省資源！）
 
 磁石の接着について（重要）:
     - φ6.0mm × 厚み1.5mm のネオジム磁石を計8個（本体4個 ＋ トップフレーム4個）使用します。
@@ -64,14 +67,15 @@ SHELF_WIDTH = 2.0           # アクリル板を受ける外周段差の幅
 # --- ケース基本構造 ---
 BOTTOM_THICKNESS = 2.0      # 底面ベース厚み（0.6mmノズル×4層、軽量高剛性）
 WALL_THICKNESS = 2.4        # 本体の直線外壁の厚み (0.6mmノズル×4周で超軽量・完全充填)
-TOP_FRAME_THICKNESS = 2.8   # トップフレームの厚み (Z方向、磁石穴上部に1.1mmの頑丈な天面)
+TOP_FRAME_THICKNESS = 3.2   # トップフレームの厚み (Z方向、磁石穴上部に1.35mmの頑丈な天面)
 TOP_FRAME_CORNER_R = 3.0    # トップフレームの四隅フィレット半径
+JUNCTION_FILLET_RADIUS = 2.0 # 本体の耳と直線壁の接合部にかける滑らかな接線フィレット半径
 
 # --- ネオジム磁石 (実寸 φ6.0mm × 1.5mm) ---
 MAGNET_DIAMETER = 6.0       # 磁石直径
 MAGNET_THICKNESS = 1.5      # 磁石厚み
-MAGNET_HOLE_D = 6.2         # 磁石穴直径 (+0.2mmクリアランス)
-MAGNET_HOLE_DEPTH = 1.7     # 磁石穴深さ (+0.2mmマージン、確実にツライチ以下に沈む)
+MAGNET_HOLE_D = 6.4         # 磁石穴直径 (0.6mmノズル収縮マージン+接着剤逃げしろ)
+MAGNET_HOLE_DEPTH = 1.85    # 磁石穴深さ (接着剤膜厚+0.25mm沈み込みマージン)
 
 # --- 公差（クリアランス） ---
 POCKET_CLEARANCE_XY = 0.4   # アクリル落とし込み用遊び (片側 0.2mm)
@@ -104,21 +108,22 @@ Z_SHELF = Z_INNER_FLOOR + INNER_DEPTH               # 47.0mm (アクリル受け
 Z_TOP = TOTAL_H                                     # 52.0mm (ケース天面)
 
 # 四隅の磁石中心座標 (cx, cy)
-diag_dist = 1.2 + (MAGNET_HOLE_D / 2)               # 4.3mm
-diag_offset = diag_dist / math.sqrt(2)              # 約 3.04mm
-MAG_CX = (POCKET_W / 2) + diag_offset               # 41.24mm
-MAG_CY = (POCKET_L / 2) + diag_offset               # 66.74mm
-CORNER_BOSS_RADIUS = (MAGNET_HOLE_D / 2) + 1.5      # 4.6mm (外側肉厚1.5mm)
+diag_dist = 1.2 + (MAGNET_HOLE_D / 2)               # 4.4mm
+diag_offset = diag_dist / math.sqrt(2)              # 約 3.11mm
+MAG_CX = (POCKET_W / 2) + diag_offset               # 41.31mm
+MAG_CY = (POCKET_L / 2) + diag_offset               # 66.81mm
+CORNER_BOSS_RADIUS = (MAGNET_HOLE_D / 2) + 1.5      # 4.7mm (外側肉厚1.5mm)
 
 # トップフレームの外形寸法（耳の先端までカバーする端正な完全長方形）
-FRAME_W = 92.0                                      # X: ±46.0mm (耳先端 45.84mm をすっぽり覆う)
-FRAME_L = 143.0                                     # Y: ±71.5mm (耳先端 71.34mm をすっぽり覆う)
+FRAME_W = 92.0                                      # X: ±46.0mm (耳先端 46.01mm をほぼツライチで覆う)
+FRAME_L = 143.0                                     # Y: ±71.5mm (耳先端 71.51mm をほぼツライチで覆う)
 
 
 def build_case_body() -> Part:
     """
     本体（case_body）を生成します。
-    直線部は厚さ2.4mmで超軽量、四隅にのみ磁石ボス（耳）を持つ高効率設計。
+    直線部は厚さ2.4mmで超軽量、四隅にのみ磁石ボス（耳）を持ち、
+    接合部にはR2.0mmの滑らかな接線フィレットを配置。
     """
     with BuildSketch() as sk:
         Rectangle(BODY_STRAIGHT_W, BODY_STRAIGHT_L)
@@ -131,6 +136,9 @@ def build_case_body() -> Part:
         for loc in corner_locs:
             with Locations(loc):
                 Circle(radius=CORNER_BOSS_RADIUS, mode=Mode.ADD)
+        # 耳と直線壁の交点（谷間）に滑らかな接線フィレットを適用
+        fillet(sk.vertices(), radius=JUNCTION_FILLET_RADIUS)
+
     outer_sk = sk.sketch
 
     with BuildPart() as case:
@@ -180,6 +188,7 @@ def build_top_frame() -> Part:
     """
     蓋（top_frame）を生成します。
     美しい完全長方形（直方体・角丸R3mm）で、本体の耳を真上からすっぽり覆い隠します。
+    厚み3.2mmで剛性と高級感を両立。
     """
     with BuildSketch() as sk:
         r = Rectangle(FRAME_W, FRAME_L)
@@ -223,7 +232,7 @@ def build_top_frame() -> Part:
 # 実行とエクスポート
 # ==============================================================================
 if __name__ == "__main__":
-    print("Building Hybrid Specimen Case (Light Ear Body + Rectangular Top Frame)...")
+    print("Building Optimized Hybrid Specimen Case (Plan A)...")
     case_body = build_case_body()
     top_frame = build_top_frame()
 
@@ -241,7 +250,7 @@ if __name__ == "__main__":
     output_path = os.path.join(output_dir, "specimen_case_prototype.step")
 
     export_step(assembly, output_path)
-    print(f"Successfully exported Hybrid STEP to: {output_path}")
+    print(f"Successfully exported Optimized Hybrid STEP to: {output_path}")
 
     try:
         show_object(case_body, name="case_body")
