@@ -3,7 +3,7 @@
 Bambu Lab P2S / PETG-CF 専用 最高級ソリッド・モノリス 昆虫標本ケース
 【新世代アーキテクチャ: 蓋側アクリル落とし込み構造】
 
-設計コンセプト:
+設計コンセプト (First Principles / ゼロベース設計):
   1. 【公差リスクの完全局所化】
      - アクリル落とし込みポケットを「本体」から「蓋（トップフレーム）」裏面へ移設。
      - アクリル寸法の誤差や熱収縮のリスクを、軽量な蓋（約28g / 25分）だけに閉じ込め、
@@ -32,7 +32,7 @@ Bambu Lab P2S / PETG-CF 専用 最高級ソリッド・モノリス 昆虫標本
     - ノズル径: 0.6mm
     - レイヤー高さ: 0.30mm Standard (全高さが0.30mmの完全整数倍)
     - 初期レイヤー高さ: 0.30mm
-    - 壁ループ (Wall Loops): 2
+    - 壁ループ (Wall Loops): 2 (外壁約1.24mmで高剛性)
     - トップシェル / ボトムシェル: 各3層 (0.90mm)
     - 疎らインフィル: 10% Cross Hatch
     - サポート: なし (None)
@@ -45,7 +45,7 @@ from pathlib import Path
 from build123d import *
 
 # ==============================================================================
-# パラメーター設定 (単位: mm)
+# 基本パラメーター (単位: mm)
 # ==============================================================================
 
 # --- レイヤー高さ基準 ---
@@ -53,15 +53,20 @@ LAYER_HEIGHT = 0.30         # 0.6mmノズルの黄金比 (50%)
 
 # --- アクリルプレート実寸 ---
 # 小型試作: 76.0mm × 127.0mm × 5.0mm
-# (将来の20cm版時は 200.0, 200.0, 5.0、CLEARANCEを 0.8 に変更)
+# (将来の20cm版時はここを 200.0, 200.0, 5.0、CLEARANCEを 0.8 に変更するだけで完全追従)
 ACRYLIC_WIDTH = 76.0        # 短辺 (X方向)
 ACRYLIC_LENGTH = 127.0      # 長辺 (Y方向)
 ACRYLIC_THICKNESS = 5.0     # 厚み (Z方向)
 
+# --- 公差（クリアランス） ---
+# 小型試作: 0.4mm (片側 0.2mm)
+# 20cm大型化時: 0.8mm (片側 0.4mm)
+POCKET_CLEARANCE_XY = 0.4
+
 # --- 標本内部空間 ---
 # 0.30mm × 150層 = 45.00mm (発泡ボード5.0mm + 標本深さ40.0mm)
 INNER_DEPTH = 150 * LAYER_HEIGHT
-SHELF_WIDTH = 1.8           # 額縁押さえ幅 (四辺均等1.8mmでアクリルをホールド)
+SHELF_WIDTH = 1.8           # 額縁押さえ幅 (四辺均等1.8mmでアクリルをホールド、かかり代1.6mm)
 
 # --- ケース基本構造 ---
 # 0.30mm × 5層 = 1.50mm (底板厚み)
@@ -69,11 +74,11 @@ BOTTOM_THICKNESS = 5 * LAYER_HEIGHT
 
 # 蓋の天面額縁厚み: 0.30mm × 9層 = 2.70mm
 LID_FRAME_THICKNESS = 9 * LAYER_HEIGHT
-CORNER_RADIUS = 3.0         # 四隅の外郭フィレット半径
+CORNER_RADIUS = 3.0         # 外郭四隅フィレット半径
 
 # --- アクリル着脱機構（蓋側） ---
-CORNER_RELIEF_R = 1.2       # 蓋側ポケット四隅のピン角逃げ ＆ 空気抜き円筒半径 (1.2mm)
-# ※指抜きノッチは完全廃止（窓側から指で押せるため）
+# 0.6mmノズル内角R（約0.35mm）への噛み込みを防ぐ最小かつ十分な逃げ半径
+CORNER_RELIEF_R = 0.6       # 0.6mm (ノズル半径と同等、磁石穴との隔壁を0.4mm確保)
 
 # --- ネオジム磁石 (実寸 φ6.0mm × 1.5mm) ---
 MAGNET_DIAMETER = 6.0       # 磁石直径
@@ -82,19 +87,18 @@ MAGNET_HOLE_D = 6.4         # 磁石穴直径 (0.6mmノズル収縮マージン+
 # 0.30mm × 6層 = 1.80mm (接着剤膜厚+約0.3mmの確実な沈み込みマージン)
 MAGNET_HOLE_DEPTH = 6 * LAYER_HEIGHT
 
-# --- 公差（クリアランス） ---
-# 小型試作(76×127mm)では0.4mm(片側0.2mm)がジャストフィット。
-# ※将来の20cm大型化(200×200mm)時は、定規測定誤差(±0.3mm)と熱収縮を考慮し「0.8mm (片側0.4mm)」を推奨。
-POCKET_CLEARANCE_XY = 0.4
+# --- 壁厚マージン (0.6mm ノズル壁ループ2本 = 約1.24mm に最適化) ---
+CORNER_INNER_WALL = 1.0     # アクリル角と磁石穴の間の内側隔壁
+OUTER_WALL_MARGIN = 1.23    # 磁石穴外側からケース外周までの肉厚
 
 # ==============================================================================
-# 計算される派生寸法 (0.30mm レイヤー完全整合)
+# 計算される派生寸法 (First Principles / 完全パラメトリック連動)
 # ==============================================================================
 
 # アクリルポケット寸法（蓋裏面の掘り込み）
 POCKET_W = ACRYLIC_WIDTH + POCKET_CLEARANCE_XY      # 76.4mm
 POCKET_L = ACRYLIC_LENGTH + POCKET_CLEARANCE_XY    # 127.4mm
-# 0.30mm × 17層 = 5.10mm (アクリル5.0mmに対して+0.10mmマージン)
+# 0.30mm × 17層 = 5.10mm (アクリル5.0mmに対して+0.10mmマージンで確実にツライチ以下に収まる)
 POCKET_DEPTH = 17 * LAYER_HEIGHT
 
 # 標本空間・窓の内寸（開口部）
@@ -102,20 +106,19 @@ INNER_W = POCKET_W - 2 * SHELF_WIDTH                # 72.8mm
 INNER_L = POCKET_L - 2 * SHELF_WIDTH                # 123.8mm
 
 # 磁石中心座標 (cx, cy)
-diag_dist = 1.0 + (MAGNET_HOLE_D / 2)               # 4.2mm
+diag_dist = CORNER_INNER_WALL + (MAGNET_HOLE_D / 2) # 1.0 + 3.2 = 4.2mm
 diag_offset = diag_dist / math.sqrt(2)              # 約 2.97mm
 MAG_CX = (POCKET_W / 2) + diag_offset               # 41.17mm
 MAG_CY = (POCKET_L / 2) + diag_offset               # 66.67mm
 
-# 外形寸法（ミリ単位で最小化した完全フラット直方体）
-TOTAL_W = 91.2                                      # X: ±45.6mm
-TOTAL_L = 142.2                                     # Y: ±71.1mm
+# 外形寸法（磁石外側肉厚 1.23mm から数学的に完全自動導出）
+TOTAL_W = 2 * (MAG_CX + (MAGNET_HOLE_D / 2) + OUTER_WALL_MARGIN)  # 91.20mm
+TOTAL_L = 2 * (MAG_CY + (MAGNET_HOLE_D / 2) + OUTER_WALL_MARGIN)  # 142.20mm
 
 # ケース本体の総高さ (0.30mm × 155層 = 46.50mm)
 BODY_TOTAL_H = BOTTOM_THICKNESS + INNER_DEPTH
 
 # 蓋の総厚み (0.30mm × 26層 = 7.80mm)
-# 天面額縁 2.70mm (9層) + アクリルポケット 5.10mm (17層)
 LID_TOTAL_H = LID_FRAME_THICKNESS + POCKET_DEPTH
 
 # セット全体の総高さ (0.30mm × 181層 = 54.30mm、従来と完全一致)
@@ -139,7 +142,7 @@ def build_case_body() -> Part:
     総高さ 46.50mm (155層)。
     内寸 72.8mm × 123.8mm × 深さ 45.00mm。
     天面四隅に磁石ポケット（深さ 1.80mm = 6層）。
-    アクリルポケットやノッチ、段差のない、極限に美しくストレートなソリッドボックス。
+    ポケットやノッチ、段差のない、極限に美しくストレートなソリッドボックス。
     """
     base_sk = create_base_sketch()
 
@@ -180,7 +183,7 @@ def build_top_frame() -> Part:
     """
     新アーキテクチャの蓋（top_frame）を生成します。
     【印刷向き】額縁の天面をZ=0（ビルドプレート側）にして配置。
-    これにより、表面テクスチャが美しく仕上がり、サポート材完全ゼロで成形可能。
+    表面テクスチャが美しく仕上がり、サポート材完全ゼロで成形可能。
 
     Z構成:
       - Z=0.00 〜 2.70mm: 天面額縁（9層、中央開口 72.8×123.8mm）
@@ -213,8 +216,8 @@ def build_top_frame() -> Part:
                 mode=Mode.SUBTRACT
             )
 
-        # 4. ポケット四隅のピン角逃げ ＆ 空気抜き (ドッグボーン R1.2mm)
-        # ※Z=2.70mm から天面まで削る（表の額縁には影響しない）
+        # 4. ポケット四隅のピン角逃げ (R0.6mm)
+        # ※Z=2.70mm から天面まで削る（表の額縁には影響せず、磁石穴との隔壁0.4mmを健全に維持）
         pocket_corners = [
             (POCKET_W / 2, POCKET_L / 2),
             (-POCKET_W / 2, POCKET_L / 2),
@@ -265,6 +268,7 @@ if __name__ == "__main__":
     print(f"・蓋ソリッド体積:   {top_frame.volume / 1000.0:.2f} cm3 (概算重量 約28g)")
     print(f"・セット総高さ:     {BODY_TOTAL_H + LID_TOTAL_H:.2f} mm (181層)")
     print(f"・アクリルポケット: 蓋裏面に配置 ({POCKET_W:.2f} × {POCKET_L:.2f} × 深さ {POCKET_DEPTH:.2f} mm)")
+    print(f"・四隅逃げR:        {CORNER_RELIEF_R:.1f} mm (磁石穴との隔壁 0.40mm 確保)")
     print(f"・指抜きノッチ:     完全廃止（窓側からワンプッシュで着脱可能）")
 
     # アセンブリ配置: ワンプレート印刷
@@ -297,5 +301,3 @@ if __name__ == "__main__":
             print("OCP CAD Viewer (show_object) にモデルを転送しました！")
         except Exception as e2:
             print(f"OCP CAD Viewer 表示スキップ: {e2}")
-
-
