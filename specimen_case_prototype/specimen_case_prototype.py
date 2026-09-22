@@ -30,7 +30,7 @@ from ocp_vscode import show_object
     - レイヤー高さ: 0.24mm Standard (全高さが0.24mmの完全整数倍)
     - 壁面生成器 (Wall generator): Arachne
     - シーム位置 (Seam): 整列 (Aligned)
-    - 壁ループ (Wall Loops): 3〜4
+    - 壁ループ (Wall Loops): 3 (直線壁2.4mmが完全ソリッド充填され、ノズルの小刻み振動を防ぐ最適値)
     - トップシェルレイヤー: 4層 (0.96mm)
     - ボトムシェルレイヤー: 4層 (0.96mm)
     - インフィル: 15% (Gyroid)
