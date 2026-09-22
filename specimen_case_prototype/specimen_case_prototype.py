@@ -1,68 +1,48 @@
-import math
-import os
-from build123d import *
-from ocp_vscode import show_object
-
 """
-設計要件:
-    - 昆虫標本（国産カブトムシ等）用の最高級・完全フラット直方体（ソリッド・モノリス）標本ケース。
-    - 一切の突起・耳・段差を完全に排除した「端正で美しい完全フラット直方体（四隅R3.0mmフィレット）」。
-    - 本体と蓋（トップフレーム）の外形寸法（幅 91.2mm × 長さ 142.2mm）が完全に一致（ツライチ）。
-      蓋を重ねた際、一本の美しいスリットのみが見える、Apple製品や高級ジュエリーケースのような佇まい。
-    - アクリル板の快適な着脱機能（見た目は100%完全直方体をキープ）：
-      1. ポケット四隅のピン角逃げ（ドッグボーン R1.2mm）：ノズルの内角Rへの角の噛み込みを防ぎ、真上からの出し入れ時の空気抜き（バキューム防止）として機能。
-      2. 隠し指抜きノッチ（長辺中央左右）：指先や爪でアクリル板の底面フチをクイッと持ち上げられる切り欠き。
-         ※蓋を閉めると額縁の下に完全に隠れ、外からは一切見えません。
-      3. クリアランスはジャストフィット (+0.4mm / 片側0.2mm) を維持し、ガタつきを一切排除。
-    - 0.6mm タングステンノズル ＆ PETG-CF 専用の完全最適化設計：
-      1. レイヤー高さ 0.30mm（0.6mmノズルの黄金比50%）を基準とし、全Z寸法を0.30mmの完全整数倍に整合。
-      2. 印刷時間を3時間から「約1時間30分〜1時間40分前後」へと半減。
-      3. 外郭を磁石配置に合わせてミリ単位で最小化（91.2mm × 142.2mm）。
-      4. 底面ベース厚み 1.50mm（0.30mm × 5層）で高剛性と軽量化を両立。
-      5. 蓋（トップフレーム）厚み 2.70mm（0.30mm × 9層）で、額縁幅9.2mmと合わさってたわみゼロの極限スリム（約12g）。
-      6. アクリル受け棚幅 1.8mm でアクリル板を四辺均等1.60mmホールド。
-    - 磁石穴公差を 0.6mm ノズル用に最適化（穴径 6.4mm × 深さ 1.80mm）：
-      0.6mmノズルの樹脂収縮を完全に相殺し、φ6.0mm × 1.5mm ネオジム磁石が接着剤とともに確実にツライチ以下に沈み込みます。
-    - アクリルプレート（実寸 76.0mm × 127.0mm × 5.0mm）を上からポンと置くだけの「トップドロップ式」。
-      スライド摩擦が文字通りゼロのため、PETG-CFのザラつきによるアクリルの擦り傷が物理的に100%発生しない。
-    - 天井庇を全廃し、オーバーハング完全ゼロ（垂れ下がり・糸引きゼロ、サポート材不要）。
-    - 内壁は底から上まで完全な長方形（直角 72.8mm × 123.8mm）を維持し、発泡スチロールボード（5.0mm）が真上からストンと敷ける。
+標本ケースプロトタイプ (specimen_case_prototype)
+Bambu Lab P2S / PETG-CF 専用 最高級ソリッド・モノリス 昆虫標本ケース
+【新世代アーキテクチャ: 蓋側アクリル落とし込み構造】
+
+設計コンセプト:
+  1. 【公差リスクの完全局所化】
+     - アクリル落とし込みポケットを「本体」から「蓋（トップフレーム）」裏面へ移設。
+     - アクリル寸法の誤差や熱収縮のリスクを、軽量な蓋（約28g / 25分）だけに閉じ込め、
+       重い本体（約100g / 1.5時間、20cm版なら400g超）は100%安全にそのまま使用可能。
+  2. 【着脱性の飛躍的向上（指抜きノッチの完全不要化）】
+     - 表側の窓（開口部）からアクリル板を指でポンと押せるため、どれだけジャストフィットでも一瞬で外せる。
+     - これにより、指抜きノッチを完全廃止し、内外ともにノイズゼロの完全ミニマルデザインへ昇華。
+  3. 【日常操作の1アクション化】
+     - 「アクリル板を抱えた蓋」をパカッと持ち上げるだけでケースが開閉可能（本物の標本箱感覚）。
+     - アクリル板自体を直接触らないため、指紋や汚れがつかない。
+  4. 【0.30mm レイヤー完全整合設計】
+     - 0.6mm ノズルの黄金比 (0.30mm) に全Z寸法を完全統一。
+     - 本体総高さ: 46.50mm (155層)
+     - 蓋総厚み: 7.80mm (26層)
+     - セット全体総高さ: 54.30mm (181層、従来と完全一致)
+     - 標本有効深さ: 40.00mm (発泡ボード5.0mm敷設後)
+  5. 【サポート完全ゼロ ＆ ワンプレート印刷】
+     - 本体・蓋ともにオーバーハングゼロでサポート材一切不要。
+     - 蓋は美しい額縁天面を下にしてベッドに接地して印刷するため、表面性状も最高品質。
 
 推奨フィラメント & ノズル:
     - フィラメント: Bambu PETG-CF 黒 (Black)
     - ノズル: 0.6mm タングステンノズル (または硬化鋼ノズル)
 
-推奨スライサー設定 (Bambu Studio - 0.30mm レイヤー高速・軽量プロファイル):
+推奨スライサー設定 (Bambu Studio):
     - ノズル径: 0.6mm
     - レイヤー高さ: 0.30mm Standard (全高さが0.30mmの完全整数倍)
     - 初期レイヤー高さ: 0.30mm
-    - 壁ループ (Wall Loops): 2 (外壁1.24mm＋内壁1.24mmでPETG-CFの剛性は万全。無駄な中実化を防ぐ軽量化の要)
-    - トップシェルレイヤー: 3層 (0.90mm)
-    - ボトムシェルレイヤー: 3層 (0.90mm)
-    - 疎らインフィル密度: 10%
-    - 疎らインフィルパターン: Cross Hatch (または Gyroid) ※Cross Hatchは高速＆省フィラメント
-    - サポート: なし (None / オーバーハング完全ゼロ設計)
+    - 壁ループ (Wall Loops): 2
+    - トップシェル / ボトムシェル: 各3層 (0.90mm)
+    - 疎らインフィル: 10% Cross Hatch
+    - サポート: なし (None)
     - 円弧フィッティング (Arc fitting): 有効 (Enable)
-
-印刷統計（予想 - 0.6mmノズル / 0.30mmレイヤー / 壁ループ2 / インフィル10% Cross Hatch）:
-    - case_body: フィラメント使用量 約105g〜110g
-    - top_frame: フィラメント使用量 約12g
-    - 合計: 約117g〜122g
-    - 印刷時間: 約1時間25分〜1時間40分
-
-磁石の接着について（重要）:
-    - φ6.0mm × 厚み1.5mm のネオジム磁石を計8個（本体4個 ＋ トップフレーム4個）使用します。
-    - 本体とトップフレームが互いに引き合うよう、極性（N極/S極）の向きを合わせて瞬間接着剤等で固定してください。
-
-底面緩衝シート（発泡スチロールボード / ペフ板）のカット寸法:
-    - ケース内寸実寸: 幅 72.8mm × 長さ 123.8mm × 深さ 45.00mm (底面からアクリル受棚まで)
-    - シート推奨カット寸法: 幅 72.0mm 〜 72.5mm × 長さ 123.0mm 〜 123.5mm × 厚み 5.0mm
-      (定規とカッターで 72mm × 123mm に切ると、四辺に約0.4mmの適度な遊びができ、斜めにせず真上からストンと綺麗に敷けます)
-    - シート敷設後の標本有効深さ: 40.00mm (有頭針を刺したオスのカブトムシの角や針頭が余裕で収まる高さ)
-
-履歴とプロンプト経緯:
-    - 詳細は同ディレクトリの history.md を参照。
 """
+
+import math
+import os
+from pathlib import Path
+from build123d import *
 
 # ==============================================================================
 # パラメーター設定 (単位: mm)
@@ -72,34 +52,34 @@ from ocp_vscode import show_object
 LAYER_HEIGHT = 0.30         # 0.6mmノズルの黄金比 (50%)
 
 # --- アクリルプレート実寸 ---
-ACRYLIC_WIDTH = 76.0        # 短辺 (X方向) ※20cm時は 200.0
-ACRYLIC_LENGTH = 127.0      # 長辺 (Y方向) ※20cm時は 200.0
-ACRYLIC_THICKNESS = 5.0     # 厚み (Z方向、実測値)
+# 小型試作: 76.0mm × 127.0mm × 5.0mm
+# (将来の20cm版時は 200.0, 200.0, 5.0、CLEARANCEを 0.8 に変更)
+ACRYLIC_WIDTH = 76.0        # 短辺 (X方向)
+ACRYLIC_LENGTH = 127.0      # 長辺 (Y方向)
+ACRYLIC_THICKNESS = 5.0     # 厚み (Z方向)
 
-# --- 標本空間 & 発泡スチロールボード ---
+# --- 標本内部空間 ---
 # 0.30mm × 150層 = 45.00mm (発泡ボード5.0mm + 標本深さ40.0mm)
 INNER_DEPTH = 150 * LAYER_HEIGHT
-SHELF_WIDTH = 1.8           # アクリル板を受ける外周段差の幅 (四辺均等1.8mmでアクリルを保持)
+SHELF_WIDTH = 1.8           # 額縁押さえ幅 (四辺均等1.8mmでアクリルをホールド)
 
 # --- ケース基本構造 ---
-# 0.30mm × 5層 = 1.50mm (0.6mm PETG-CFとして十分すぎる高剛性底板)
+# 0.30mm × 5層 = 1.50mm (底板厚み)
 BOTTOM_THICKNESS = 5 * LAYER_HEIGHT
 
-# 0.30mm × 9層 = 2.70mm (額縁幅9.2mmにより2.70mmでたわみゼロの超軽量蓋)
-TOP_FRAME_THICKNESS = 9 * LAYER_HEIGHT
+# 蓋の天面額縁厚み: 0.30mm × 9層 = 2.70mm
+LID_FRAME_THICKNESS = 9 * LAYER_HEIGHT
 CORNER_RADIUS = 3.0         # 四隅の外郭フィレット半径
 
-# --- アクリル着脱機構（蓋で完全に隠れる設計） ---
-CORNER_RELIEF_R = 1.2       # 四隅のピン角逃げ ＆ 空気抜き円筒半径 (1.2mm)
-NOTCH_W = 3.0               # 指抜きノッチ外側への掘り込み量 (3.0mm)
-NOTCH_L = 18.0              # 指抜きノッチ長さ (18.0mm、指の腹が入るサイズ)
-NOTCH_DEPTH = 6.0           # 指抜きノッチ深さ (6.0mm、アクリル底面より深く指が入る)
+# --- アクリル着脱機構（蓋側） ---
+CORNER_RELIEF_R = 1.2       # 蓋側ポケット四隅のピン角逃げ ＆ 空気抜き円筒半径 (1.2mm)
+# ※指抜きノッチは完全廃止（窓側から指で押せるため）
 
 # --- ネオジム磁石 (実寸 φ6.0mm × 1.5mm) ---
 MAGNET_DIAMETER = 6.0       # 磁石直径
 MAGNET_THICKNESS = 1.5      # 磁石厚み
 MAGNET_HOLE_D = 6.4         # 磁石穴直径 (0.6mmノズル収縮マージン+接着剤逃げしろ)
-# 0.30mm × 6層 = 1.80mm (接着剤膜厚+約0.2mmの確実な沈み込みマージン)
+# 0.30mm × 6層 = 1.80mm (接着剤膜厚+約0.3mmの確実な沈み込みマージン)
 MAGNET_HOLE_DEPTH = 6 * LAYER_HEIGHT
 
 # --- 公差（クリアランス） ---
@@ -108,44 +88,43 @@ MAGNET_HOLE_DEPTH = 6 * LAYER_HEIGHT
 POCKET_CLEARANCE_XY = 0.4
 
 # ==============================================================================
-# 計算される派生寸法
+# 計算される派生寸法 (0.30mm レイヤー完全整合)
 # ==============================================================================
 
-# アクリルポケット寸法（本体天面の掘り込み）
+# アクリルポケット寸法（蓋裏面の掘り込み）
 POCKET_W = ACRYLIC_WIDTH + POCKET_CLEARANCE_XY      # 76.4mm
 POCKET_L = ACRYLIC_LENGTH + POCKET_CLEARANCE_XY    # 127.4mm
-# 0.30mm × 17層 = 5.10mm (アクリル5.0mmに対して+0.10mmで完璧なツライチ)
+# 0.30mm × 17層 = 5.10mm (アクリル5.0mmに対して+0.10mmマージン)
 POCKET_DEPTH = 17 * LAYER_HEIGHT
 
-# 標本・ボード空間の内寸（開口部）
+# 標本空間・窓の内寸（開口部）
 INNER_W = POCKET_W - 2 * SHELF_WIDTH                # 72.8mm
 INNER_L = POCKET_L - 2 * SHELF_WIDTH                # 123.8mm
 
 # 磁石中心座標 (cx, cy)
-# アクリル角 (38.2, 63.7) との間に1.0mmの隔壁を確保
 diag_dist = 1.0 + (MAGNET_HOLE_D / 2)               # 4.2mm
 diag_offset = diag_dist / math.sqrt(2)              # 約 2.97mm
 MAG_CX = (POCKET_W / 2) + diag_offset               # 41.17mm
 MAG_CY = (POCKET_L / 2) + diag_offset               # 66.67mm
 
 # 外形寸法（ミリ単位で最小化した完全フラット直方体）
-# 磁石外側に1.23mm以上の外壁肉厚を確保
 TOTAL_W = 91.2                                      # X: ±45.6mm
 TOTAL_L = 142.2                                     # Y: ±71.1mm
 
-# ケース本体の総高さ (0.30mm × 172層 = 51.60mm)
-TOTAL_H = BOTTOM_THICKNESS + INNER_DEPTH + POCKET_DEPTH
+# ケース本体の総高さ (0.30mm × 155層 = 46.50mm)
+BODY_TOTAL_H = BOTTOM_THICKNESS + INNER_DEPTH
 
-# 各高さ基準 (Z座標)
-Z_BOTTOM = 0.0
-Z_INNER_FLOOR = BOTTOM_THICKNESS                    # 1.50mm (発泡ボード底)
-Z_SHELF = Z_INNER_FLOOR + INNER_DEPTH               # 46.50mm (アクリル受け棚面)
-Z_TOP = TOTAL_H                                     # 51.60mm (ケース天面)
+# 蓋の総厚み (0.30mm × 26層 = 7.80mm)
+# 天面額縁 2.70mm (9層) + アクリルポケット 5.10mm (17層)
+LID_TOTAL_H = LID_FRAME_THICKNESS + POCKET_DEPTH
+
+# セット全体の総高さ (0.30mm × 181層 = 54.30mm、従来と完全一致)
+SET_TOTAL_H = BODY_TOTAL_H + LID_TOTAL_H
 
 
 def create_base_sketch() -> Sketch:
     """
-    一切の突起・耳・くびれのない、美しく角丸（R3.0mm）を施した完全フラット長方形の外郭プロファイルを作成します。
+    一切の突起・耳・くびれのない、角丸（R3.0mm）完全フラット長方形プロファイルを作成します。
     """
     with BuildSketch() as sk:
         r = Rectangle(TOTAL_W, TOTAL_L)
@@ -157,73 +136,39 @@ def build_case_body() -> Part:
     """
     標本ケース本体（case_body）を生成します。
     完全フラット直方体・全Z寸法0.30mmレイヤー完全整合。
-    四隅ピン角逃げ＆隠し指抜きノッチを内包。
+    総高さ 46.50mm (155層)。
+    内寸 72.8mm × 123.8mm × 深さ 45.00mm。
+    天面四隅に磁石ポケット（深さ 1.80mm = 6層）。
+    アクリルポケットやノッチ、段差のない、極限に美しくストレートなソリッドボックス。
     """
     base_sk = create_base_sketch()
 
     with BuildPart() as case:
-        # 1. 外郭ソリッドの押し出し（完全フラット直方体）
-        extrude(base_sk, amount=TOTAL_H)
+        # 1. 外郭ソリッドの押し出し（高さ 46.50mm）
+        extrude(base_sk, amount=BODY_TOTAL_H)
 
-        # 2. 標本＆発泡ボードの内部空間を削る（Z=1.50 から上まで完全な長方形 72.8mm × 123.8mm）
-        with Locations((0, 0, Z_INNER_FLOOR)):
+        # 2. 標本＆発泡ボードの内部空間を削る（Z=1.50 から天面まで貫通 72.8mm × 123.8mm）
+        with Locations((0, 0, BOTTOM_THICKNESS)):
             Box(
                 INNER_W,
                 INNER_L,
-                TOTAL_H - Z_INNER_FLOOR + 1.0,
+                BODY_TOTAL_H - BOTTOM_THICKNESS + 1.0,
                 align=(Align.CENTER, Align.CENTER, Align.MIN),
                 mode=Mode.SUBTRACT
             )
 
-        # 3. アクリル落とし込みポケットを削る（Z=46.50 から天面まで）
-        with Locations((0, 0, Z_SHELF)):
-            Box(
-                POCKET_W,
-                POCKET_L,
-                POCKET_DEPTH + 1.0,
-                align=(Align.CENTER, Align.CENTER, Align.MIN),
-                mode=Mode.SUBTRACT
-            )
-
-        # 4. 四隅のピン角逃げ＆空気抜き（ポケット四隅の直角噛み込みを防ぐ）
-        pocket_corners = [
-            (POCKET_W / 2, POCKET_L / 2),
-            (-POCKET_W / 2, POCKET_L / 2),
-            (-POCKET_W / 2, -POCKET_L / 2),
-            (POCKET_W / 2, -POCKET_L / 2)
-        ]
-        for cx, cy in pocket_corners:
-            with Locations((cx, cy, Z_SHELF)):
-                Cylinder(
-                    radius=CORNER_RELIEF_R,
-                    height=POCKET_DEPTH + 1.0,
-                    align=(Align.CENTER, Align.CENTER, Align.MIN),
-                    mode=Mode.SUBTRACT
-                )
-
-        # 5. 天面四隅の磁石ポケットを削る（深さ 1.80mm = 6層）
+        # 3. 天面四隅の磁石ポケットを削る（深さ 1.80mm = 6層）
         corner_locs = [
-            (MAG_CX, MAG_CY, Z_TOP),
-            (-MAG_CX, MAG_CY, Z_TOP),
-            (-MAG_CX, -MAG_CY, Z_TOP),
-            (MAG_CX, -MAG_CY, Z_TOP)
+            (MAG_CX, MAG_CY, BODY_TOTAL_H),
+            (-MAG_CX, MAG_CY, BODY_TOTAL_H),
+            (-MAG_CX, -MAG_CY, BODY_TOTAL_H),
+            (MAG_CX, -MAG_CY, BODY_TOTAL_H)
         ]
         for loc in corner_locs:
             with Locations(loc):
                 Cylinder(
                     radius=MAGNET_HOLE_D / 2,
                     height=MAGNET_HOLE_DEPTH,
-                    align=(Align.CENTER, Align.CENTER, Align.MAX),
-                    mode=Mode.SUBTRACT
-                )
-
-        # 6. 隠し指抜きノッチ（長辺中央左右、蓋を閉めると100%隠れる）
-        for side in [-1, 1]:
-            with Locations((side * (POCKET_W / 2), 0, Z_TOP)):
-                Box(
-                    NOTCH_W * 2,
-                    NOTCH_L,
-                    NOTCH_DEPTH,
                     align=(Align.CENTER, Align.CENTER, Align.MAX),
                     mode=Mode.SUBTRACT
                 )
@@ -233,74 +178,33 @@ def build_case_body() -> Part:
 
 def build_top_frame() -> Part:
     """
-    蓋（top_frame）を生成します。
-    本体と全く同一の完全フラット外郭（幅91.2mm × 長さ142.2mm、角丸R3mm）を持ちます。
-    厚み 2.70mm（9層）、天面肉厚 0.90mm（3層の完全平滑シェル）。
+    新アーキテクチャの蓋（top_frame）を生成します。
+    【印刷向き】額縁の天面をZ=0（ビルドプレート側）にして配置。
+    これにより、表面テクスチャが美しく仕上がり、サポート材完全ゼロで成形可能。
+
+    Z構成:
+      - Z=0.00 〜 2.70mm: 天面額縁（9層、中央開口 72.8×123.8mm）
+      - Z=2.70 〜 7.80mm: アクリルポケット（17層、開口 76.4×127.4mm）
+      - Z=7.80mm (上面): 本体との合わせ面。四隅に磁石穴（深さ1.80mm）
     """
     base_sk = create_base_sketch()
 
     with BuildPart() as frame:
-        # 1. 外郭ソリッドの押し出し（Z=0 から Z=2.70mm）
-        extrude(base_sk, amount=TOP_FRAME_THICKNESS)
+        # 1. 外郭ソリッド押し出し（総厚み 7.80mm）
+        extrude(base_sk, amount=LID_TOTAL_H)
 
-        # 2. 中央の窓開口部を【完全に上下貫通】して削る（Z=-1.0 から完全に削り落とす）
+        # 2. 中央の窓開口部を【上下完全貫通】して削る (72.8mm × 123.8mm)
         with Locations((0, 0, -1.0)):
             Box(
                 INNER_W,
                 INNER_L,
-                TOP_FRAME_THICKNESS + 2.0,
+                LID_TOTAL_H + 2.0,
                 align=(Align.CENTER, Align.CENTER, Align.MIN),
                 mode=Mode.SUBTRACT
             )
 
-        # 3. 裏面（下面 Z=0）四隅の磁石ポケットを削る（深さ 1.80mm = 6層）
-        corner_locs = [
-            (MAG_CX, MAG_CY, 0),
-            (-MAG_CX, MAG_CY, 0),
-            (-MAG_CX, -MAG_CY, 0),
-            (MAG_CX, -MAG_CY, 0)
-        ]
-        for loc in corner_locs:
-            with Locations(loc):
-                Cylinder(
-                    radius=MAGNET_HOLE_D / 2,
-                    height=MAGNET_HOLE_DEPTH,
-                    align=(Align.CENTER, Align.CENTER, Align.MIN),
-                    mode=Mode.SUBTRACT
-                )
-
-    return frame.part
-
-
-def build_fit_test_frame() -> Part:
-    """
-    アクリル落とし込み・着脱性確認用の薄型テストフレーム（fit_test_frame）を生成します。
-    本番と同一の横幅・長さ・公差・四隅逃げR・隠しノッチ・磁石穴を持ち、
-    底なし中空貫通＋総高さ10.20mm（34層）の最小構成で素早くテスト可能です。
-    """
-    test_shelf_h = 17 * LAYER_HEIGHT   # 5.10mm (下部受け棚)
-    test_total_h = test_shelf_h + POCKET_DEPTH  # 10.20mm (34層)
-    z_shelf = test_shelf_h
-    z_top = test_total_h
-
-    base_sk = create_base_sketch()
-
-    with BuildPart() as frame:
-        # 1. 外郭ソリッド押し出し (高さ 10.20mm)
-        extrude(base_sk, amount=test_total_h)
-
-        # 2. 内寸の底なし完全貫通 (Z=-1.0 から天面まで突き抜け)
-        with Locations((0, 0, -1.0)):
-            Box(
-                INNER_W,
-                INNER_L,
-                test_total_h + 2.0,
-                align=(Align.CENTER, Align.CENTER, Align.MIN),
-                mode=Mode.SUBTRACT
-            )
-
-        # 3. アクリル落とし込みポケットを削る (Z=z_shelf から天面まで)
-        with Locations((0, 0, z_shelf)):
+        # 3. アクリル落とし込みポケットを削る (Z=2.70mm から天面まで深さ 5.10mm)
+        with Locations((0, 0, LID_FRAME_THICKNESS)):
             Box(
                 POCKET_W,
                 POCKET_L,
@@ -309,7 +213,8 @@ def build_fit_test_frame() -> Part:
                 mode=Mode.SUBTRACT
             )
 
-        # 4. 四隅のピン角逃げ＆空気抜き (ドッグボーン R1.2mm)
+        # 4. ポケット四隅のピン角逃げ ＆ 空気抜き (ドッグボーン R1.2mm)
+        # ※Z=2.70mm から天面まで削る（表の額縁には影響しない）
         pocket_corners = [
             (POCKET_W / 2, POCKET_L / 2),
             (-POCKET_W / 2, POCKET_L / 2),
@@ -317,7 +222,7 @@ def build_fit_test_frame() -> Part:
             (POCKET_W / 2, -POCKET_L / 2)
         ]
         for cx, cy in pocket_corners:
-            with Locations((cx, cy, z_shelf)):
+            with Locations((cx, cy, LID_FRAME_THICKNESS)):
                 Cylinder(
                     radius=CORNER_RELIEF_R,
                     height=POCKET_DEPTH + 1.0,
@@ -325,29 +230,18 @@ def build_fit_test_frame() -> Part:
                     mode=Mode.SUBTRACT
                 )
 
-        # 5. 天面四隅の磁石ポケット (深さ 1.80mm = 6層)
+        # 5. 上面（本体との合わせ面 Z=7.80mm）四隅の磁石ポケットを削る (深さ 1.80mm = 6層)
         corner_locs = [
-            (MAG_CX, MAG_CY, z_top),
-            (-MAG_CX, MAG_CY, z_top),
-            (-MAG_CX, -MAG_CY, z_top),
-            (MAG_CX, -MAG_CY, z_top)
+            (MAG_CX, MAG_CY, LID_TOTAL_H),
+            (-MAG_CX, MAG_CY, LID_TOTAL_H),
+            (-MAG_CX, -MAG_CY, LID_TOTAL_H),
+            (MAG_CX, -MAG_CY, LID_TOTAL_H)
         ]
         for loc in corner_locs:
             with Locations(loc):
                 Cylinder(
                     radius=MAGNET_HOLE_D / 2,
                     height=MAGNET_HOLE_DEPTH,
-                    align=(Align.CENTER, Align.CENTER, Align.MAX),
-                    mode=Mode.SUBTRACT
-                )
-
-        # 6. 隠し指抜きノッチ (長辺中央左右)
-        for side in [-1, 1]:
-            with Locations((side * (POCKET_W / 2), 0, z_top)):
-                Box(
-                    NOTCH_W * 2,
-                    NOTCH_L,
-                    NOTCH_DEPTH,
                     align=(Align.CENTER, Align.CENTER, Align.MAX),
                     mode=Mode.SUBTRACT
                 )
@@ -359,17 +253,19 @@ def build_fit_test_frame() -> Part:
 # 実行とエクスポート
 # ==============================================================================
 if __name__ == "__main__":
-    print("Building 0.30mm Solid Monolith Specimen Case (with Corner Relief & Hidden Notches)...")
+    print("=" * 60)
+    print("標本ケース (蓋側アクリル落とし込み・新アーキテクチャ) 生成")
+    print("=" * 60)
     case_body = build_case_body()
     top_frame = build_top_frame()
-    fit_test_frame = build_fit_test_frame()
 
-    print(f"Case Body Bounding Box: {case_body.bounding_box()}")
-    print(f"Top Frame Bounding Box: {top_frame.bounding_box()}")
-    print(f"Fit Test Frame Bounding Box: {fit_test_frame.bounding_box()}")
-    print(f"Case Body Solid Volume: {case_body.volume / 1000.0:.2f} cm3")
-    print(f"Top Frame Solid Volume: {top_frame.volume / 1000.0:.2f} cm3")
-    print(f"Fit Test Frame Solid Volume: {fit_test_frame.volume / 1000.0:.2f} cm3 (約25g)")
+    print(f"・本体寸法: {case_body.bounding_box().size.X:.1f} × {case_body.bounding_box().size.Y:.1f} × {case_body.bounding_box().size.Z:.2f} mm")
+    print(f"・蓋寸法:   {top_frame.bounding_box().size.X:.1f} × {top_frame.bounding_box().size.Y:.1f} × {top_frame.bounding_box().size.Z:.2f} mm")
+    print(f"・本体ソリッド体積: {case_body.volume / 1000.0:.2f} cm3 (概算重量 約100g)")
+    print(f"・蓋ソリッド体積:   {top_frame.volume / 1000.0:.2f} cm3 (概算重量 約28g)")
+    print(f"・セット総高さ:     {BODY_TOTAL_H + LID_TOTAL_H:.2f} mm (181層)")
+    print(f"・アクリルポケット: 蓋裏面に配置 ({POCKET_W:.2f} × {POCKET_L:.2f} × 深さ {POCKET_DEPTH:.2f} mm)")
+    print(f"・指抜きノッチ:     完全廃止（窓側からワンプッシュで着脱可能）")
 
     # アセンブリ配置: ワンプレート印刷
     # 本体の右側にトップフレームを並べて配置（Z=0接地）
@@ -378,20 +274,19 @@ if __name__ == "__main__":
 
     output_dir = os.path.dirname(__file__)
     main_step_path = os.path.join(output_dir, "specimen_case_prototype.step")
-    test_step_path = os.path.join(output_dir, "fit_test_frame.step")
 
-    # 1. 本番モデル (本体 + 蓋)
+    # 本番モデル (本体 + 蓋のワンプレート配置)
     export_step(assembly, main_step_path)
-    print(f"Successfully exported Main STEP to: {main_step_path}")
+    print(f"\nSuccessfully exported Main STEP to: {main_step_path}")
 
-    # 2. テスト用薄型フレーム (底なし)
-    export_step(fit_test_frame, test_step_path)
-    print(f"Successfully exported Fit Test Frame STEP to: {test_step_path}")
+    # 蓋単体テスト用モデル (アクリル嵌合確認用として単体出力も保持)
+    test_step_path = os.path.join(output_dir, "fit_test_frame.step")
+    export_step(top_frame, test_step_path)
+    print(f"Successfully exported Lid Fit Test STEP to: {test_step_path}")
+    print("=" * 60)
 
     try:
         show_object(case_body, name="case_body")
         show_object(placed_frame, name="top_frame")
-        show_object(fit_test_frame, name="fit_test_frame")
     except Exception:
         pass
-
