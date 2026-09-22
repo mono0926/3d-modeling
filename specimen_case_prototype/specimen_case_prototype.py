@@ -272,6 +272,89 @@ def build_top_frame() -> Part:
     return frame.part
 
 
+def build_fit_test_frame() -> Part:
+    """
+    アクリル落とし込み・着脱性確認用の薄型テストフレーム（fit_test_frame）を生成します。
+    本番と同一の横幅・長さ・公差・四隅逃げR・隠しノッチ・磁石穴を持ち、
+    底なし中空貫通＋総高さ10.20mm（34層）の最小構成で素早くテスト可能です。
+    """
+    test_shelf_h = 17 * LAYER_HEIGHT   # 5.10mm (下部受け棚)
+    test_total_h = test_shelf_h + POCKET_DEPTH  # 10.20mm (34層)
+    z_shelf = test_shelf_h
+    z_top = test_total_h
+
+    base_sk = create_base_sketch()
+
+    with BuildPart() as frame:
+        # 1. 外郭ソリッド押し出し (高さ 10.20mm)
+        extrude(base_sk, amount=test_total_h)
+
+        # 2. 内寸の底なし完全貫通 (Z=-1.0 から天面まで突き抜け)
+        with Locations((0, 0, -1.0)):
+            Box(
+                INNER_W,
+                INNER_L,
+                test_total_h + 2.0,
+                align=(Align.CENTER, Align.CENTER, Align.MIN),
+                mode=Mode.SUBTRACT
+            )
+
+        # 3. アクリル落とし込みポケットを削る (Z=z_shelf から天面まで)
+        with Locations((0, 0, z_shelf)):
+            Box(
+                POCKET_W,
+                POCKET_L,
+                POCKET_DEPTH + 1.0,
+                align=(Align.CENTER, Align.CENTER, Align.MIN),
+                mode=Mode.SUBTRACT
+            )
+
+        # 4. 四隅のピン角逃げ＆空気抜き (ドッグボーン R1.2mm)
+        pocket_corners = [
+            (POCKET_W / 2, POCKET_L / 2),
+            (-POCKET_W / 2, POCKET_L / 2),
+            (-POCKET_W / 2, -POCKET_L / 2),
+            (POCKET_W / 2, -POCKET_L / 2)
+        ]
+        for cx, cy in pocket_corners:
+            with Locations((cx, cy, z_shelf)):
+                Cylinder(
+                    radius=CORNER_RELIEF_R,
+                    height=POCKET_DEPTH + 1.0,
+                    align=(Align.CENTER, Align.CENTER, Align.MIN),
+                    mode=Mode.SUBTRACT
+                )
+
+        # 5. 天面四隅の磁石ポケット (深さ 1.80mm = 6層)
+        corner_locs = [
+            (MAG_CX, MAG_CY, z_top),
+            (-MAG_CX, MAG_CY, z_top),
+            (-MAG_CX, -MAG_CY, z_top),
+            (MAG_CX, -MAG_CY, z_top)
+        ]
+        for loc in corner_locs:
+            with Locations(loc):
+                Cylinder(
+                    radius=MAGNET_HOLE_D / 2,
+                    height=MAGNET_HOLE_DEPTH,
+                    align=(Align.CENTER, Align.CENTER, Align.MAX),
+                    mode=Mode.SUBTRACT
+                )
+
+        # 6. 隠し指抜きノッチ (長辺中央左右)
+        for side in [-1, 1]:
+            with Locations((side * (POCKET_W / 2), 0, z_top)):
+                Box(
+                    NOTCH_W * 2,
+                    NOTCH_L,
+                    NOTCH_DEPTH,
+                    align=(Align.CENTER, Align.CENTER, Align.MAX),
+                    mode=Mode.SUBTRACT
+                )
+
+    return frame.part
+
+
 # ==============================================================================
 # 実行とエクスポート
 # ==============================================================================
@@ -279,11 +362,14 @@ if __name__ == "__main__":
     print("Building 0.30mm Solid Monolith Specimen Case (with Corner Relief & Hidden Notches)...")
     case_body = build_case_body()
     top_frame = build_top_frame()
+    fit_test_frame = build_fit_test_frame()
 
     print(f"Case Body Bounding Box: {case_body.bounding_box()}")
     print(f"Top Frame Bounding Box: {top_frame.bounding_box()}")
+    print(f"Fit Test Frame Bounding Box: {fit_test_frame.bounding_box()}")
     print(f"Case Body Solid Volume: {case_body.volume / 1000.0:.2f} cm3")
     print(f"Top Frame Solid Volume: {top_frame.volume / 1000.0:.2f} cm3")
+    print(f"Fit Test Frame Solid Volume: {fit_test_frame.volume / 1000.0:.2f} cm3 (約25g)")
 
     # アセンブリ配置: ワンプレート印刷
     # 本体の右側にトップフレームを並べて配置（Z=0接地）
@@ -291,13 +377,21 @@ if __name__ == "__main__":
     assembly = Compound(children=[case_body, placed_frame])
 
     output_dir = os.path.dirname(__file__)
-    output_path = os.path.join(output_dir, "specimen_case_prototype.step")
+    main_step_path = os.path.join(output_dir, "specimen_case_prototype.step")
+    test_step_path = os.path.join(output_dir, "fit_test_frame.step")
 
-    export_step(assembly, output_path)
-    print(f"Successfully exported STEP to: {output_path}")
+    # 1. 本番モデル (本体 + 蓋)
+    export_step(assembly, main_step_path)
+    print(f"Successfully exported Main STEP to: {main_step_path}")
+
+    # 2. テスト用薄型フレーム (底なし)
+    export_step(fit_test_frame, test_step_path)
+    print(f"Successfully exported Fit Test Frame STEP to: {test_step_path}")
 
     try:
         show_object(case_body, name="case_body")
         show_object(placed_frame, name="top_frame")
+        show_object(fit_test_frame, name="fit_test_frame")
     except Exception:
         pass
+
