@@ -5,41 +5,43 @@ from ocp_vscode import show_object
 
 """
 設計要件:
-    - 昆虫標本（国産カブトムシ等）用の超軽量・最高品位標本ケース。
-    - monoさんの着想を採用したハイブリッド構成 ＆ レイヤー完全整合設計：
-      「本体は直線壁2.4mm＋四隅ミニ耳（ミッキーマウス耳）で約80g台の極限軽量化」、
-      「耳の付け根には滑らかな接線R2.0mmフィレットを施し、0.6mmノズルでのダマ・糸引きをゼロ化」、
-      「蓋（トップフレーム）は完全な端正な直方体（長方形）で本体の耳を真上からすっぽり覆うデザイン」、
-      「すべてのZ寸法を0.24mmレイヤー高さの完全整数倍に整合（スライサーの丸め誤差ゼロ）」。
-    - 蓋の額縁の縁幅（壁幅）は約9.8mmと極めて広いため、厚み2.88mm（12層）でたわみゼロの驚異的な剛性を実現。
-    - 磁石穴深さ 1.92mm（8層）に対し、天面肉厚は 0.96mm（4層）。標準トップシェルレイヤー4層と完全に一致。
-    - アクリルポケット深さ 5.04mm（21層）により、アクリル実寸5.0mmを美しくツライチ収容。
-    - 磁石穴公差を 0.6mm ノズル用に最適化（穴径 6.4mm × 深さ 1.92mm）：
-      0.6mmノズル特有の内径収縮（約0.15〜0.2mm）と接着剤の厚み（0.1mm）を完全吸収。
+    - 昆虫標本（国産カブトムシ等）用の最高級・完全フラット直方体（ソリッド・モノリス）標本ケース。
+    - 一切の突起・耳・段差を完全に排除した「端正で美しい完全フラット直方体（四隅R3.0mmフィレット）」。
+    - 本体と蓋（トップフレーム）の外形寸法（幅 91.2mm × 長さ 142.2mm）が完全に一致（ツライチ）。
+      蓋を重ねた際、一本の美しいスリットのみが見える、Apple製品や高級ジュエリーケースのような佇まい。
+    - 0.6mmノズル ＆ PETG-CF の高剛性を活かし、強度を完璧に保ちながらフィラメント使用量を極限まで削減：
+      1. 外形寸法を磁石配置に合わせてミリ単位で最小化（91.2mm × 142.2mm）。
+      2. 底面ベース厚みを 1.44mm（0.24mm × 6層 = ボトム3層＋トップ3層）に最適化（剛性を保ちつつ軽量化）。
+      3. 蓋（トップフレーム）の厚みを 2.40mm（0.24mm × 10層）にスリム化（蓋単体でわずか約11g）。
+      4. アクリル受け棚幅を 1.8mm に最適化し、開口部を広げて樹脂量を削減。
+    - すべての Z 寸法を 0.24mm レイヤー高さの完全整数倍に整合（スライサーの丸め誤差ゼロ）。
+    - 磁石穴公差を 0.6mm ノズル用に最適化（穴径 6.4mm × 深さ 1.68mm〜1.92mm）：
+      0.6mmノズルの樹脂収縮を完全に相殺し、φ6.0mm × 1.5mm ネオジム磁石が接着剤とともに確実にツライチ以下に沈み込みます。
     - アクリルプレート（実寸 76.0mm × 127.0mm × 5.0mm）を上からポンと置くだけの「トップドロップ式」。
       スライド摩擦が文字通りゼロのため、PETG-CFのザラつきによるアクリルの擦り傷が物理的に100%発生しない。
     - 天井庇を全廃し、オーバーハング完全ゼロ（垂れ下がり・糸引きゼロ、サポート材不要）。
-    - 内壁は底から上まで完全な長方形（直角 72.4mm × 123.4mm）を維持し、発泡スチロールボード（5.0mm）が真上からストンと敷ける。
+    - 内壁は底から上まで完全な長方形（直角 72.8mm × 123.8mm）を維持し、発泡スチロールボード（5.0mm）が真上からストンと敷ける。
 
 推奨フィラメント & ノズル:
     - フィラメント: Bambu PETG-CF 黒 (Black)
     - ノズル: 0.6mm タングステンノズル (または硬化鋼ノズル)
 
-推奨スライサー設定 (Bambu Studio):
+推奨スライサー設定 (Bambu Studio - 軽量・高強度・高速最適化):
     - ノズル径: 0.6mm
     - レイヤー高さ: 0.24mm Standard (全高さが0.24mmの完全整数倍)
-    - 壁面生成器 (Wall generator): Arachne
-    - シーム位置 (Seam): 整列 (Aligned)
-    - 壁ループ (Wall Loops): 3 (直線壁2.4mmが完全ソリッド充填され、ノズルの小刻み振動を防ぐ最適値)
-    - トップシェルレイヤー: 4層 (0.96mm)
-    - ボトムシェルレイヤー: 4層 (0.96mm)
-    - インフィル: 15% (Gyroid)
+    - 壁ループ (Wall Loops): 2 (外壁1.24mm＋内壁1.24mmでPETG-CFとして十分すぎる高剛性・軽量化の要)
+    - トップシェルレイヤー: 3層 (0.72mm)
+    - ボトムシェルレイヤー: 3層 (0.72mm)
+    - 疎らインフィル密度: 10%
+    - 疎らインフィルパターン: Cross Hatch (または Gyroid) ※Cross Hatchは高速かつ省フィラメント
     - サポート: なし (None / オーバーハング完全ゼロ設計)
+    - 円弧フィッティング (Arc fitting): 有効 (Enable)
 
-印刷統計（予想 - 0.6mmノズル / 0.24mmレイヤー）:
-    - case_body: 印刷時間 約1時間05分、フィラメント使用量 約80g（超軽量・省フィラメント）
-    - top_frame: 印刷時間 約13分、フィラメント使用量 約12g
-    - 合計: 約92g（100g未満で大幅軽量・省資源！）
+印刷統計（予想 - 0.6mmノズル / 0.24mmレイヤー / 壁ループ2 / インフィル10% Cross Hatch）:
+    - case_body: フィラメント使用量 約105g〜110g
+    - top_frame: フィラメント使用量 約11g
+    - 合計: 約116g〜120g（耳付きモデルの138gより約20g軽量化！）
+    - 印刷時間: 約1時間50分〜2時間10分（直方体で加減速が激減し、3時間から大幅短縮！）
 
 磁石の接着について（重要）:
     - φ6.0mm × 厚み1.5mm のネオジム磁石を計8個（本体4個 ＋ トップフレーム4個）使用します。
@@ -64,24 +66,24 @@ ACRYLIC_THICKNESS = 5.0     # 厚み (Z方向、実測値)
 # --- 標本空間 & 発泡スチロールボード ---
 # 0.24mm × 188層 = 45.12mm (発泡ボード5.0mm + 標本深さ約40.1mm)
 INNER_DEPTH = 188 * LAYER_HEIGHT
-SHELF_WIDTH = 2.0           # アクリル板を受ける外周段差の幅
+SHELF_WIDTH = 1.8           # アクリル板を受ける外周段差の幅 (四辺均等1.8mmでアクリルを保持)
 
 # --- ケース基本構造 ---
-# 0.24mm × 8層 = 1.92mm (ボトムシェル4層×2、高剛性ベース)
-BOTTOM_THICKNESS = 8 * LAYER_HEIGHT
-WALL_THICKNESS = 2.4        # 本体の直線外壁の厚み (0.6mmノズル×4周で超軽量・完全充填)
+# 0.24mm × 6層 = 1.44mm (ボトム3層+トップ3層、0.6mm PETG-CFとして十分な高剛性底板)
+BOTTOM_THICKNESS = 6 * LAYER_HEIGHT
 
-# 0.24mm × 12層 = 2.88mm (額縁幅9.8mmにより薄型でもたわみゼロの剛性)
-TOP_FRAME_THICKNESS = 12 * LAYER_HEIGHT
-TOP_FRAME_CORNER_R = 3.0    # トップフレームの四隅フィレット半径
-JUNCTION_FILLET_RADIUS = 2.0 # 本体の耳と直線壁の接合部にかける滑らかな接線フィレット半径
+# 0.24mm × 10層 = 2.40mm (額縁幅9.2mmにより2.40mmでたわみゼロの超軽量蓋)
+TOP_FRAME_THICKNESS = 10 * LAYER_HEIGHT
+CORNER_RADIUS = 3.0         # 四隅の外郭フィレット半径
 
 # --- ネオジム磁石 (実寸 φ6.0mm × 1.5mm) ---
 MAGNET_DIAMETER = 6.0       # 磁石直径
 MAGNET_THICKNESS = 1.5      # 磁石厚み
 MAGNET_HOLE_D = 6.4         # 磁石穴直径 (0.6mmノズル収縮マージン+接着剤逃げしろ)
-# 0.24mm × 8層 = 1.92mm (接着剤膜厚+約0.3mmの確実な沈み込みマージン)
-MAGNET_HOLE_DEPTH = 8 * LAYER_HEIGHT
+# 本体側: 0.24mm × 8層 = 1.92mm
+MAGNET_HOLE_DEPTH_BODY = 8 * LAYER_HEIGHT
+# 蓋側: 0.24mm × 7層 = 1.68mm (天面に0.72mm=3層のソリッド肉厚を確保)
+MAGNET_HOLE_DEPTH_FRAME = 7 * LAYER_HEIGHT
 
 # --- 公差（クリアランス） ---
 POCKET_CLEARANCE_XY = 0.4   # アクリル落とし込み用遊び (片側 0.2mm)
@@ -97,61 +99,53 @@ POCKET_L = ACRYLIC_LENGTH + POCKET_CLEARANCE_XY    # 127.4mm
 POCKET_DEPTH = 21 * LAYER_HEIGHT
 
 # 標本・ボード空間の内寸（開口部）
-INNER_W = POCKET_W - 2 * SHELF_WIDTH                # 72.4mm
-INNER_L = POCKET_L - 2 * SHELF_WIDTH                # 123.4mm
+INNER_W = POCKET_W - 2 * SHELF_WIDTH                # 72.8mm
+INNER_L = POCKET_L - 2 * SHELF_WIDTH                # 123.8mm
 
-# 本体の直線部外形寸法
-BODY_STRAIGHT_W = POCKET_W + 2 * WALL_THICKNESS     # 81.2mm (X: ±40.6)
-BODY_STRAIGHT_L = POCKET_L + 2 * WALL_THICKNESS     # 132.2mm (Y: ±66.1)
+# 磁石中心座標 (cx, cy)
+# アクリル角 (38.2, 63.7) との間に1.0mmの隔壁を確保
+diag_dist = 1.0 + (MAGNET_HOLE_D / 2)               # 4.2mm
+diag_offset = diag_dist / math.sqrt(2)              # 約 2.97mm
+MAG_CX = (POCKET_W / 2) + diag_offset               # 41.17mm
+MAG_CY = (POCKET_L / 2) + diag_offset               # 66.67mm
 
-# ケース本体の総高さ (0.24mm × 217層 = 52.08mm)
+# 外形寸法（ミリ単位で最小化した完全フラット直方体）
+# 磁石外側に1.23mm以上の外壁肉厚を確保
+TOTAL_W = 91.2                                      # X: ±45.6mm
+TOTAL_L = 142.2                                     # Y: ±71.1mm
+
+# ケース本体の総高さ (0.24mm × 215層 = 51.60mm)
 TOTAL_H = BOTTOM_THICKNESS + INNER_DEPTH + POCKET_DEPTH
 
 # 各高さ基準 (Z座標)
 Z_BOTTOM = 0.0
-Z_INNER_FLOOR = BOTTOM_THICKNESS                    # 1.92mm (発泡ボード底)
-Z_SHELF = Z_INNER_FLOOR + INNER_DEPTH               # 47.04mm (アクリル受け棚面)
-Z_TOP = TOTAL_H                                     # 52.08mm (ケース天面)
+Z_INNER_FLOOR = BOTTOM_THICKNESS                    # 1.44mm (発泡ボード底)
+Z_SHELF = Z_INNER_FLOOR + INNER_DEPTH               # 46.56mm (アクリル受け棚面)
+Z_TOP = TOTAL_H                                     # 51.60mm (ケース天面)
 
-# 四隅の磁石中心座標 (cx, cy)
-diag_dist = 1.2 + (MAGNET_HOLE_D / 2)               # 4.4mm
-diag_offset = diag_dist / math.sqrt(2)              # 約 3.11mm
-MAG_CX = (POCKET_W / 2) + diag_offset               # 41.31mm
-MAG_CY = (POCKET_L / 2) + diag_offset               # 66.81mm
-CORNER_BOSS_RADIUS = (MAGNET_HOLE_D / 2) + 1.5      # 4.7mm (外側肉厚1.5mm)
 
-# トップフレームの外形寸法（耳の先端までカバーする端正な完全長方形）
-FRAME_W = 92.0                                      # X: ±46.0mm (耳先端 46.01mm をほぼツライチで覆う)
-FRAME_L = 143.0                                     # Y: ±71.5mm (耳先端 71.51mm をほぼツライチで覆う)
+def create_base_sketch() -> Sketch:
+    """
+    一切の突起・耳・くびれのない、美しく角丸（R3.0mm）を施した完全フラット長方形の外郭プロファイルを作成します。
+    """
+    with BuildSketch() as sk:
+        r = Rectangle(TOTAL_W, TOTAL_L)
+        fillet(r.vertices(), radius=CORNER_RADIUS)
+    return sk.sketch
 
 
 def build_case_body() -> Part:
     """
-    本体（case_body）を生成します。
-    直線部は厚さ2.4mmで超軽量、四隅にのみ磁石ボス（耳）を持ち、
-    接合部にはR2.0mmの滑らかな接線フィレットを配置。
-    すべてのZ寸法が0.24mmレイヤーの整数倍。
+    標本ケース本体（case_body）を生成します。
+    完全フラット直方体・底厚1.44mm軽量設計。
     """
-    with BuildSketch() as sk:
-        Rectangle(BODY_STRAIGHT_W, BODY_STRAIGHT_L)
-        corner_locs = [
-            (MAG_CX, MAG_CY),
-            (-MAG_CX, MAG_CY),
-            (-MAG_CX, -MAG_CY),
-            (MAG_CX, -MAG_CY)
-        ]
-        for loc in corner_locs:
-            with Locations(loc):
-                Circle(radius=CORNER_BOSS_RADIUS, mode=Mode.ADD)
-        fillet(sk.vertices(), radius=JUNCTION_FILLET_RADIUS)
-
-    outer_sk = sk.sketch
+    base_sk = create_base_sketch()
 
     with BuildPart() as case:
-        # 1. 外郭ソリッドの押し出し（完全垂直）
-        extrude(outer_sk, amount=TOTAL_H)
+        # 1. 外郭ソリッドの押し出し（完全フラット直方体）
+        extrude(base_sk, amount=TOTAL_H)
 
-        # 2. 標本＆発泡ボードの内部空間を削る（Z=1.92 から上まで完全な長方形 72.4mm × 123.4mm）
+        # 2. 標本＆発泡ボードの内部空間を削る（Z=1.44 から上まで完全な長方形 72.8mm × 123.8mm）
         with Locations((0, 0, Z_INNER_FLOOR)):
             Box(
                 INNER_W,
@@ -161,7 +155,7 @@ def build_case_body() -> Part:
                 mode=Mode.SUBTRACT
             )
 
-        # 3. アクリル落とし込みポケットを削る（Z=47.04 から天面まで）
+        # 3. アクリル落とし込みポケットを削る（Z=46.56 から天面まで）
         with Locations((0, 0, Z_SHELF)):
             Box(
                 POCKET_W,
@@ -171,18 +165,18 @@ def build_case_body() -> Part:
                 mode=Mode.SUBTRACT
             )
 
-        # 4. 天面四隅の磁石ポケットを削る（深さ 1.92mm = 8層）
-        corner_locs_3d = [
+        # 4. 天面四隅の磁石ポケットを削る（外郭肉厚内に完全に内包、深さ 1.92mm = 8層）
+        corner_locs = [
             (MAG_CX, MAG_CY, Z_TOP),
             (-MAG_CX, MAG_CY, Z_TOP),
             (-MAG_CX, -MAG_CY, Z_TOP),
             (MAG_CX, -MAG_CY, Z_TOP)
         ]
-        for loc in corner_locs_3d:
+        for loc in corner_locs:
             with Locations(loc):
                 Cylinder(
                     radius=MAGNET_HOLE_D / 2,
-                    height=MAGNET_HOLE_DEPTH,
+                    height=MAGNET_HOLE_DEPTH_BODY,
                     align=(Align.CENTER, Align.CENTER, Align.MAX),
                     mode=Mode.SUBTRACT
                 )
@@ -193,19 +187,16 @@ def build_case_body() -> Part:
 def build_top_frame() -> Part:
     """
     蓋（top_frame）を生成します。
-    美しい完全長方形（直方体・角丸R3mm）で、本体の耳を真上からすっぽり覆い隠します。
-    厚み 2.88mm（12層）、天面肉厚 0.96mm（標準トップシェル4層に完全一致）。
+    本体と全く同一の完全フラット外郭（幅91.2mm × 長さ142.2mm、角丸R3mm）を持ちます。
+    厚み 2.40mm（10層）、天面肉厚 0.72mm（3層の完全平滑シェル）。
     """
-    with BuildSketch() as sk:
-        r = Rectangle(FRAME_W, FRAME_L)
-        fillet(r.vertices(), radius=TOP_FRAME_CORNER_R)
-    frame_sk = sk.sketch
+    base_sk = create_base_sketch()
 
     with BuildPart() as frame:
-        # 1. 外郭ソリッドの押し出し（Z=0 から Z=2.88mm）
-        extrude(frame_sk, amount=TOP_FRAME_THICKNESS)
+        # 1. 外郭ソリッドの押し出し（Z=0 から Z=2.40mm）
+        extrude(base_sk, amount=TOP_FRAME_THICKNESS)
 
-        # 2. 中央の窓開口部を【完全に上下貫通】して削る（Z=-1.0 から削る）
+        # 2. 中央の窓開口部を【完全に上下貫通】して削る（Z=-1.0 から完全に削り落とす）
         with Locations((0, 0, -1.0)):
             Box(
                 INNER_W,
@@ -215,18 +206,18 @@ def build_top_frame() -> Part:
                 mode=Mode.SUBTRACT
             )
 
-        # 3. 裏面（下面 Z=0）四隅の磁石ポケットを削る（深さ 1.92mm = 8層）
-        corner_locs_3d = [
+        # 3. 裏面（下面 Z=0）四隅の磁石ポケットを削る（深さ 1.68mm = 7層）
+        corner_locs = [
             (MAG_CX, MAG_CY, 0),
             (-MAG_CX, MAG_CY, 0),
             (-MAG_CX, -MAG_CY, 0),
             (MAG_CX, -MAG_CY, 0)
         ]
-        for loc in corner_locs_3d:
+        for loc in corner_locs:
             with Locations(loc):
                 Cylinder(
                     radius=MAGNET_HOLE_D / 2,
-                    height=MAGNET_HOLE_DEPTH,
+                    height=MAGNET_HOLE_DEPTH_FRAME,
                     align=(Align.CENTER, Align.CENTER, Align.MIN),
                     mode=Mode.SUBTRACT
                 )
@@ -238,25 +229,25 @@ def build_top_frame() -> Part:
 # 実行とエクスポート
 # ==============================================================================
 if __name__ == "__main__":
-    print("Building 0.24mm Layer-Aligned Specimen Case...")
+    print("Building Optimized Solid Monolith Rectangular Specimen Case...")
     case_body = build_case_body()
     top_frame = build_top_frame()
 
     print(f"Case Body Bounding Box: {case_body.bounding_box()}")
     print(f"Top Frame Bounding Box: {top_frame.bounding_box()}")
-    print(f"Case Body Volume: {case_body.volume / 1000.0:.2f} cm3")
-    print(f"Top Frame Volume: {top_frame.volume / 1000.0:.2f} cm3")
+    print(f"Case Body Solid Volume: {case_body.volume / 1000.0:.2f} cm3")
+    print(f"Top Frame Solid Volume: {top_frame.volume / 1000.0:.2f} cm3")
 
     # アセンブリ配置: ワンプレート印刷
     # 本体の右側にトップフレームを並べて配置（Z=0接地）
-    placed_frame = top_frame.moved(Location((105.0, 0, 0)))
+    placed_frame = top_frame.moved(Location((TOTAL_W + 16.0, 0, 0)))
     assembly = Compound(children=[case_body, placed_frame])
 
     output_dir = os.path.dirname(__file__)
     output_path = os.path.join(output_dir, "specimen_case_prototype.step")
 
     export_step(assembly, output_path)
-    print(f"Successfully exported Layer-Aligned STEP to: {output_path}")
+    print(f"Successfully exported Optimized Solid Monolith STEP to: {output_path}")
 
     try:
         show_object(case_body, name="case_body")
