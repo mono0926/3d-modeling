@@ -286,7 +286,16 @@ if __name__ == "__main__":
     print("=" * 60)
 
     try:
-        show_object(case_body, name="case_body")
-        show_object(placed_frame, name="top_frame")
-    except Exception:
-        pass
+        from ocp_vscode import show, Camera
+        show(case_body, placed_frame, names=["case_body", "top_frame"], reset_camera=Camera.RESET)
+        print("OCP CAD Viewer にモデルを転送しました！")
+    except Exception as e:
+        try:
+            from ocp_vscode import show_object
+            show_object(case_body, name="case_body")
+            show_object(placed_frame, name="top_frame")
+            print("OCP CAD Viewer (show_object) にモデルを転送しました！")
+        except Exception as e2:
+            print(f"OCP CAD Viewer 表示スキップ: {e2}")
+
+
