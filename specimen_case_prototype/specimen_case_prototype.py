@@ -9,9 +9,14 @@ from ocp_vscode import show_object
     - 一切の突起・耳・段差を完全に排除した「端正で美しい完全フラット直方体（四隅R3.0mmフィレット）」。
     - 本体と蓋（トップフレーム）の外形寸法（幅 91.2mm × 長さ 142.2mm）が完全に一致（ツライチ）。
       蓋を重ねた際、一本の美しいスリットのみが見える、Apple製品や高級ジュエリーケースのような佇まい。
+    - アクリル板の快適な着脱機能（見た目は100%完全直方体をキープ）：
+      1. ポケット四隅のピン角逃げ（ドッグボーン R1.2mm）：ノズルの内角Rへの角の噛み込みを防ぎ、真上からの出し入れ時の空気抜き（バキューム防止）として機能。
+      2. 隠し指抜きノッチ（長辺中央左右）：指先や爪でアクリル板の底面フチをクイッと持ち上げられる切り欠き。
+         ※蓋を閉めると額縁の下に完全に隠れ、外からは一切見えません。
+      3. クリアランスはジャストフィット (+0.4mm / 片側0.2mm) を維持し、ガタつきを一切排除。
     - 0.6mm タングステンノズル ＆ PETG-CF 専用の完全最適化設計：
       1. レイヤー高さ 0.30mm（0.6mmノズルの黄金比50%）を基準とし、全Z寸法を0.30mmの完全整数倍に整合。
-      2. 印刷時間を3時間から「約1時間30分前後」へと半減！
+      2. 印刷時間を3時間から「約1時間30分〜1時間40分前後」へと半減。
       3. 外郭を磁石配置に合わせてミリ単位で最小化（91.2mm × 142.2mm）。
       4. 底面ベース厚み 1.50mm（0.30mm × 5層）で高剛性と軽量化を両立。
       5. 蓋（トップフレーム）厚み 2.70mm（0.30mm × 9層）で、額縁幅9.2mmと合わさってたわみゼロの極限スリム（約12g）。
@@ -43,7 +48,7 @@ from ocp_vscode import show_object
     - case_body: フィラメント使用量 約105g〜110g
     - top_frame: フィラメント使用量 約12g
     - 合計: 約117g〜122g
-    - 印刷時間: 約1時間25分〜1時間40分（3時間から半減！）
+    - 印刷時間: 約1時間25分〜1時間40分
 
 磁石の接着について（重要）:
     - φ6.0mm × 厚み1.5mm のネオジム磁石を計8個（本体4個 ＋ トップフレーム4個）使用します。
@@ -84,6 +89,12 @@ BOTTOM_THICKNESS = 5 * LAYER_HEIGHT
 TOP_FRAME_THICKNESS = 9 * LAYER_HEIGHT
 CORNER_RADIUS = 3.0         # 四隅の外郭フィレット半径
 
+# --- アクリル着脱機構（蓋で完全に隠れる設計） ---
+CORNER_RELIEF_R = 1.2       # 四隅のピン角逃げ ＆ 空気抜き円筒半径 (1.2mm)
+NOTCH_W = 3.0               # 指抜きノッチ外側への掘り込み量 (3.0mm)
+NOTCH_L = 18.0              # 指抜きノッチ長さ (18.0mm、指の腹が入るサイズ)
+NOTCH_DEPTH = 6.0           # 指抜きノッチ深さ (6.0mm、アクリル底面より深く指が入る)
+
 # --- ネオジム磁石 (実寸 φ6.0mm × 1.5mm) ---
 MAGNET_DIAMETER = 6.0       # 磁石直径
 MAGNET_THICKNESS = 1.5      # 磁石厚み
@@ -92,7 +103,7 @@ MAGNET_HOLE_D = 6.4         # 磁石穴直径 (0.6mmノズル収縮マージン+
 MAGNET_HOLE_DEPTH = 6 * LAYER_HEIGHT
 
 # --- 公差（クリアランス） ---
-POCKET_CLEARANCE_XY = 0.4   # アクリル落とし込み用遊び (片側 0.2mm)
+POCKET_CLEARANCE_XY = 0.4   # アクリル落とし込み用遊び (片側 0.2mm、ジャストフィット維持)
 
 # ==============================================================================
 # 計算される派生寸法
@@ -144,6 +155,7 @@ def build_case_body() -> Part:
     """
     標本ケース本体（case_body）を生成します。
     完全フラット直方体・全Z寸法0.30mmレイヤー完全整合。
+    四隅ピン角逃げ＆隠し指抜きノッチを内包。
     """
     base_sk = create_base_sketch()
 
@@ -171,7 +183,23 @@ def build_case_body() -> Part:
                 mode=Mode.SUBTRACT
             )
 
-        # 4. 天面四隅の磁石ポケットを削る（深さ 1.80mm = 6層）
+        # 4. 四隅のピン角逃げ＆空気抜き（ポケット四隅の直角噛み込みを防ぐ）
+        pocket_corners = [
+            (POCKET_W / 2, POCKET_L / 2),
+            (-POCKET_W / 2, POCKET_L / 2),
+            (-POCKET_W / 2, -POCKET_L / 2),
+            (POCKET_W / 2, -POCKET_L / 2)
+        ]
+        for cx, cy in pocket_corners:
+            with Locations((cx, cy, Z_SHELF)):
+                Cylinder(
+                    radius=CORNER_RELIEF_R,
+                    height=POCKET_DEPTH + 1.0,
+                    align=(Align.CENTER, Align.CENTER, Align.MIN),
+                    mode=Mode.SUBTRACT
+                )
+
+        # 5. 天面四隅の磁石ポケットを削る（深さ 1.80mm = 6層）
         corner_locs = [
             (MAG_CX, MAG_CY, Z_TOP),
             (-MAG_CX, MAG_CY, Z_TOP),
@@ -183,6 +211,17 @@ def build_case_body() -> Part:
                 Cylinder(
                     radius=MAGNET_HOLE_D / 2,
                     height=MAGNET_HOLE_DEPTH,
+                    align=(Align.CENTER, Align.CENTER, Align.MAX),
+                    mode=Mode.SUBTRACT
+                )
+
+        # 6. 隠し指抜きノッチ（長辺中央左右、蓋を閉めると100%隠れる）
+        for side in [-1, 1]:
+            with Locations((side * (POCKET_W / 2), 0, Z_TOP)):
+                Box(
+                    NOTCH_W * 2,
+                    NOTCH_L,
+                    NOTCH_DEPTH,
                     align=(Align.CENTER, Align.CENTER, Align.MAX),
                     mode=Mode.SUBTRACT
                 )
@@ -235,7 +274,7 @@ def build_top_frame() -> Part:
 # 実行とエクスポート
 # ==============================================================================
 if __name__ == "__main__":
-    print("Building 0.30mm Layer-Aligned Solid Monolith Specimen Case...")
+    print("Building 0.30mm Solid Monolith Specimen Case (with Corner Relief & Hidden Notches)...")
     case_body = build_case_body()
     top_frame = build_top_frame()
 
@@ -253,7 +292,7 @@ if __name__ == "__main__":
     output_path = os.path.join(output_dir, "specimen_case_prototype.step")
 
     export_step(assembly, output_path)
-    print(f"Successfully exported 0.30mm Monolith STEP to: {output_path}")
+    print(f"Successfully exported STEP to: {output_path}")
 
     try:
         show_object(case_body, name="case_body")
