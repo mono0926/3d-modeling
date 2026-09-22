@@ -276,17 +276,11 @@ if __name__ == "__main__":
     placed_frame = top_frame.moved(Location((TOTAL_W + 16.0, 0, 0)))
     assembly = Compound(children=[case_body, placed_frame])
 
+    # STEPエクスポート (本体 + 蓋のワンプレート配置アセンブリ)
     output_dir = os.path.dirname(__file__)
     main_step_path = os.path.join(output_dir, "specimen_case_prototype.step")
-
-    # 本番モデル (本体 + 蓋のワンプレート配置)
     export_step(assembly, main_step_path)
-    print(f"\nSuccessfully exported Main STEP to: {main_step_path}")
-
-    # 蓋単体テスト用モデル (アクリル嵌合確認用として単体出力も保持)
-    test_step_path = os.path.join(output_dir, "fit_test_frame.step")
-    export_step(top_frame, test_step_path)
-    print(f"Successfully exported Lid Fit Test STEP to: {test_step_path}")
+    print(f"\nSuccessfully exported STEP to: {main_step_path}")
     print("=" * 60)
 
     try:

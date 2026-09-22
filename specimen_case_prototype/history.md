@@ -26,8 +26,9 @@
      - **外形寸法の完全パラメトリック数式化**: 旧モデルのハードコード値（`91.2`, `142.2`）を廃止し、アクリル寸法と磁石位置・外壁肉厚（1.23mm＝壁ループ2本分）から数学的に完全自動導出される構成へリファクタリング。将来の20cm版等のサイズ変更にも全自動で完全追従。
 - **成果物**:
   - `specimen_case_prototype/specimen_case_prototype.py`
-  - `specimen_case_prototype/specimen_case_prototype.step`（本体＋蓋のワンプレート配置）
-  - `specimen_case_prototype/fit_test_frame.step`（蓋単体のテスト出力用）
+  - `specimen_case_prototype/specimen_case_prototype.step`（本体＋蓋のワンプレート配置アセンブリ）
+  - ※蓋そのものがアクリル嵌合テストピースとなったため、余分な `fit_test_frame.step` は完全廃止・一本化。
+
 
 - **背景・目的**:
   - アクリル板の落とし込み具合（四隅ピン角逃げ、バキューム吸着解消、隠し指抜きノッチの使い勝手、磁石・蓋との嵌合）を、時間とフィラメントを消費せずに素早く確認・調整するため、底なし・薄型のテストモデルを作成。
