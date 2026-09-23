@@ -22,10 +22,10 @@ from build123d import *
 # パラメーター設定 (単位: mm)
 # ==============================================================================
 
-LAYER_HEIGHT = 0.24         # 積層ピッチ (0.6mmノズル Fine設定 0.24mm)
-TOTAL_THICKNESS = 2 * LAYER_HEIGHT   # 0.48mm (2層)
-HINGE_THICKNESS = 1 * LAYER_HEIGHT   # 0.24mm (1層リビングヒンジ: しなやかさ2倍・白化/割れ防止)
-HINGE_GAP = 1.0             # 折り目溝幅 (1.0mm: 曲げ応力を緩やかに分散し亀裂を防止)
+LAYER_HEIGHT = 0.18         # 積層ピッチ (0.6mmノズル High Quality設定 0.18mm)
+TOTAL_THICKNESS = 2 * LAYER_HEIGHT   # 0.36mm (2層)
+HINGE_THICKNESS = 1 * LAYER_HEIGHT   # 0.18mm (1層リビングヒンジ: クリアファイル級の超しなやかさ・割れゼロ)
+HINGE_GAP = 0.8             # 折り目溝幅 (0.8mm: 0.18mm層に最適化された極薄折り目)
 
 # --- ケース内寸 (specimen_case_prototype.py 準拠) ---
 # 内寸: 72.8mm × 123.8mm × 深さ 45.00mm
@@ -35,11 +35,11 @@ CASE_INNER_DEPTH = 45.00
 
 # --- インナー寸法（ベッド接地側を内面として外折りしたときの実外郭から完全逆算） ---
 # 狙いとする折った状態の外寸: 72.0mm × 123.0mm (ケース内寸 72.8×123.8 に対し四方0.4mmの完全安全クリアランス)
-# 折ったときの実効外寸 = BASE + 2 * TOTAL_THICKNESS (約 0.96mm)
-# BASE_W = 72.0 - 2 * 0.48 = 71.04 -> 71.00mm
-# BASE_L = 123.0 - 2 * 0.48 = 122.04 -> 122.00mm
-BASE_W = 71.00
-BASE_L = 122.00
+# 折ったときの実効外寸 = BASE + 2 * TOTAL_THICKNESS (約 0.72mm)
+# BASE_W = 72.0 - 2 * 0.36 = 71.28 -> 71.20mm
+# BASE_L = 123.0 - 2 * 0.36 = 122.28 -> 122.20mm
+BASE_W = 71.20
+BASE_L = 122.20
 WALL_H = 44.50              # 深さ45.0mmに対して0.5mmマージン (受け棚や蓋に干渉ゼロ)
 CORNER_CHAMFER = 1.5        # 立ち上げ時の垂直コーナー干渉・長手方向の座屈を防ぐ逃げ面取り (1.5mm)
 
