@@ -22,10 +22,10 @@ from build123d import *
 # パラメーター設定 (単位: mm)
 # ==============================================================================
 
-LAYER_HEIGHT = 0.30         # 積層ピッチ (0.6mmノズル標準)
-TOTAL_THICKNESS = 2 * LAYER_HEIGHT   # 0.60mm (2層)
-HINGE_THICKNESS = 1 * LAYER_HEIGHT   # 0.30mm (1層)
-HINGE_GAP = 1.0             # 折り目溝幅 (1.0mm)
+LAYER_HEIGHT = 0.24         # 積層ピッチ (0.6mmノズル Fine設定 0.24mm)
+TOTAL_THICKNESS = 2 * LAYER_HEIGHT   # 0.48mm (2層)
+HINGE_THICKNESS = 1 * LAYER_HEIGHT   # 0.24mm (1層リビングヒンジ: しなやかさ2倍・白化/割れ防止)
+HINGE_GAP = 1.0             # 折り目溝幅 (1.0mm: 曲げ応力を緩やかに分散し亀裂を防止)
 
 # --- ケース内寸 (specimen_case_prototype.py 準拠) ---
 # 内寸: 72.8mm × 123.8mm × 深さ 45.00mm
@@ -33,12 +33,15 @@ CASE_INNER_W = 72.8
 CASE_INNER_L = 123.8
 CASE_INNER_DEPTH = 45.00
 
-# --- インナー公差（折り曲げ時の曲げR膨らみ・内角R逃げを完全吸収） ---
-CLEARANCE = 1.2             # ケース内壁との逃げ代 (片側 0.6mm、折り曲げ時の曲げR膨らみを完全吸収)
-BASE_W = CASE_INNER_W - CLEARANCE     # 71.60mm
-BASE_L = CASE_INNER_L - CLEARANCE     # 122.60mm
-WALL_H = CASE_INNER_DEPTH - 0.30      # 44.70mm (天面とのツライチマージン)
-CORNER_CHAMFER = 0.8        # 立ち上げ時の垂直コーナー干渉を防ぐ逃げ面取り (0.8mm)
+# --- インナー寸法（ベッド接地側を内面として外折りしたときの実外郭から完全逆算） ---
+# 狙いとする折った状態の外寸: 72.0mm × 123.0mm (ケース内寸 72.8×123.8 に対し四方0.4mmの完全安全クリアランス)
+# 折ったときの実効外寸 = BASE + 2 * TOTAL_THICKNESS (約 0.96mm)
+# BASE_W = 72.0 - 2 * 0.48 = 71.04 -> 71.00mm
+# BASE_L = 123.0 - 2 * 0.48 = 122.04 -> 122.00mm
+BASE_W = 71.00
+BASE_L = 122.00
+WALL_H = 44.50              # 深さ45.0mmに対して0.5mmマージン (受け棚や蓋に干渉ゼロ)
+CORNER_CHAMFER = 1.5        # 立ち上げ時の垂直コーナー干渉・長手方向の座屈を防ぐ逃げ面取り (1.5mm)
 
 
 def build_folding_white_liner() -> Part:
