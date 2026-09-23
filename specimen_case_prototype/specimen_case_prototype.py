@@ -82,10 +82,17 @@ CORNER_RELIEF_R = 0.6       # 0.6mm (ノズル半径と同等、磁石穴との�
 
 # --- ネオジム磁石 (実寸 φ6.0mm × 1.5mm) ---
 MAGNET_DIAMETER = 6.0       # 磁石直径
-MAGNET_THICKNESS = 1.5      # 磁石厚み
+MAGNET_THICKNESS = 1.5      # 磁石厚み (実寸 1.50mm = 0.30mm × 5層)
 MAGNET_HOLE_D = 6.4         # 磁石穴直径 (0.6mmノズル収縮マージン+接着剤逃げしろ)
-# 0.30mm × 6層 = 1.80mm (接着剤膜厚+約0.3mmの確実な沈み込みマージン)
-MAGNET_HOLE_DEPTH = 6 * LAYER_HEIGHT
+
+# --- 磁石インロー構造（本体2枚オス ＋ 蓋1枚メス / 16層 = 4.80mm） ---
+# 本体側：2枚重ね（3.00mm厚）。深さ2.40mm（8層）とし、0.60mm突出させてオス（位置決めピン）とする
+BODY_MAGNET_COUNT = 2
+BODY_MAGNET_HOLE_DEPTH = 8 * LAYER_HEIGHT   # 2.40mm (オス突出: 3.00 - 2.40 = 0.60mm)
+
+# 蓋側：1枚（1.50mm厚）。深さ2.40mm（8層）とし、0.90mm窪ませてメス（受座）とする
+LID_MAGNET_COUNT = 1
+LID_MAGNET_HOLE_DEPTH = 8 * LAYER_HEIGHT    # 2.40mm (メス窪み: 2.40 - 1.50 = 0.90mm)
 
 # --- 壁厚マージン (0.6mm ノズル壁ループ2本 = 約1.24mm に最適化) ---
 CORNER_INNER_WALL = 1.0     # アクリル角と磁石穴の間の内側隔壁
@@ -160,7 +167,7 @@ def build_case_body() -> Part:
                 mode=Mode.SUBTRACT
             )
 
-        # 3. 天面四隅の磁石ポケットを削る（深さ 1.80mm = 6層）
+        # 3. 天面四隅の磁石ポケットを削る（深さ 2.40mm = 8層、2枚重ねで0.60mm突出オス）
         corner_locs = [
             (MAG_CX, MAG_CY, BODY_TOTAL_H),
             (-MAG_CX, MAG_CY, BODY_TOTAL_H),
@@ -171,7 +178,7 @@ def build_case_body() -> Part:
             with Locations(loc):
                 Cylinder(
                     radius=MAGNET_HOLE_D / 2,
-                    height=MAGNET_HOLE_DEPTH,
+                    height=BODY_MAGNET_HOLE_DEPTH,
                     align=(Align.CENTER, Align.CENTER, Align.MAX),
                     mode=Mode.SUBTRACT
                 )
@@ -188,7 +195,7 @@ def build_top_frame() -> Part:
     Z構成:
       - Z=0.00 〜 2.70mm: 天面額縁（9層、中央開口 72.8×123.8mm）
       - Z=2.70 〜 7.80mm: アクリルポケット（17層、開口 76.4×127.4mm）
-      - Z=7.80mm (上面): 本体との合わせ面。四隅に磁石穴（深さ1.80mm）
+      - Z=7.80mm (上面): 本体との合わせ面。四隅に磁石穴（深さ2.40mm = 8層、メス窪み0.90mm）
     """
     base_sk = create_base_sketch()
 
@@ -233,7 +240,7 @@ def build_top_frame() -> Part:
                     mode=Mode.SUBTRACT
                 )
 
-        # 5. 上面（本体との合わせ面 Z=7.80mm）四隅の磁石ポケットを削る (深さ 1.80mm = 6層)
+        # 5. 上面（本体との合わせ面 Z=7.80mm）四隅の磁石ポケットを削る (深さ 2.40mm = 8層、1枚で0.90mm窪みメス)
         corner_locs = [
             (MAG_CX, MAG_CY, LID_TOTAL_H),
             (-MAG_CX, MAG_CY, LID_TOTAL_H),
@@ -244,7 +251,7 @@ def build_top_frame() -> Part:
             with Locations(loc):
                 Cylinder(
                     radius=MAGNET_HOLE_D / 2,
-                    height=MAGNET_HOLE_DEPTH,
+                    height=LID_MAGNET_HOLE_DEPTH,
                     align=(Align.CENTER, Align.CENTER, Align.MAX),
                     mode=Mode.SUBTRACT
                 )
@@ -270,6 +277,7 @@ if __name__ == "__main__":
     print(f"・アクリルポケット: 蓋裏面に配置 ({POCKET_W:.2f} × {POCKET_L:.2f} × 深さ {POCKET_DEPTH:.2f} mm)")
     print(f"・四隅逃げR:        {CORNER_RELIEF_R:.1f} mm (磁石穴との隔壁 0.40mm 確保)")
     print(f"・指抜きノッチ:     完全廃止（窓側からワンプッシュで着脱可能）")
+    print(f"・磁石インロー構造: 本体8層(深さ{BODY_MAGNET_HOLE_DEPTH:.2f}mm, 2枚重ねオス0.60mm突出) / 蓋8層(深さ{LID_MAGNET_HOLE_DEPTH:.2f}mm, 1枚メス0.90mm窪み)")
 
     # アセンブリ配置: ワンプレート印刷
     # 本体の右側にトップフレームを並べて配置（Z=0接地）
