@@ -25,7 +25,7 @@ from build123d import *
 LAYER_HEIGHT = 0.18         # 積層ピッチ (0.6mmノズル High Quality設定 0.18mm)
 TOTAL_THICKNESS = 2 * LAYER_HEIGHT   # 0.36mm (2層)
 HINGE_THICKNESS = 1 * LAYER_HEIGHT   # 0.18mm (1層リビングヒンジ: クリアファイル級の超しなやかさ・割れゼロ)
-HINGE_GAP = 0.8             # 折り目溝幅 (0.8mm: 0.18mm層に最適化された極薄折り目)
+HINGE_GAP = 1.0             # 折り目溝幅 (1.0mm: 0.6mmノズルの吐出幅約0.62mmに対し確実に非融着・応力分散)
 
 # --- ケース内寸 (specimen_case_prototype.py 準拠) ---
 # 内寸: 72.8mm × 123.8mm × 深さ 45.00mm
