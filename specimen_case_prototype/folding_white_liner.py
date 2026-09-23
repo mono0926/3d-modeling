@@ -33,12 +33,12 @@ CASE_INNER_W = 72.8
 CASE_INNER_L = 123.8
 CASE_INNER_DEPTH = 45.00
 
-# --- インナー公差 ---
-CLEARANCE = 0.4             # ケース内壁との遊び (片側 0.2mm)
-BASE_W = CASE_INNER_W - CLEARANCE     # 72.4mm
-BASE_L = CASE_INNER_L - CLEARANCE     # 123.4mm
+# --- インナー公差（折り曲げ時の曲げR膨らみ・内角R逃げを完全吸収） ---
+CLEARANCE = 1.2             # ケース内壁との逃げ代 (片側 0.6mm、折り曲げ時の曲げR膨らみを完全吸収)
+BASE_W = CASE_INNER_W - CLEARANCE     # 71.60mm
+BASE_L = CASE_INNER_L - CLEARANCE     # 122.60mm
 WALL_H = CASE_INNER_DEPTH - 0.30      # 44.70mm (天面とのツライチマージン)
-CORNER_CHAMFER = 0.3        # 折り曲げ時の角干渉を防ぐ微小面取り
+CORNER_CHAMFER = 0.8        # 立ち上げ時の垂直コーナー干渉を防ぐ逃げ面取り (0.8mm)
 
 
 def build_folding_white_liner() -> Part:
