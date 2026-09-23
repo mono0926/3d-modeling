@@ -41,7 +41,7 @@ CASE_INNER_DEPTH = 45.00
 BASE_W = 71.20
 BASE_L = 122.20
 WALL_H = 44.50              # 深さ45.0mmに対して0.5mmマージン (受け棚や蓋に干渉ゼロ)
-CORNER_CHAMFER = 1.5        # 立ち上げ時の垂直コーナー干渉・長手方向の座屈を防ぐ逃げ面取り (1.5mm)
+CORNER_CHAMFER = 0.25       # 角の黒い隙間を極小ヘアライン化する超精密コーナー逃げ (0.25mm)
 
 
 def build_folding_white_liner() -> Part:
