@@ -2,21 +2,21 @@
 20cm四方アクリル板対応 本番用大型標本ケース (specimen_case_20cm)
 
 概要:
-    実測「厚さ 2.90mm × 196.0mm 四方」のアクリル板に完全適合する本番用大型標本ケース。
+    実測「厚さ 2.90mm × 199.6mm 四方」のアクリル板に完全適合する本番用大型標本ケース。
     8箇所（四隅4個 ＋ 各辺中央4個）の磁石インロー構造により、大型ケースでも全周が
     隙間ゼロでピタッと吸着し、横ズレ・たわみ浮きを完全ゼロ化します。
 
 設計特徴:
-    - アクリル実寸: 196.0mm × 196.0mm × 厚さ 2.90mm
-    - アクリルポケット: 196.8mm × 196.8mm × 深さ 3.00mm (クリアランス0.80mm、深さ10層でツライチ+0.10mm)
-    - 標本空間内寸: 193.2mm × 193.2mm × 深さ 45.00mm (150層)
+    - アクリル実寸: 199.6mm × 199.6mm × 厚さ 2.90mm
+    - アクリルポケット: 200.4mm × 200.4mm × 深さ 3.00mm (クリアランス0.80mm、深さ10層でツライチ+0.10mm)
+    - 標本空間内寸: 196.8mm × 196.8mm × 深さ 45.00mm (150層)
       ※無針標本マウントシート「大中 / 小中」4枚レイアウト(専有 156×184mm)が完璧に収まります。
     - 磁石実寸: 直径 6.0mm × 厚さ 2.60mm 最適化 (計8箇所)
       - 本体側(オス): 穴深さ 1.50mm (5層) -> 1.10mm 突出 (埋まり深さ 1.50mm / 58% で接着強度完璧)
       - 蓋側(メス): 穴深さ 3.90mm (13層) -> 1.30mm 窪み (天井肉厚 1.80mm / 6層 確保)
       - 磁石間実質エアギャップ: 約 0.10mm (接着剤厚み考慮) -> 本来の磁力を 95% 以上発揮
       - 外郭樹脂: 100% 隙間ゼロ密着 (メス窪みがオス突起より 0.20mm 深いため)
-    - ケース外形寸法: 214.08mm × 214.08mm (Bambu 256×256 ビルドプレートに余裕で収まる！)
+    - ケース外形寸法: 217.68mm × 217.68mm (Bambu 256×256 ビルドプレートに余裕で収まる！)
     - 総高さ: 52.20mm (本体 46.50mm + 蓋 5.70mm = 174層)
 
 推奨スライサー設定 (Bambu Studio):
@@ -45,8 +45,8 @@ from build123d import *
 LAYER_HEIGHT = 0.30         # 0.6mmノズルの黄金比 (50%)
 
 # --- アクリルプレート実寸 ---
-ACRYLIC_WIDTH = 196.0       # 幅 (X方向)
-ACRYLIC_LENGTH = 196.0      # 長さ (Y方向)
+ACRYLIC_WIDTH = 199.6       # 幅 (X方向、実測値 199.6mm)
+ACRYLIC_LENGTH = 199.6      # 長さ (Y方向、実測値 199.6mm)
 ACRYLIC_THICKNESS = 2.90    # 厚み (Z方向、実測値)
 
 # --- 公差（クリアランス） ---
@@ -91,28 +91,28 @@ OUTER_WALL_MARGIN = 1.24    # 磁石穴外側からケース外周までの肉�
 # ==============================================================================
 
 # アクリルポケット寸法（蓋裏面の掘り込み）
-POCKET_W = ACRYLIC_WIDTH + POCKET_CLEARANCE_XY      # 196.80mm
-POCKET_L = ACRYLIC_LENGTH + POCKET_CLEARANCE_XY    # 196.80mm
+POCKET_W = ACRYLIC_WIDTH + POCKET_CLEARANCE_XY      # 200.40mm
+POCKET_L = ACRYLIC_LENGTH + POCKET_CLEARANCE_XY    # 200.40mm
 # 0.30mm × 10層 = 3.00mm (アクリル2.90mmに対して+0.10mmマージンで確実にツライチ以下に収まる)
 POCKET_DEPTH = 10 * LAYER_HEIGHT
 
 # 標本空間・窓の内寸（開口部）
-INNER_W = POCKET_W - 2 * SHELF_WIDTH                # 193.20mm
-INNER_L = POCKET_L - 2 * SHELF_WIDTH                # 193.20mm
+INNER_W = POCKET_W - 2 * SHELF_WIDTH                # 196.80mm
+INNER_L = POCKET_L - 2 * SHELF_WIDTH                # 196.80mm
 
 # --- 磁石穴座標の算出 ---
 # 1. 各辺中央の磁石位置 (X=0 または Y=0 の直線上)
-MID_MAG_POS = (POCKET_W / 2) + MID_INNER_WALL + (MAGNET_HOLE_D / 2)  # 98.4 + 1.0 + 3.2 = 102.60mm
+MID_MAG_POS = (POCKET_W / 2) + MID_INNER_WALL + (MAGNET_HOLE_D / 2)  # 100.2 + 1.0 + 3.2 = 104.40mm
 
 # 2. 外郭寸法 (各辺中央の磁石外壁肉厚 1.24mm から数学的に自動導出)
-HALF_TOTAL_W = MID_MAG_POS + (MAGNET_HOLE_D / 2) + OUTER_WALL_MARGIN # 102.60 + 3.2 + 1.24 = 107.04mm
-TOTAL_W = 2 * HALF_TOTAL_W                          # 214.08mm
-TOTAL_L = TOTAL_W                                   # 214.08mm (正方形)
+HALF_TOTAL_W = MID_MAG_POS + (MAGNET_HOLE_D / 2) + OUTER_WALL_MARGIN # 104.40 + 3.2 + 1.24 = 108.84mm
+TOTAL_W = 2 * HALF_TOTAL_W                          # 217.68mm
+TOTAL_L = TOTAL_W                                   # 217.68mm (正方形)
 
 # 3. 四隅の磁石位置 (アクリル角からの斜めオフセット 1.0mm)
 diag_dist = CORNER_INNER_WALL + (MAGNET_HOLE_D / 2) # 1.0 + 3.2 = 4.2mm
 diag_offset = diag_dist / math.sqrt(2)              # 約 2.97mm
-CORNER_MAG_POS = (POCKET_W / 2) + diag_offset       # 98.4 + 2.97 = 101.37mm
+CORNER_MAG_POS = (POCKET_W / 2) + diag_offset       # 100.2 + 2.97 = 103.17mm
 
 # 全8箇所の磁石中心座標 (X, Y)
 MAGNET_LOCATIONS_XY = [
@@ -144,7 +144,7 @@ SET_TOTAL_H = BODY_TOTAL_H + LID_TOTAL_H
 
 def create_base_sketch() -> Sketch:
     """
-    外郭プロファイル（214.08mm × 214.08mm、角丸 R3.0mm）を作成します。
+    外郭プロファイル（217.68mm × 217.68mm、角丸 R3.0mm）を作成します。
     """
     with BuildSketch() as sk:
         r = Rectangle(TOTAL_W, TOTAL_L)
@@ -155,7 +155,7 @@ def create_base_sketch() -> Sketch:
 def build_case_body() -> Part:
     """
     20cm標本ケース本体（case_body）を生成します。
-    総高さ 46.50mm (155層)、内寸 193.2mm × 193.2mm × 深さ 45.00mm。
+    総高さ 46.50mm (155層)、内寸 196.8mm × 196.8mm × 深さ 45.00mm。
     天面8箇所に磁石ポケット（深さ 1.50mm = 5層、厚み2.60mm磁石で1.10mm突出オス）。
     """
     base_sk = create_base_sketch()
@@ -164,7 +164,7 @@ def build_case_body() -> Part:
         # 1. 外郭ソリッドの押し出し（高さ 46.50mm）
         extrude(base_sk, amount=BODY_TOTAL_H)
 
-        # 2. 標本内部空間を削る（Z=1.50 から天面まで貫通 193.2mm × 193.2mm）
+        # 2. 標本内部空間を削る（Z=1.50 から天面まで貫通 196.8mm × 196.8mm）
         with Locations((0, 0, BOTTOM_THICKNESS)):
             Box(
                 INNER_W,
@@ -194,8 +194,8 @@ def build_top_frame() -> Part:
     表面テクスチャが美しく仕上がり、サポート材完全ゼロで成形可能。
 
     Z構成:
-      - Z=0.00 〜 2.70mm: 天面額縁（9層、中央開口 193.2×193.2mm）
-      - Z=2.70 〜 5.70mm: アクリルポケット（10層、開口 196.8×196.8mm）
+      - Z=0.00 〜 2.70mm: 天面額縁（9層、中央開口 196.8×196.8mm）
+      - Z=2.70 〜 5.70mm: アクリルポケット（10層、開口 200.4×200.4mm）
       - Z=5.70mm (上面): 本体との合わせ面。8箇所に磁石穴（深さ3.90mm = 13層、厚み2.60mm磁石でメス窪み1.30mm、天井肉厚1.80mm確保）
     """
     base_sk = create_base_sketch()
