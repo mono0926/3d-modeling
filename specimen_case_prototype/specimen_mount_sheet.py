@@ -21,8 +21,9 @@
       FDM造形時の内径収縮（約0.10〜0.12mm）を見込み、CAD上で φ0.30mm に設計。
       実測で約 φ0.18〜0.20mm に仕上がり、φ0.32mm の針先で押し広げて刺すことで
       PLA樹脂の弾性によりガタつきゼロでキュッと摩擦保持（フリクションホールド）されます。
-    - シート厚み 0.40mm:
-      0.2mmノズル（0.08mm×5層）でも 0.4mmノズル（0.20mm×2層）でも完全整数倍になる極薄設計。
+    - シート厚み 0.30mm (3層):
+      0.2mmノズル標準プロファイル（0.10mm Standard: 初期レイヤー0.10mm + 0.10mm×2層 = 3層）に完全整合。
+      レフ板との段差が目立たない極薄でありながら、剥がす際やボンド接着時に折れ曲がらない適度なコシを確保。
 """
 
 import os
@@ -43,8 +44,10 @@ LABEL_SPACE_H = 4.0         # 10pt文字ラベル高さ
 BOTTOM_MARGIN = 2.0         # シート下端からの余白
 EXTRA_LENGTH = LABEL_SPACE_H + BOTTOM_MARGIN  # +6.0mm
 
-# シート基本形状
-SHEET_THICKNESS = 0.40      # 0.08mm×5層 (0.2mmノズル) / 0.20mm×2層 (0.4mmノズル)
+# シート基本形状 (0.2mmノズル 0.10mm Standard プロファイル × 3層 = 0.30mm)
+LAYER_HEIGHT = 0.10
+SHEET_LAYERS = 3
+SHEET_THICKNESS = SHEET_LAYERS * LAYER_HEIGHT  # 0.30mm
 CORNER_RADIUS = 2.0         # 四隅の角丸半径
 
 # 針穴パラメーター (φ0.32mm 昆虫針用)
