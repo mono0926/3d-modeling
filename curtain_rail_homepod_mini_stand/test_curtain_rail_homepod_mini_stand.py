@@ -4,7 +4,24 @@ from pathlib import Path
 import math
 import tempfile
 import unittest
-from build123d import Align, Box, BuildPart, BuildSketch, Cylinder, Plane, Polygon, Pos, Rot, extrude, import_step
+from build123d import (
+    Align,
+    Box,
+    BuildLine,
+    BuildPart,
+    BuildSketch,
+    Cylinder,
+    Plane,
+    Polygon,
+    Polyline,
+    Pos,
+    Rot,
+    extrude,
+    fillet,
+    import_step,
+    make_face,
+    vertices,
+)
 
 try:
     from curtain_rail_homepod_mini_stand.curtain_rail_homepod_mini_stand import (
@@ -16,16 +33,21 @@ try:
         DECK_TOP_HEIGHT,
         FIT_TEST_WIDTH,
         FIT_U_OFFSET,
+        FLEX_OUTER_GAP,
         FRONT_FLEX_REST_U,
         FRONT_HOOK_LIP_DEPTH,
         HOOK_LIP_THICKNESS,
         HOMEPOD_FOOT_DIA,
         M3_AXIS_V,
+        M3_NUT_SLOT_U_START,
         MAIN_BODY_DEPTH,
         MAIN_U_OFFSET,
         NOMINAL_RAIL_SPAN,
+        OUTER_FRAME_FRONT_U,
+        OUTER_FRAME_INNER_U,
         POCKET_CENTER_U,
         POCKET_DEPTH,
+        RAIL_CORNER_RADIUS,
         RAIL_RUNNER_SLOT_WIDTH,
         RAIL_SLOT_HEIGHT,
         RAIL_THICKNESS,
@@ -49,16 +71,21 @@ except ModuleNotFoundError:
         DECK_TOP_HEIGHT,
         FIT_TEST_WIDTH,
         FIT_U_OFFSET,
+        FLEX_OUTER_GAP,
         FRONT_FLEX_REST_U,
         FRONT_HOOK_LIP_DEPTH,
         HOOK_LIP_THICKNESS,
         HOMEPOD_FOOT_DIA,
         M3_AXIS_V,
+        M3_NUT_SLOT_U_START,
         MAIN_BODY_DEPTH,
         MAIN_U_OFFSET,
         NOMINAL_RAIL_SPAN,
+        OUTER_FRAME_FRONT_U,
+        OUTER_FRAME_INNER_U,
         POCKET_CENTER_U,
         POCKET_DEPTH,
+        RAIL_CORNER_RADIUS,
         RAIL_RUNNER_SLOT_WIDTH,
         RAIL_SLOT_HEIGHT,
         RAIL_THICKNESS,
@@ -99,8 +126,31 @@ def _box_uvz(
     return Pos(cx, cy, cz) * Box(u_max - u_min, v_max - v_min, z_max - z_min)
 
 
+def _rounded_rail_uvz(
+    u_min: float,
+    u_max: float,
+    v_min: float,
+    v_max: float,
+    corner_r: float,
+    z_min: float,
+    z_max: float,
+    u_offset: float = MAIN_U_OFFSET,
+):
+    """楕円(角丸R)断面を持つC型カーテンレール外形ソリッドを生成する."""
+    x0, x1 = u_min + u_offset, u_max + u_offset
+    y0, y1 = v_min + V_OFFSET, v_max + V_OFFSET
+    with BuildPart() as rail_bp:
+        with BuildSketch(Plane.XY.offset(z_min)):
+            with BuildLine():
+                Polyline((x0, y0), (x1, y0), (x1, y1), (x0, y1), close=True)
+            make_face()
+            fillet(vertices(), radius=corner_r)
+        extrude(amount=z_max - z_min)
+    return rail_bp.part
+
+
 class TestCurtainRailHomePodMiniStand(unittest.TestCase):
-    """本番モデルおよび事前嵌合テストピースの仕様適合テスト."""
+    """本番モデルおよび事前嵌合テストピースの仕様適合テスト (v2 実測楕円レール最適化版)."""
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -120,10 +170,10 @@ class TestCurtainRailHomePodMiniStand(unittest.TestCase):
         self.assertAlmostEqual(bb.max.Z, STAND_WIDTH, places=2)
         self.assertAlmostEqual(bb.size.Z, 66.0, places=2)
 
-        # XY外寸: 97.4mm (本体90.2mm + クリップ7.2mm) x 21.4mm、中心(0,0)、P2S造形範囲内
-        self.assertAlmostEqual(MAIN_BODY_DEPTH, 90.2, places=2)
+        # XY外寸: 95.0mm (本体87.8mm + クリップ7.2mm) x 21.4mm、中心(0,0)、P2S造形範囲内
+        self.assertAlmostEqual(MAIN_BODY_DEPTH, 87.8, places=2)
         self.assertAlmostEqual(CABLE_CLIP_PROTRUSION, 7.2, places=2)
-        self.assertAlmostEqual(TOTAL_DEPTH_WITH_CLIP, 97.4, places=2)
+        self.assertAlmostEqual(TOTAL_DEPTH_WITH_CLIP, 95.0, places=2)
         self.assertAlmostEqual(TOTAL_HEIGHT, 21.4, places=2)
         self.assertAlmostEqual(bb.size.X, TOTAL_DEPTH_WITH_CLIP, delta=0.05)
         self.assertAlmostEqual(bb.size.Y, TOTAL_HEIGHT, delta=0.05)
@@ -134,26 +184,37 @@ class TestCurtainRailHomePodMiniStand(unittest.TestCase):
         self.assertLess(bb.size.Z, 250.0)
 
     def test_curtain_rails_and_runner_slots_clearance_and_claws(self) -> None:
-        # 1. 前後2本のC型レール本体 (幅20.4 x 厚さ9.5mm、外寸スパン70.0mm) と自由状態で干渉しないこと
+        # 1. 実測合わせ済みの楕円断面ダブルC型レール (幅17.5 x 厚さ9.5mm、角丸R3.2mm、外寸スパン66.8mm) と自由状態で非干渉
         self.assertAlmostEqual(RAIL_THICKNESS, 9.5, places=2)
         self.assertAlmostEqual(RAIL_SLOT_HEIGHT, 9.8, places=2)
-        self.assertAlmostEqual(RAIL_WIDTH, 20.4, places=2)
-        self.assertAlmostEqual(NOMINAL_RAIL_SPAN, 70.0, places=2)
+        self.assertAlmostEqual(RAIL_WIDTH, 17.5, places=2)
+        self.assertAlmostEqual(RAIL_CORNER_RADIUS, 3.2, places=2)
+        self.assertAlmostEqual(NOMINAL_RAIL_SPAN, 66.8, places=2)
 
-        rear_rail = _box_uvz(0.0, RAIL_WIDTH, -RAIL_THICKNESS, 0.0, -5.0, STAND_WIDTH + 5.0)
+        rear_rail = _rounded_rail_uvz(
+            0.0,
+            RAIL_WIDTH,
+            -RAIL_THICKNESS,
+            0.0,
+            RAIL_CORNER_RADIUS,
+            -5.0,
+            STAND_WIDTH + 5.0,
+        )
         front_rail_start = NOMINAL_RAIL_SPAN - RAIL_WIDTH
-        front_rail = _box_uvz(
+        front_rail = _rounded_rail_uvz(
             front_rail_start,
             NOMINAL_RAIL_SPAN,
             -RAIL_THICKNESS,
             0.0,
+            RAIL_CORNER_RADIUS,
             -5.0,
             STAND_WIDTH + 5.0,
         )
         self.assertAlmostEqual(_intersection_volume(self.stand, rear_rail), 0.0, places=2)
         self.assertAlmostEqual(_intersection_volume(self.stand, front_rail), 0.0, places=2)
 
-        # 2. 前後両レール底面中央のランナー走行空間 (中央幅6.5mm + 左右余裕1.0mmずつ = 幅8.5mm × 下方全域) と完全非干渉であること
+        # 2. 前後両レール底面中央のランナー走行空間 (中央幅6.0mm + 左右余裕1.0mmずつ = 幅8.0mm × 下方全域) と完全非干渉
+        self.assertAlmostEqual(RAIL_RUNNER_SLOT_WIDTH, 6.0, places=2)
         runner_margin = 1.0
         rear_slot_center = RAIL_WIDTH / 2.0
         front_slot_center = front_rail_start + RAIL_WIDTH / 2.0
@@ -178,37 +239,53 @@ class TestCurtainRailHomePodMiniStand(unittest.TestCase):
         self.assertAlmostEqual(_intersection_volume(self.stand, rear_runner_zone), 0.0, places=2)
         self.assertAlmostEqual(_intersection_volume(self.stand, front_runner_zone), 0.0, places=2)
 
-        # 3. 奥側固定下ツメ (0〜3.5mm) と手前バネ下ツメ (69.4〜72.0mm) が確実にレール下方に回り込んでいること
-        self.assertAlmostEqual(REAR_HOOK_LIP_DEPTH, 3.5, places=2)
-        self.assertAlmostEqual(FRONT_FLEX_REST_U, 72.0, places=2)
-        self.assertAlmostEqual(FRONT_HOOK_LIP_DEPTH, 2.6, places=2)
+        # 3. 楕円丸みを越えて底面フラット部を捉える深め下ツメ (奥4.3mm、手前3.6mm) かつ ロック時しなり約0.8mm (自由位置67.6mm)
+        self.assertAlmostEqual(REAR_HOOK_LIP_DEPTH, 4.3, places=2)
+        self.assertAlmostEqual(FRONT_FLEX_REST_U, 67.6, places=2)
+        self.assertAlmostEqual(FRONT_HOOK_LIP_DEPTH, 3.6, places=2)
         self.assertAlmostEqual(HOOK_LIP_THICKNESS, 3.2, places=2)
+        self.assertAlmostEqual(FLEX_OUTER_GAP, 3.4, places=2)
 
-        rear_claw_probe = _box_uvz(0.4, 3.0, -12.6, -10.2, 10.0, 56.0)
-        front_claw_probe = _box_uvz(69.8, 71.8, -12.6, -10.2, 10.0, 56.0)
-        self.assertGreater(_intersection_volume(self.stand, rear_claw_probe), 200.0)
-        self.assertGreater(_intersection_volume(self.stand, front_claw_probe), 150.0)
+        # 手前ツメ先端 (67.6 - 3.6 = 64.0mm) がレール外寸 (66.8mm) より2.8mm内側へ入り込み、片手スナップ仮固定が効くこと
+        front_lip_tip_u = FRONT_FLEX_REST_U - FRONT_HOOK_LIP_DEPTH
+        self.assertAlmostEqual(front_lip_tip_u, 64.0, places=2)
+        self.assertGreater(NOMINAL_RAIL_SPAN - front_lip_tip_u, 2.5)
 
-        # 4. 手前バネ爪の背面に弾性スナップ用の逃げ空間 (u=74.2〜75.9mm) が開いていること
-        flex_gap_probe = _box_uvz(74.2, 75.9, -9.0, 3.5, 8.0, 22.0)
+        rear_claw_probe = _box_uvz(0.5, 3.9, -12.6, -10.2, 10.0, 56.0)
+        front_claw_probe = _box_uvz(64.4, 67.3, -12.6, -10.2, 10.0, 56.0)
+        self.assertGreater(_intersection_volume(self.stand, rear_claw_probe), 250.0)
+        self.assertGreater(_intersection_volume(self.stand, front_claw_probe), 200.0)
+
+        # 4. 手前バネ爪の背面に2.8mmスナップ変形を余裕で逃がす3.4mmの逃げ空間 (u=69.4〜72.8mm) が開いていること
+        flex_gap_probe = _box_uvz(70.1, 72.5, -9.0, 3.5, 8.0, 22.0)
         self.assertAlmostEqual(_intersection_volume(self.stand, flex_gap_probe), 0.0, places=2)
 
     def test_m3_deadlock_bolt_hole_and_hex_nut_slot(self) -> None:
         z_mid = STAND_WIDTH / 2.0
-        # 1. M3ボルト軸 (v = M3_AXIS_V = -4.9mm, z = 33.0mm) が外枠 (u=76.2〜85.2mm) を貫通していること
+        # 1. M3ボルト軸 (v = M3_AXIS_V = -4.9mm, z = 33.0mm) が外枠 (u=72.8〜82.8mm) を貫通していること
+        self.assertAlmostEqual(OUTER_FRAME_INNER_U, 72.8, places=2)
+        self.assertAlmostEqual(OUTER_FRAME_FRONT_U, 82.8, places=2)
         self.assertAlmostEqual(M3_AXIS_V, -4.9, places=2)
-        bolt_ray = _box_uvz(75.5, 86.0, M3_AXIS_V - 1.0, M3_AXIS_V + 1.0, z_mid - 1.0, z_mid + 1.0)
+        bolt_ray = _box_uvz(
+            OUTER_FRAME_INNER_U - 0.5,
+            OUTER_FRAME_FRONT_U + 0.5,
+            M3_AXIS_V - 1.0,
+            M3_AXIS_V + 1.0,
+            z_mid - 1.0,
+            z_mid + 1.0,
+        )
         self.assertAlmostEqual(_intersection_volume(self.stand, bolt_ray), 0.0, places=2)
 
-        # 2. 前面ボルト頭ザグリ (u=82.0〜85.2mm, φ6.6mm相当) が開口していること
-        cbore_probe = _box_uvz(82.1, 85.2, M3_AXIS_V - 2.0, M3_AXIS_V + 2.0, z_mid - 2.0, z_mid + 2.0)
+        # 2. 前面ボルト頭ザグリ (u=78.4〜82.8mm, M3×12mm頭ツライチ対応) が開口していること
+        cbore_probe = _box_uvz(78.7, 82.8, M3_AXIS_V - 2.0, M3_AXIS_V + 2.0, z_mid - 2.0, z_mid + 2.0)
         self.assertAlmostEqual(_intersection_volume(self.stand, cbore_probe), 0.0, places=2)
 
-        # 3. M3六角ナット下差し込みスロット (u=77.55〜80.20mm) が下端面からナット中心まで開口し、
-        #    かつ実寸 M3 六角ナット (二面幅5.50mm × 厚み2.40mm) が非干渉で収まり回転止めされること
+        # 3. M3六角ナット下差し込みスロット (u=74.15〜76.80mm) が下端面からナット中心まで開口し、
+        #    実寸 M3 六角ナット (二面幅5.50mm × 厚み2.40mm) が非干渉で収まり回転止めされること
+        self.assertAlmostEqual(M3_NUT_SLOT_U_START, 74.15, places=2)
         nut_chute_probe = _box_uvz(
-            77.8,
-            79.95,
+            M3_NUT_SLOT_U_START + 0.25,
+            M3_NUT_SLOT_U_START + 2.40,
             -13.2,
             M3_AXIS_V + 1.5,
             z_mid - 2.6,
@@ -216,11 +293,12 @@ class TestCurtainRailHomePodMiniStand(unittest.TestCase):
         )
         self.assertAlmostEqual(_intersection_volume(self.stand, nut_chute_probe), 0.0, places=2)
 
+        nut_u = M3_NUT_SLOT_U_START + 0.125
         hf = 5.50 / 2.0
         cr = 5.50 / math.sqrt(3.0)
         hs = cr / 2.0
         nut_plane = Plane(
-            origin=(77.675 + MAIN_U_OFFSET, M3_AXIS_V + V_OFFSET, z_mid),
+            origin=(nut_u + MAIN_U_OFFSET, M3_AXIS_V + V_OFFSET, z_mid),
             x_dir=(0, 1, 0),
             z_dir=(1, 0, 0),
         )
@@ -242,9 +320,9 @@ class TestCurtainRailHomePodMiniStand(unittest.TestCase):
 
         # 30度回転させた場合は60°六角壁と干渉し、空回り防止(アンチスピン)が機能すること
         rotated_nut = (
-            Pos(77.675 + MAIN_U_OFFSET, M3_AXIS_V + V_OFFSET, z_mid)
+            Pos(nut_u + MAIN_U_OFFSET, M3_AXIS_V + V_OFFSET, z_mid)
             * Rot(30, 0, 0)
-            * Pos(-(77.675 + MAIN_U_OFFSET), -(M3_AXIS_V + V_OFFSET), -z_mid)
+            * Pos(-(nut_u + MAIN_U_OFFSET), -(M3_AXIS_V + V_OFFSET), -z_mid)
             * real_m3_nut_bp.part
         )
         self.assertGreater(_intersection_volume(self.stand, rotated_nut), 1.0)
@@ -254,7 +332,7 @@ class TestCurtainRailHomePodMiniStand(unittest.TestCase):
         pocket_floor_v = DECK_TOP_HEIGHT - POCKET_DEPTH
         self.assertAlmostEqual(DECK_TOP_HEIGHT, 8.4, places=2)
         self.assertAlmostEqual(POCKET_DEPTH, 1.5, places=2)
-        self.assertAlmostEqual(POCKET_CENTER_U, 38.0, places=2)
+        self.assertAlmostEqual(POCKET_CENTER_U, 36.5, places=2)
         self.assertAlmostEqual(HOMEPOD_FOOT_DIA, 48.0, places=2)
 
         # 1. HomePod mini 2 底面シリコン足 (φ48.0mm) が浅溝底面 (v=+6.9mm) 上に非干渉で収まること
@@ -271,7 +349,7 @@ class TestCurtainRailHomePodMiniStand(unittest.TestCase):
 
         # 2. 浅溝外周の天板リム (v=+7.2〜+8.2mm) が存在し、かつ浅溝直下 (v=+0.5〜+6.7mm) が100%ソリッド反射床であること
         rim_probe = _box_uvz(2.0, 8.0, 7.2, 8.2, z_mid - 2.0, z_mid + 2.0)
-        solid_floor_probe = _box_uvz(25.0, 51.0, 0.5, 6.7, z_mid - 5.0, z_mid + 5.0)
+        solid_floor_probe = _box_uvz(23.5, 49.5, 0.5, 6.7, z_mid - 5.0, z_mid + 5.0)
         self.assertGreater(_intersection_volume(self.stand, rim_probe), 20.0)
         self.assertAlmostEqual(
             _intersection_volume(self.stand, solid_floor_probe),
@@ -322,8 +400,8 @@ class TestCurtainRailHomePodMiniStand(unittest.TestCase):
         # テストピース中央 (z = 6.0mm) でも M3 ボルト穴およびナットスロットが貫通していること
         z_fit_mid = FIT_TEST_WIDTH / 2.0
         fit_bolt_ray = _box_uvz(
-            75.5,
-            86.0,
+            OUTER_FRAME_INNER_U - 0.5,
+            OUTER_FRAME_FRONT_U + 0.5,
             M3_AXIS_V - 1.0,
             M3_AXIS_V + 1.0,
             z_fit_mid - 1.0,

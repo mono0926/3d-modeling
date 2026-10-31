@@ -1,14 +1,18 @@
 """
 設計要件:
-    - リビング後方のC型ダブルカーテンレール（厚さ実測9.5mm・1本幅約20.4mm・前後2本外寸スパン約70.0mm）の上に、
-      HomePod mini 2（第2世代・球体直径97.9mm・底面シリコン足約φ48.0mm・重量335g）を両面テープ無しで常設する機械ロック式スタンド。
+    - リビング後方の楕円（角丸）断面C型ダブルカーテンレール（厚さ実測9.5mm・1本幅約17.5mm・角丸約R3.2mm・
+      前後2本外寸スパン実測約66.8mm）の上に、HomePod mini 2（第2世代・球体直径97.9mm・底面シリコン足約φ48.0mm・
+      重量335g）を両面テープ無しで常設する機械ロック式スタンド。
     - 設置推奨位置である「金属ダブルブラケットのすぐ左側（白キャップ〜ブラケット間のフラット区間）」に最適化し、
       壁穴ゼロ・カーテンランナー完全非干渉・地震やコード引っ張りでの落下リスクゼロを実現する。
-    - 2段階機械ロック機構:
-      1. 奥レール側: 背面〜底面外側3.5mmを抱え込む固定C字外爪（ランナー走行溝6.5mmと片側3.4mm以上離間）。
-      2. 手前レール側: PETG一体バネ外爪（底面回り込み2.6mm・下端45°導入テーパー）により高所でも片手でパチンと仮固定でき、
-         手前外枠のM3六角ナット＋M3×12mm（または16mm）黒六角穴付きボルトを締め込むことでガタつき・低音ビビり音をゼロ化しつつ、
-         バネ爪背面の開き空間を物理的に塞ぐデッドロック構造（外寸スパン68.5〜71.8mmの写真採寸誤差を吸収）。
+    - 2段階機械ロック機構（v2 実機テスト校正済み）:
+      1. 奥レール側: 楕円レール背面に沿う凹R1.8mmクレードル内壁と、丸みを越えて底面フラット部を捉える深さ4.3mmの固定C字外爪
+         （中央ランナー走行溝6.0mmと十分な離間を確保）。
+      2. 手前レール側: PETG一体バネ外爪（自由位置u=67.6mm・底面回り込み3.6mm・内角凹R1.6mm・下端45°導入テーパー・
+         背面スナップ逃げ隙間3.4mm）により、高所でも片手で上から押すだけでパチンと確実に仮固定でき、
+         手前外枠（厚み10.0mm）のM3六角ナット＋M3×12mm（または16mm）黒六角穴付きボルトを締め込むことで、
+         わずか約0.8mmの微小しなり（ほぼ垂直・長期クリープゼロ）でガタつき・低音ビビり音をゼロ化しつつ、
+         バネ爪背面の開き空間を物理的に塞ぐデッドロック構造（外寸スパン65.0〜68.0mmを吸収）。
     - 音響ミニマル設計:
       球体メッシュ側面およびパッシブラジエーターを遮る横ガードを一切設けず（0mm）、底面の360°アコースティックウェーブガイドに
       必要なソリッド水平反射床（厚み6.9mm）と、底面シリコン足（φ48.0mm）用の極浅センタリング溝（深さ1.5mm・45°テーパー縁）のみを設ける。
@@ -31,10 +35,10 @@
     - トップ / ボトムシェル (Top/Bottom shells): 各 4 層（1.20mm）
     - インフィル (Sparse infill): 20〜25% (Gyroid または Cross Hatch — 音響反射天板のソリッド感と制振性を向上)
     - サポート (Supports): なし (None / 全形状オーバーハング45°以下の完全サポートフリー設計)
-    - ブリム (Brim): 不要（Z=0に約90×21mmの広いフラット接地面があるため安定）
+    - ブリム (Brim): 不要（Z=0に約88×21mmの広いフラット接地面があるため安定。本番PETG造形で端の反り予防を万全にする場合のみ外側ブリム5mm）
 
 印刷統計（予想）:
-    - curtain_rail_homepod_mini_stand.step: 印刷時間 約45〜55分、フィラメント使用量 約42g
+    - curtain_rail_homepod_mini_stand.step: 印刷時間 約45〜55分、フィラメント使用量 約41g
     - curtain_rail_homepod_mini_stand_fit_test.step: 印刷時間 約8〜10分、フィラメント使用量 約6g
 
 履歴とプロンプト経緯:
@@ -63,29 +67,32 @@ LAYER_HEIGHT = 0.30
 STAND_WIDTH = 220 * LAYER_HEIGHT        # 66.00mm (本番スタンド横幅)
 FIT_TEST_WIDTH = 40 * LAYER_HEIGHT      # 12.00mm (M3ナット＆ボルト実装確認対応の薄切りテストピース幅)
 
-# --- C型ダブルカーテンレール基準寸法 (u軸: 奥レール背面 u=0 → 手前 +u / v軸: レール上面 v=0 → 上 +v) ---
-RAIL_THICKNESS = 9.5                    # レール高さ (ノギス/実測値)
+# --- 楕円(角丸)断面 C型ダブルカーテンレール基準寸法 (u軸: 奥レール背面 u=0 → 手前 +u / v軸: レール上面 v=0 → 上 +v) ---
+RAIL_THICKNESS = 9.5                    # レール高さ (実測値)
 RAIL_VERTICAL_CLEARANCE = 0.3           # 装着スムーズさとクランプ密着を両立する縦クリアランス
 RAIL_SLOT_HEIGHT = RAIL_THICKNESS + RAIL_VERTICAL_CLEARANCE  # 9.80mm (v = -9.80 〜 0.00mm)
 
-RAIL_WIDTH = 20.4                       # C型レール1本の奥行 (写真定規読み取り＆TOSO C型規格値)
-RAIL_RUNNER_SLOT_WIDTH = 6.5            # C型レール底面中央のランナー走行溝幅
-NOMINAL_RAIL_SPAN = 70.0                # 前後2本跨ぎの標準外寸スパン (対応範囲: 68.5〜71.8mm)
+RAIL_WIDTH = 17.5                       # C型レール1本の奥行 (定規写真読み取り＆中型C型規格値)
+RAIL_CORNER_RADIUS = 3.2                # C型レール側面の上下楕円(角丸)R基準値
+RAIL_RUNNER_SLOT_WIDTH = 6.0            # C型レール底面中央のランナー走行溝幅
+NOMINAL_RAIL_SPAN = 66.8                # 実機テストロック再現写真から校正した前後2本外寸スパン (対応範囲: 65.0〜68.0mm)
 
-# --- 奥側固定C字外爪 & レール上面ソリッド受け座 ---
+# --- 奥側固定C字外爪 (楕円レール受け凹Rクレードル) & レール上面ソリッド受け座 ---
 REAR_WALL_THICKNESS = 5.0               # 奥レール背面を抱える壁厚 (u = -5.00 〜 0.00mm)
-REAR_HOOK_LIP_DEPTH = 3.5               # 奥レール底面外側への回り込み量 (ランナー溝まで約3.45mm余裕)
+REAR_HOOK_LIP_DEPTH = 4.3               # 楕円丸みを越えて奥レール底面フラット部を捉える回り込み量
+REAR_CRADLE_FILLET_R = 1.8              # 奥レール楕円上下角に馴染む内角凹フィレットR
 HOOK_LIP_THICKNESS = 3.2                # 前後下ツメの縦肉厚 (v = -13.00 〜 -9.80mm)
-SOLID_BEARING_END_U = 66.5              # レール上面が直接当たる連続ソリッド受け座の前端u座標
+SOLID_BEARING_END_U = 63.0              # レール上面が直接当たる連続ソリッド受け座の前端u座標
 
-# --- 手前側 PETG一体バネ外爪 (片手スナップ仮固定アーム) ---
-FRONT_FLEX_REST_U = 72.0                # ボルト緩め時(自由状態)の手前バネ爪内壁u座標
+# --- 手前側 PETG一体バネ外爪 (片手スナップ仮固定 & 微小しなりロックアーム) ---
+FRONT_FLEX_REST_U = 67.6                # ボルト緩め時(自由状態)の手前バネ爪内壁u座標 (レール66.8mmに対し+0.8mm)
 FLEX_ARM_THICKNESS = 1.8                # バネ腕の肉厚 (0.6mmノズル × 3周の連続ループ壁)
-FRONT_HOOK_LIP_DEPTH = 2.6              # 手前レール底面外側への回り込み量 (先端 u = 69.40mm)
-FRONT_SNAP_RAMP_SIZE = 1.8              # 下端内角の45°スナップ導入テーパー寸法
+FRONT_HOOK_LIP_DEPTH = 3.6              # 楕円丸みを越えて手前レール底面フラット部を捉える回り込み量 (先端 u = 64.00mm)
+FRONT_CRADLE_FILLET_R = 1.6             # 手前レール下角の楕円丸みに馴染む内角凹フィレットR
+FRONT_SNAP_RAMP_SIZE = 2.0              # 下端内角の45°スナップ導入テーパー寸法
 FLEX_RELIEF_CEILING_V = 5.2             # バネ腕根元の掘り上げ天井v座標 (有効片持ち長 18.2mm)
-FLEX_RELIEF_INNER_U = 68.2              # バネ腕が内側(68.5mm)へ押し込まれた際の逃げ天井内端u座標
-FLEX_OUTER_GAP = 2.4                    # スナップ装着時にバネ腕が外側へ逃げる隙間幅 (u = 73.80 〜 76.20mm)
+FLEX_RELIEF_INNER_U = 64.5              # バネ腕が内側(65.0mm)へ押し込まれた際の逃げ天井内端u座標
+FLEX_OUTER_GAP = 3.4                    # 2.8mmのスナップ拡開を余裕で逃がす隙間幅 (u = 69.40 〜 72.80mm)
 
 FLEX_BOLT_PAD_THICKNESS = 0.6           # ボルト先端が当たる中央部の背面肉盛り厚
 FLEX_BOLT_PAD_HEIGHT = 8.0              # ボルト受けパッドのv方向高さ
@@ -94,17 +101,17 @@ FLEX_BOLT_DIMPLE_RADIUS = 1.3           # ボルト先端センタリング円�
 FLEX_BOLT_DIMPLE_DEPTH = 0.8            # ボルト先端センタリング円錐窪み深さ
 
 # --- 手前外側 高剛性M3デッドロック枠 (M3×12mm / 16mm 六角穴付きボルト + M3六角ナット) ---
-OUTER_FRAME_INNER_U = FRONT_FLEX_REST_U + FLEX_ARM_THICKNESS + FLEX_OUTER_GAP  # 76.20mm
-OUTER_FRAME_THICKNESS = 9.0             # 外枠のu方向厚み (u = 76.20 〜 85.20mm)
-OUTER_FRAME_FRONT_U = OUTER_FRAME_INNER_U + OUTER_FRAME_THICKNESS              # 85.20mm
+OUTER_FRAME_INNER_U = FRONT_FLEX_REST_U + FLEX_ARM_THICKNESS + FLEX_OUTER_GAP  # 72.80mm
+OUTER_FRAME_THICKNESS = 10.0            # 外枠のu方向厚み (u = 72.80 〜 82.80mm)
+OUTER_FRAME_FRONT_U = OUTER_FRAME_INNER_U + OUTER_FRAME_THICKNESS              # 82.80mm
 
-M3_AXIS_V = -4.9                        # M3ボルト・ナット中心高さ (レール厚9.5mmのほぼ中央)
+M3_AXIS_V = -4.9                        # M3ボルト・ナット中心高さ (レール厚9.5mmの最大膨らみ中央)
 M3_SHANK_CLEARANCE_RADIUS = 1.70        # M3ボルト貫通穴半径 (φ3.40mm ティアドロップ付き)
 M3_CBORE_RADIUS = 3.30                  # M3キャップボルト頭ザグリ半径 (φ6.60mm ティアドロップ付き)
-M3_CBORE_DEPTH = 3.40                   # 前面からのザグリ深さ (底面 u = 81.80mm、M3×12mm頭ツライチ対応)
+M3_CBORE_DEPTH = 4.40                   # 前面からのザグリ深さ (座面 u = 78.40mm、M3×12mmロック時頭ほぼツライチ＆増し締め余裕2mm)
 
-M3_NUT_SLOT_U_START = 77.55             # M3六角ナットスロット内端u座標 (内壁1.35mm確保)
-M3_NUT_SLOT_THICKNESS = 2.65            # M3六角ナット(厚2.4mm)用のスロット厚み (u = 77.55 〜 80.20mm)
+M3_NUT_SLOT_U_START = OUTER_FRAME_INNER_U + 1.35  # 74.15mm (M3六角ナットスロット内端、内壁1.35mm確保)
+M3_NUT_SLOT_THICKNESS = 2.65            # M3六角ナット(厚2.4mm)用のスロット厚み (u = 74.15 〜 76.80mm)
 M3_NUT_ACROSS_FLATS = 5.65              # M3六角ナット(二面幅5.5mm)の回転止め幅 (z方向二面幅)
 
 # --- 音響ミニマル天板 & HomePod mini 2 底面シリコン足浅溝 ---
@@ -114,7 +121,7 @@ POCKET_FLOOR_CLEARANCE = 1.5            # シリコン足直径に対する浅�
 POCKET_FLOOR_DIA = HOMEPOD_FOOT_DIA + POCKET_FLOOR_CLEARANCE  # 49.50mm
 POCKET_DEPTH = 1.5                      # 横滑り防止用の極浅くぼみ深さ (音響メッシュ遮蔽 0mm)
 POCKET_TOP_DIA = POCKET_FLOOR_DIA + 2.0 * POCKET_DEPTH        # 52.50mm (45°テーパー縁)
-POCKET_CENTER_U = 38.0                  # スピーカー載置中心u座標 (レール中央35mmより3mm室内側で壁余裕確保)
+POCKET_CENTER_U = 36.5                  # スピーカー載置中心u座標 (レール中央33.4mmより3.1mm室内側・100%ソリッド床直上)
 
 # --- 左側面下部 電源コード抜け止めC字クリップ (ストレインリリーフ) ---
 CABLE_CLIP_PROTRUSION = 7.2             # 奥壁外面(u=-5.0)からの後方張り出し量 (u = -12.20 〜 -5.00mm)
@@ -130,12 +137,12 @@ CABLE_CLIP_TOP_V = -3.6                 # クリップ耳部の上端フラッ�
 
 # --- 算出全体外寸およびXY原点センタリングオフセット ---
 BOTTOM_V = -(RAIL_SLOT_HEIGHT + HOOK_LIP_THICKNESS)            # -13.00mm
-MAIN_BODY_DEPTH = OUTER_FRAME_FRONT_U + REAR_WALL_THICKNESS    # 90.20mm (u = -5.00 〜 +85.20mm)
-TOTAL_DEPTH_WITH_CLIP = MAIN_BODY_DEPTH + CABLE_CLIP_PROTRUSION  # 97.40mm (u = -12.20 〜 +85.20mm)
+MAIN_BODY_DEPTH = OUTER_FRAME_FRONT_U + REAR_WALL_THICKNESS    # 87.80mm (u = -5.00 〜 +82.80mm)
+TOTAL_DEPTH_WITH_CLIP = MAIN_BODY_DEPTH + CABLE_CLIP_PROTRUSION  # 95.00mm (u = -12.20 〜 +82.80mm)
 TOTAL_HEIGHT = DECK_TOP_HEIGHT - BOTTOM_V                      # 21.40mm (v = -13.00 〜 +8.40mm)
 
-MAIN_U_OFFSET = -(OUTER_FRAME_FRONT_U + (-REAR_WALL_THICKNESS - CABLE_CLIP_PROTRUSION)) / 2.0  # -36.50mm
-FIT_U_OFFSET = -(OUTER_FRAME_FRONT_U - REAR_WALL_THICKNESS) / 2.0                              # -40.10mm
+MAIN_U_OFFSET = -(OUTER_FRAME_FRONT_U + (-REAR_WALL_THICKNESS - CABLE_CLIP_PROTRUSION)) / 2.0  # -35.30mm
+FIT_U_OFFSET = -(OUTER_FRAME_FRONT_U - REAR_WALL_THICKNESS) / 2.0                              # -38.90mm
 V_OFFSET = -(DECK_TOP_HEIGHT + BOTTOM_V) / 2.0                                                 # +2.30mm
 
 
@@ -158,28 +165,23 @@ def _main_profile_points_and_fillets(
         (OUTER_FRAME_FRONT_U, DECK_TOP_HEIGHT, 1.6),
         (OUTER_FRAME_FRONT_U, BOTTOM_V, 1.0),
         (OUTER_FRAME_INNER_U, BOTTOM_V, 0.7),
-        # バネ逃げ空間天井 (u = 76.2 -> 73.8, v = +5.2)
+        # バネ逃げ空間天井 (u = 72.8 -> 69.4, v = +5.2)
         (OUTER_FRAME_INNER_U, FLEX_RELIEF_CEILING_V, 1.0),
         (flex_back_u, FLEX_RELIEF_CEILING_V, 1.0),
-        # 手前バネ外爪下端 & 45°スナップ導入テーパー
+        # 手前バネ外爪下端 & 45°スナップ導入テーパー & 楕円レール下角凹R
         (flex_back_u, BOTTOM_V, 0.7),
         (front_ramp_bottom_u, BOTTOM_V, 0.5),
         (front_lip_tip_u, front_ramp_top_v, 0.3),
-        (front_lip_tip_u, -RAIL_SLOT_HEIGHT, 0.25),
-        (FRONT_FLEX_REST_U, -RAIL_SLOT_HEIGHT, 0.5),
+        (front_lip_tip_u, -RAIL_SLOT_HEIGHT, 0.3),
+        (FRONT_FLEX_REST_U, -RAIL_SLOT_HEIGHT, FRONT_CRADLE_FILLET_R),
         # 手前バネ腕内壁〜バネ押し込みリリーフ空間
         (FRONT_FLEX_REST_U, FLEX_RELIEF_CEILING_V, 1.0),
         (FLEX_RELIEF_INNER_U, FLEX_RELIEF_CEILING_V, 1.0),
         (SOLID_BEARING_END_U, 0.0, 0.8),
-        # レール上面ソリッド受け座〜奥レール上角の応力緩和逃げ(ドッグボーンR)
-        (0.6, 0.0, 0.2),
-        (0.0, 0.4, 0.2),
-        (-0.4, 0.4, 0.2),
-        (-0.4, -0.4, 0.2),
-        (0.0, -0.8, 0.2),
-        # 奥レール背面突き当て壁〜奥側固定下ツメ
-        (0.0, -RAIL_SLOT_HEIGHT, 0.25),
-        (REAR_HOOK_LIP_DEPTH, -RAIL_SLOT_HEIGHT, 0.25),
+        # レール上面ソリッド受け座〜奥レール楕円受け凹Rクレードル & 固定下ツメ
+        (0.0, 0.0, REAR_CRADLE_FILLET_R),
+        (0.0, -RAIL_SLOT_HEIGHT, REAR_CRADLE_FILLET_R),
+        (REAR_HOOK_LIP_DEPTH, -RAIL_SLOT_HEIGHT, 0.35),
         (REAR_HOOK_LIP_DEPTH, rear_ramp_top_v, 0.3),
         (rear_ramp_bottom_u, BOTTOM_V, 0.5),
         (-REAR_WALL_THICKNESS, BOTTOM_V, 1.2),
