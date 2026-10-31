@@ -1,10 +1,10 @@
 """
 設計要件:
     - リビング後方の楕円（角丸）断面C型ダブルカーテンレール（厚さ実測9.5mm・1本幅約17.5mm・角丸約R3.2mm・
-      前後2本外寸スパン実測約66.8mm）の上に、HomePod mini 2（第2世代・球体直径97.9mm・底面シリコン足約φ48.0mm・
-      重量335g）を両面テープ無しで常設する機械ロック式スタンド。
-    - 設置推奨位置である「金属ダブルブラケットのすぐ左側（白キャップ〜ブラケット間のフラット区間）」に最適化し、
-      壁穴ゼロ・カーテンランナー完全非干渉・地震やコード引っ張りでの落下リスクゼロを実現する。
+      前後2本外寸スパン実測約66.8mm）の上に、HomePod mini 2（第2世代・球体直径97.9mm・底面シリコン足ノギス実測φ42.9mm・
+      重量335g）を常設する機械ロック式スタンド。
+    - 設置推奨位置である「金属ダブルブラケットのすぐ左側（白キャップ〜ブラケット間のフラット区間＝リビング間取り図の右下コーナー）」に
+      最適化し、壁穴ゼロ・カーテンランナー完全非干渉・地震やコード引っ張りでの落下リスクゼロを実現する。
     - 2段階機械ロック機構（v2 実機テスト校正済み）:
       1. 奥レール側: 楕円レール背面に沿う凹R1.8mmクレードル内壁と、丸みを越えて底面フラット部を捉える深さ4.3mmの固定C字外爪
          （中央ランナー走行溝6.0mmと十分な離間を確保）。
@@ -13,13 +13,16 @@
          手前外枠（厚み10.0mm）のM3六角ナット＋M3×12mm（または16mm）黒六角穴付きボルトを締め込むことで、
          わずか約0.8mmの微小しなり（ほぼ垂直・長期クリープゼロ）でガタつき・低音ビビり音をゼロ化しつつ、
          バネ爪背面の開き空間を物理的に塞ぐデッドロック構造（外寸スパン65.0〜68.0mmを吸収）。
-    - 音響ミニマル設計:
-      球体メッシュ側面およびパッシブラジエーターを遮る横ガードを一切設けず（0mm）、底面の360°アコースティックウェーブガイドに
-      必要なソリッド水平反射床（厚み6.9mm）と、底面シリコン足（φ48.0mm）用の極浅センタリング溝（深さ1.5mm・45°テーパー縁）のみを設ける。
+    - 間取り最適化・2軸傾斜アコースティック天板（v3 間取り図＆ノギス実測反映）:
+      リビング間取り図において右下カーテンレール端からソファ（右方向-zへ約2.30m・手前+uへ約0.79m、方位角約71°・俯角約22°）および
+      ダイニングテーブル（方位角約55°）へ高域・定位のスイートスポットを真っ直ぐ届けるため、天板反射床ごと
+      「右側（ソファ・TV方向 -z）へ 9.0° ＋ 手前（室内方向 +u）へ 3.5°」（合成傾斜角 約9.65°・方位角 68.7°）の2軸傾斜を付与。
+      球体メッシュ側面を遮る横ガードは一切設けず（0mm）、ノギス実測 φ42.9mm の底面シリコン足＋薄型強力両面テープ（厚さ0.5〜0.8mm推奨）に
+      最適化した精密センタリング浅溝（底面φ43.7mm・深さ1.8mm・造形時オーバーハング45°以下を厳守する54°テーパー縁）を設ける。
     - 左側面下部（白キャップ側）に45°傾斜ガセット付きの電源コード抜け止めC字クリップ（内径φ4.5mm・導入スリット2.9mm）を一体造形。
     - 右側面（ブラケット側端面）をビルドプレート接地面（Z=0）にした横向き一体造形で、分割なしの1パーツ完結・サポート材完全ゼロ（0g）・
-      一筆書き連続ループ積層によるツメ破断リスクゼロを達成する。
-    - 最新の3Dプリンター（Bambu Lab P2S Combo 等）での出力を想定し、M3ボルト＆ナット実装確認も可能な薄切り嵌合テストピース（幅12.0mm）も同時出力する。
+      天板傾斜面の積層段差ゼロ・一筆書き連続ループ積層によるツメ破断リスクゼロを達成する。
+    - 最新の3Dプリンター（Bambu Lab P2S Combo 等）での出力を想定し、レール嵌合用薄切りテストピース（幅12.0mm）も同時出力する。
 
 推奨フィラメント:
     - 非CFの純粋な PETG（Bambu PETG HF / Bambu PETG Basic 等、または ASA）
@@ -33,12 +36,12 @@
     - 壁面生成器 (Wall generator): Arachne（1.8mm厚の一体バネ外爪を隙間なく3周の連続壁ループで充填）
     - 壁ループ (Wall loops): 3〜4（フック首元およびM3デッドロック外枠の高剛性確保）
     - トップ / ボトムシェル (Top/Bottom shells): 各 4 層（1.20mm）
-    - インフィル (Sparse infill): 20〜25% (Gyroid または Cross Hatch — 音響反射天板のソリッド感と制振性を向上)
-    - サポート (Supports): なし (None / 全形状オーバーハング45°以下の完全サポートフリー設計)
-    - ブリム (Brim): 不要（Z=0に約88×21mmの広いフラット接地面があるため安定。本番PETG造形で端の反り予防を万全にする場合のみ外側ブリム5mm）
+    - インフィル (Sparse infill): 20〜25% (Gyroid または Cross Hatch — 傾斜音響反射天板のソリッド感と制振性を向上)
+    - サポート (Supports): なし (None / 2軸傾斜天板および浅溝を含め全形状オーバーハング45°以下の完全サポートフリー設計)
+    - ブリム (Brim): 不要（Z=0に約88×21mm以上の広いフラット接地面があるため安定。本番PETG造形で反り予防を万全にする場合のみ外側ブリム5mm）
 
 印刷統計（予想）:
-    - curtain_rail_homepod_mini_stand.step: 印刷時間 約45〜55分、フィラメント使用量 約41g
+    - curtain_rail_homepod_mini_stand.step: 印刷時間 約60〜70分、フィラメント使用量 約62g
     - curtain_rail_homepod_mini_stand_fit_test.step: 印刷時間 約8〜10分、フィラメント使用量 約6g
 
 履歴とプロンプト経緯:
@@ -59,10 +62,10 @@ except ImportError:  # pragma: no cover
 
 
 # ==============================================================================
-# 定数パラメーター定義 (単位: mm)
+# 定数パラメーター定義 (単位: mm / 角度: deg)
 # ==============================================================================
 
-# --- 積層ピッチ・造形方向幅 (Z軸: 右側面 Z=0 → 左側面 Z=STAND_WIDTH) ---
+# --- 積層ピッチ・造形方向幅 (Z軸: 右側面・ソファ側 Z=0 → 左側面・部屋角側 Z=STAND_WIDTH) ---
 LAYER_HEIGHT = 0.30
 STAND_WIDTH = 220 * LAYER_HEIGHT        # 66.00mm (本番スタンド横幅)
 FIT_TEST_WIDTH = 40 * LAYER_HEIGHT      # 12.00mm (M3ナット＆ボルト実装確認対応の薄切りテストピース幅)
@@ -114,14 +117,23 @@ M3_NUT_SLOT_U_START = OUTER_FRAME_INNER_U + 1.35  # 74.15mm (M3六角ナット�
 M3_NUT_SLOT_THICKNESS = 2.65            # M3六角ナット(厚2.4mm)用のスロット厚み (u = 74.15 〜 76.80mm)
 M3_NUT_ACROSS_FLATS = 5.65              # M3六角ナット(二面幅5.5mm)の回転止め幅 (z方向二面幅)
 
-# --- 音響ミニマル天板 & HomePod mini 2 底面シリコン足浅溝 ---
-DECK_TOP_HEIGHT = 8.4                   # レール上面(v=0)からの天板上面高さ (ソリッド反射床厚 6.9mm)
-HOMEPOD_FOOT_DIA = 48.0                 # HomePod mini 2 底面シリコン足直径
-POCKET_FLOOR_CLEARANCE = 1.5            # シリコン足直径に対する浅溝底面クリアランス (片側0.75mm)
-POCKET_FLOOR_DIA = HOMEPOD_FOOT_DIA + POCKET_FLOOR_CLEARANCE  # 49.50mm
-POCKET_DEPTH = 1.5                      # 横滑り防止用の極浅くぼみ深さ (音響メッシュ遮蔽 0mm)
-POCKET_TOP_DIA = POCKET_FLOOR_DIA + 2.0 * POCKET_DEPTH        # 52.50mm (45°テーパー縁)
-POCKET_CENTER_U = 36.5                  # スピーカー載置中心u座標 (レール中央33.4mmより3.1mm室内側・100%ソリッド床直上)
+# --- 間取り最適化 2軸傾斜アコースティック天板 & ノギス実測φ42.9mm浅溝 (v3) ---
+DECK_MIN_TOP_HEIGHT = 8.4               # 最薄部(手前右角 u=82.8, z=0)のレール上面からの天板高さ
+DECK_TOP_HEIGHT = DECK_MIN_TOP_HEIGHT   # 後方互換エイリアス (テストピース天板高さ)
+DECK_TILT_TOWARD_SOFA_Z_DEG = 9.0       # 右側(-z: ソファ・ダイニング・TV方向)への傾斜角 (造形時オーバーハングわずか9°)
+DECK_TILT_FORWARD_U_DEG = 3.5           # 手前側(+u: 室内方向)への傾斜角 (合成傾斜角 約9.65°・方位角68.7°でソファ直撃)
+
+HOMEPOD_FOOT_DIA = 42.9                 # HomePod mini 2 底面シリコン足直径 (ノギス実測確定値)
+POCKET_FLOOR_CLEARANCE = 0.8            # PETG公差に最適化した精密クリアランス (片側0.40mm)
+POCKET_FLOOR_DIA = HOMEPOD_FOOT_DIA + POCKET_FLOOR_CLEARANCE  # 43.70mm
+POCKET_DEPTH = 1.8                      # 薄型強力両面テープ(0.5〜0.8mm厚)使用時もフチに1mm以上掛かる浅溝深さ
+POCKET_BEVEL_TAPER_DEG = (
+    45.0 + DECK_TILT_TOWARD_SOFA_Z_DEG
+)  # 54.0° (+Z側でも造形オーバーハング角を厳密に45.0°以下に保つテーパー角)
+POCKET_TOP_DIA = POCKET_FLOOR_DIA + 2.0 * POCKET_DEPTH * math.tan(
+    math.radians(POCKET_BEVEL_TAPER_DEG)
+)  # 約48.66mm
+POCKET_CENTER_U = 36.5                  # スピーカー載置中心u座標 (100%ソリッド反射床直上)
 
 # --- 左側面下部 電源コード抜け止めC字クリップ (ストレインリリーフ) ---
 CABLE_CLIP_PROTRUSION = 7.2             # 奥壁外面(u=-5.0)からの後方張り出し量 (u = -12.20 〜 -5.00mm)
@@ -139,15 +151,54 @@ CABLE_CLIP_TOP_V = -3.6                 # クリップ耳部の上端フラッ�
 BOTTOM_V = -(RAIL_SLOT_HEIGHT + HOOK_LIP_THICKNESS)            # -13.00mm
 MAIN_BODY_DEPTH = OUTER_FRAME_FRONT_U + REAR_WALL_THICKNESS    # 87.80mm (u = -5.00 〜 +82.80mm)
 TOTAL_DEPTH_WITH_CLIP = MAIN_BODY_DEPTH + CABLE_CLIP_PROTRUSION  # 95.00mm (u = -12.20 〜 +82.80mm)
-TOTAL_HEIGHT = DECK_TOP_HEIGHT - BOTTOM_V                      # 21.40mm (v = -13.00 〜 +8.40mm)
+
+DECK_MAX_TOP_HEIGHT = (
+    DECK_MIN_TOP_HEIGHT
+    + MAIN_BODY_DEPTH * math.tan(math.radians(DECK_TILT_FORWARD_U_DEG))
+    + STAND_WIDTH * math.tan(math.radians(DECK_TILT_TOWARD_SOFA_Z_DEG))
+)  # 約24.22mm (最厚部: 奥左角 u=-5.0, z=66.0)
+
+TOTAL_HEIGHT = DECK_MAX_TOP_HEIGHT - BOTTOM_V                  # 約37.22mm (本番モデル全高)
+FIT_TEST_HEIGHT = DECK_MIN_TOP_HEIGHT - BOTTOM_V               # 21.40mm (薄切りテストピース全高)
 
 MAIN_U_OFFSET = -(OUTER_FRAME_FRONT_U + (-REAR_WALL_THICKNESS - CABLE_CLIP_PROTRUSION)) / 2.0  # -35.30mm
 FIT_U_OFFSET = -(OUTER_FRAME_FRONT_U - REAR_WALL_THICKNESS) / 2.0                              # -38.90mm
-V_OFFSET = -(DECK_TOP_HEIGHT + BOTTOM_V) / 2.0                                                 # +2.30mm
+MAIN_V_OFFSET = -(DECK_MAX_TOP_HEIGHT + BOTTOM_V) / 2.0
+FIT_V_OFFSET = -(DECK_MIN_TOP_HEIGHT + BOTTOM_V) / 2.0
+V_OFFSET = MAIN_V_OFFSET
+
+
+def deck_top_v_at(u: float, z: float) -> float:
+    """内部座標 (u, z) における2軸傾斜天板の上面 v 座標を返す."""
+    return (
+        DECK_MIN_TOP_HEIGHT
+        + (OUTER_FRAME_FRONT_U - u) * math.tan(math.radians(DECK_TILT_FORWARD_U_DEG))
+        + z * math.tan(math.radians(DECK_TILT_TOWARD_SOFA_Z_DEG))
+    )
+
+
+def get_tilted_deck_plane(
+    u_offset: float = MAIN_U_OFFSET, v_offset: float = MAIN_V_OFFSET
+) -> Plane:
+    """スピーカー載置中心を原点とし、外向き法線(+z_dir)がソファ＆室内方向を向く2軸傾斜天板Planeを返す."""
+    tan_u = math.tan(math.radians(DECK_TILT_FORWARD_U_DEG))
+    tan_z = math.tan(math.radians(DECK_TILT_TOWARD_SOFA_Z_DEG))
+
+    z_center = STAND_WIDTH / 2.0
+    v_center = deck_top_v_at(POCKET_CENTER_U, z_center)
+    origin_xyz = (POCKET_CENTER_U + u_offset, v_center + v_offset, z_center)
+
+    # 平面方程式 v - [v_0 - u*tan_u + z*tan_z] = 0 の外向き勾配ベクトル: (+tan_u, +1.0, -tan_z)
+    normal_vec = Vector(tan_u, 1.0, -tan_z).normalized()
+    in_plane_x = Vector(1.0, -tan_u, 0.0).normalized()
+    return Plane(origin=origin_xyz, x_dir=in_plane_x, z_dir=normal_vec)
 
 
 def _main_profile_points_and_fillets(
     u_offset: float,
+    v_offset: float,
+    raw_top_v: float,
+    fillet_top_corners: bool,
 ) -> tuple[list[tuple[float, float]], list[tuple[float, float, float]]]:
     """2段階ロック断面の2Dポリライン頂点リストと (X, Y, R) フィレット定義を返す."""
     flex_back_u = FRONT_FLEX_REST_U + FLEX_ARM_THICKNESS
@@ -158,11 +209,12 @@ def _main_profile_points_and_fillets(
     rear_ramp_size = 1.6
     rear_ramp_bottom_u = REAR_HOOK_LIP_DEPTH - rear_ramp_size
     rear_ramp_top_v = BOTTOM_V + rear_ramp_size
+    top_r = 1.6 if fillet_top_corners else 0.0
 
     raw_uv_with_r: list[tuple[float, float, float]] = [
         # 天板上面〜手前M3外枠外面
-        (-REAR_WALL_THICKNESS, DECK_TOP_HEIGHT, 1.6),
-        (OUTER_FRAME_FRONT_U, DECK_TOP_HEIGHT, 1.6),
+        (-REAR_WALL_THICKNESS, raw_top_v, top_r),
+        (OUTER_FRAME_FRONT_U, raw_top_v, top_r),
         (OUTER_FRAME_FRONT_U, BOTTOM_V, 1.0),
         (OUTER_FRAME_INNER_U, BOTTOM_V, 0.7),
         # バネ逃げ空間天井 (u = 72.8 -> 69.4, v = +5.2)
@@ -187,8 +239,8 @@ def _main_profile_points_and_fillets(
         (-REAR_WALL_THICKNESS, BOTTOM_V, 1.2),
     ]
 
-    pts = [(u + u_offset, v + V_OFFSET) for u, v, _ in raw_uv_with_r]
-    fillets = [(u + u_offset, v + V_OFFSET, r) for u, v, r in raw_uv_with_r if r > 0.0]
+    pts = [(u + u_offset, v + v_offset) for u, v, _ in raw_uv_with_r]
+    fillets = [(u + u_offset, v + v_offset, r) for u, v, r in raw_uv_with_r if r > 0.0]
     return pts, fillets
 
 
@@ -213,11 +265,12 @@ def _build_teardrop_x_cutter(
     center_z: float,
     radius: float,
     u_offset: float,
+    v_offset: float,
 ) -> Part:
     """+Z頂点45°ティアドロップ断面を持つX方向(u方向)貫通穴カッターソリッドを返す."""
     x_min = u_start + u_offset
     length = u_end - u_start
-    cy = center_v + V_OFFSET
+    cy = center_v + v_offset
     s45 = radius * math.sqrt(0.5)
     apex_z = radius * math.sqrt(2.0)
 
@@ -236,15 +289,15 @@ def _build_teardrop_x_cutter(
     return cutter_bp.part
 
 
-def _build_m3_nut_slot_cutter(center_z: float, u_offset: float) -> Part:
+def _build_m3_nut_slot_cutter(center_z: float, u_offset: float, v_offset: float) -> Part:
     """下端面(-Y)から差し込む回転止めM3六角ナットスロット(45°山形屋根付き)カッターを返す."""
     half_flat_z = M3_NUT_ACROSS_FLATS / 2.0               # 2.825mm (Z方向二面幅半分)
     circum_r_v = M3_NUT_ACROSS_FLATS / math.sqrt(3.0)     # 3.262mm (V方向頂点半径)
     half_side_v = circum_r_v / 2.0                        # 1.631mm
 
     x_start = M3_NUT_SLOT_U_START + u_offset
-    cy = M3_AXIS_V + V_OFFSET
-    y_bottom_open = BOTTOM_V + V_OFFSET - 1.0
+    cy = M3_AXIS_V + v_offset
+    y_bottom_open = BOTTOM_V + v_offset - 1.0
 
     # 1. XY平面で下端開口〜六角先端Vストップ形状をZ方向(二面幅5.65mm)に押し出し
     with BuildPart() as slot_bp:
@@ -294,17 +347,16 @@ def _build_m3_nut_slot_cutter(center_z: float, u_offset: float) -> Part:
 
 
 def _build_flex_bolt_pad_and_dimple(
-    total_width: float, u_offset: float
+    total_width: float, u_offset: float, v_offset: float
 ) -> tuple[Part, Part]:
     """バネ爪背面のボルト受け補強パッド(+Z/-Z 45°テーパー付き)とセンタリング円錐窪みを返す."""
     z_mid = total_width / 2.0
     flex_back_x = FRONT_FLEX_REST_U + FLEX_ARM_THICKNESS + u_offset
-    cy = M3_AXIS_V + V_OFFSET
+    cy = M3_AXIS_V + v_offset
 
     pad_half_w = min(FLEX_BOLT_PAD_WIDTH / 2.0, total_width / 2.0 - 0.6)
     ramp = FLEX_BOLT_PAD_THICKNESS
 
-    # XZ平面(-Y方向押し出し, local y = +Z)で上下45°テーパー付きの台形パッドを形成 (サポート不要)
     pad_xz_plane = Plane(
         origin=(flex_back_x, cy + FLEX_BOLT_PAD_HEIGHT / 2.0, z_mid),
         x_dir=(1, 0, 0),
@@ -321,7 +373,6 @@ def _build_flex_bolt_pad_and_dimple(
             )
         extrude(amount=FLEX_BOLT_PAD_HEIGHT)
 
-    # ボルト先端を受ける円錐窪み (pad表面から内側へ深さ0.8mm)
     pad_outer_x = flex_back_x + FLEX_BOLT_PAD_THICKNESS
     dimple_plane = Plane(origin=(pad_outer_x + 0.05, cy, z_mid), x_dir=(0, 1, 0), z_dir=(-1, 0, 0))
     with BuildPart() as dimple_bp:
@@ -332,15 +383,16 @@ def _build_flex_bolt_pad_and_dimple(
     return pad_bp.part, dimple_bp.part
 
 
-def _build_cable_clip_ear_and_cutter(u_offset: float) -> tuple[Part, Part]:
+def _build_cable_clip_ear_and_cutter(
+    u_offset: float, v_offset: float
+) -> tuple[Part, Part]:
     """左側面下部の45°傾斜ガセット付き電源コード抜け止めクリップ耳部とC字開口カッターを返す."""
     x_wall = -REAR_WALL_THICKNESS + u_offset
     x_outer = x_wall - CABLE_CLIP_PROTRUSION
-    y_bottom = BOTTOM_V + V_OFFSET
-    y_top_flat = CABLE_CLIP_TOP_V + V_OFFSET
+    y_bottom = BOTTOM_V + v_offset
+    y_top_flat = CABLE_CLIP_TOP_V + v_offset
     y_top_blend = y_top_flat + 2.4
 
-    # 1. XY断面(外側上下角R1.2mm＋上端壁面ブレンド付き)を Z=48.8〜66.0mm まで押し出し
     ear_height_z = STAND_WIDTH - CABLE_CLIP_GUSSET_START_Z
     with BuildPart() as ear_uv_bp:
         with BuildSketch(Plane.XY.offset(CABLE_CLIP_GUSSET_START_Z)):
@@ -362,7 +414,6 @@ def _build_cable_clip_ear_and_cutter(u_offset: float) -> tuple[Part, Part]:
             )
         extrude(amount=ear_height_z)
 
-    # 2. XZ平面(local x = +X, local y = +Z, z_dir = -Y)の45°サポートフリー傾斜ウェッジとの共通部分をとる
     wedge_xz_plane = Plane(
         origin=(0.0, y_top_blend + 1.0, 0.0),
         x_dir=(1, 0, 0),
@@ -382,9 +433,8 @@ def _build_cable_clip_ear_and_cutter(u_offset: float) -> tuple[Part, Part]:
 
     ear_solid = ear_uv_bp.part & wedge_bp.part
 
-    # 3. φ4.5mm コード保持ボア ＋ 背面(-X側)導入スリット(幅2.9mm)のカッター (各Z層で上下顎が壁面に単連結)
     bore_cx = CABLE_CLIP_CENTER_U + u_offset
-    bore_cy = CABLE_CLIP_CENTER_V + V_OFFSET
+    bore_cy = CABLE_CLIP_CENTER_V + v_offset
     with BuildPart() as cutter_bp:
         with BuildSketch(Plane.XY.offset(CABLE_CLIP_GUSSET_START_Z - 0.5)):
             with Locations((bore_cx, bore_cy)):
@@ -396,9 +446,20 @@ def _build_cable_clip_ear_and_cutter(u_offset: float) -> tuple[Part, Part]:
     return ear_solid, cutter_bp.part
 
 
-def _build_core_body(width: float, u_offset: float) -> Part:
+def _build_core_body(
+    width: float,
+    u_offset: float,
+    v_offset: float,
+    raw_top_v: float,
+    fillet_top_corners: bool,
+) -> Part:
     """指定幅で2段階ロック本体(M3ボルト穴・ナットスロット・バネ受けパッド込み)を生成する."""
-    pts, fillets = _main_profile_points_and_fillets(u_offset)
+    pts, fillets = _main_profile_points_and_fillets(
+        u_offset=u_offset,
+        v_offset=v_offset,
+        raw_top_v=raw_top_v,
+        fillet_top_corners=fillet_top_corners,
+    )
     z_mid = width / 2.0
 
     with BuildPart() as bp:
@@ -410,7 +471,7 @@ def _build_core_body(width: float, u_offset: float) -> Part:
         extrude(amount=width)
 
     part = bp.part
-    pad_part, dimple_cutter = _build_flex_bolt_pad_and_dimple(width, u_offset)
+    pad_part, dimple_cutter = _build_flex_bolt_pad_and_dimple(width, u_offset, v_offset)
     part = part + pad_part - dimple_cutter
 
     shank_cutter = _build_teardrop_x_cutter(
@@ -420,6 +481,7 @@ def _build_core_body(width: float, u_offset: float) -> Part:
         center_z=z_mid,
         radius=M3_SHANK_CLEARANCE_RADIUS,
         u_offset=u_offset,
+        v_offset=v_offset,
     )
     cbore_cutter = _build_teardrop_x_cutter(
         u_start=OUTER_FRAME_FRONT_U - M3_CBORE_DEPTH,
@@ -428,35 +490,56 @@ def _build_core_body(width: float, u_offset: float) -> Part:
         center_z=z_mid,
         radius=M3_CBORE_RADIUS,
         u_offset=u_offset,
+        v_offset=v_offset,
     )
-    nut_cutter = _build_m3_nut_slot_cutter(center_z=z_mid, u_offset=u_offset)
+    nut_cutter = _build_m3_nut_slot_cutter(
+        center_z=z_mid, u_offset=u_offset, v_offset=v_offset
+    )
 
     part = part - shank_cutter - cbore_cutter - nut_cutter
     return part
 
 
 def build_stand() -> Part:
-    """カーテンレール上用 HomePod mini 2 機械ロック式スタンド（本番モデル）を生成して返す."""
-    part = _build_core_body(width=STAND_WIDTH, u_offset=MAIN_U_OFFSET)
+    """カーテンレール上用 HomePod mini 2 機械ロック式スタンド（v3 間取り最適化2軸傾斜版）を生成して返す."""
+    part = _build_core_body(
+        width=STAND_WIDTH,
+        u_offset=MAIN_U_OFFSET,
+        v_offset=MAIN_V_OFFSET,
+        raw_top_v=DECK_MAX_TOP_HEIGHT + 5.0,
+        fillet_top_corners=False,
+    )
 
-    # 1. 天板上面の HomePod mini 2 底面シリコン足センタリング浅溝 (深さ1.5mm・全周45°テーパー)
-    pocket_cx = POCKET_CENTER_U + MAIN_U_OFFSET
-    pocket_top_y = DECK_TOP_HEIGHT + V_OFFSET
-    overcut = 0.05
-    pocket_plane = Plane(
-        origin=(pocket_cx, pocket_top_y + overcut, STAND_WIDTH / 2.0),
-        x_dir=(1, 0, 0),
-        z_dir=(0, -1, 0),
+    # 1. リビング間取り(右下スピーカー -> ソファ＆ダイニング方向)に合わせた2軸傾斜平面で天板をカット
+    deck_plane = get_tilted_deck_plane(u_offset=MAIN_U_OFFSET, v_offset=MAIN_V_OFFSET)
+    with BuildPart() as sky_cutter_bp:
+        with BuildSketch(deck_plane):
+            Rectangle(300.0, 300.0)
+        extrude(amount=80.0)
+    part = part - sky_cutter_bp.part
+
+    # 2. 傾斜天板に垂直な HomePod mini 2 底面シリコン足(ノギス実測φ42.9mm)用センタリング浅溝
+    #    (底面φ43.7mm・深さ1.8mm・造形時+Z側オーバーハングを厳密に45.0°以下に保つ54.0°テーパー)
+    overcut = 0.10
+    pocket_cut_plane = Plane(
+        origin=deck_plane.origin + deck_plane.z_dir * overcut,
+        x_dir=deck_plane.x_dir,
+        z_dir=-deck_plane.z_dir,
+    )
+    sketch_radius = POCKET_FLOOR_DIA / 2.0 + (POCKET_DEPTH + overcut) * math.tan(
+        math.radians(POCKET_BEVEL_TAPER_DEG)
     )
     with BuildPart() as pocket_bp:
-        with BuildSketch(pocket_plane):
-            Circle(radius=POCKET_TOP_DIA / 2.0 + overcut)
-        extrude(amount=POCKET_DEPTH + overcut, taper=45.0)
+        with BuildSketch(pocket_cut_plane):
+            Circle(radius=sketch_radius)
+        extrude(amount=POCKET_DEPTH + overcut, taper=POCKET_BEVEL_TAPER_DEG)
 
     part = part - pocket_bp.part
 
-    # 2. 左側面下部の電源コード抜け止めクリップ (45°サポートフリーガセット一体型)
-    clip_ear, clip_cutter = _build_cable_clip_ear_and_cutter(u_offset=MAIN_U_OFFSET)
+    # 3. 左側面下部の電源コード抜け止めクリップ (45°サポートフリーガセット一体型)
+    clip_ear, clip_cutter = _build_cable_clip_ear_and_cutter(
+        u_offset=MAIN_U_OFFSET, v_offset=MAIN_V_OFFSET
+    )
     part = (part + clip_ear) - clip_cutter
 
     part.label = "curtain_rail_homepod_mini_stand"
@@ -464,8 +547,14 @@ def build_stand() -> Part:
 
 
 def build_fit_test_piece() -> Part:
-    """本番造形前にレール嵌合とM3ボルト＆ナットロックを約8分で実機確認できる薄切りテストピースを返す."""
-    part = _build_core_body(width=FIT_TEST_WIDTH, u_offset=FIT_U_OFFSET)
+    """レール嵌合とM3ボルト＆ナットロックを約8分で実機確認できる薄切りテストピースを返す."""
+    part = _build_core_body(
+        width=FIT_TEST_WIDTH,
+        u_offset=FIT_U_OFFSET,
+        v_offset=FIT_V_OFFSET,
+        raw_top_v=DECK_MIN_TOP_HEIGHT,
+        fillet_top_corners=True,
+    )
     part.label = "curtain_rail_homepod_mini_stand_fit_test"
     return part
 
@@ -505,7 +594,7 @@ if __name__ == "__main__":
     try:
         show_object(stand_part, name="curtain_rail_homepod_mini_stand")
         show_object(
-            Pos(0.0, 35.0, 0.0) * fit_test_part,
+            Pos(0.0, 45.0, 0.0) * fit_test_part,
             name="curtain_rail_homepod_mini_stand_fit_test",
         )
     except Exception as exc:  # pragma: no cover
