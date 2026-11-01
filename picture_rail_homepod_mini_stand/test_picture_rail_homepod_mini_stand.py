@@ -124,20 +124,24 @@ class TestPictureRailHomePodMiniStand(unittest.TestCase):
 
     def test_picture_rail_wall_and_sub_beam_zero_interference(self) -> None:
         """ピクチャーレール外寸・背面壁・上方小梁と干渉ゼロであり、二点接地と下面受けが機能すること."""
+        # 造形時は左壁(ケーブルクリップ)側を Z=0 接地とするため Y軸周り180°回転座標: X = -(u + MAIN_U_OFFSET), Y = v + MAIN_V_OFFSET
         x_off = MAIN_U_OFFSET
         y_off = MAIN_V_OFFSET
 
+        def bx(u_center: float) -> float:
+            return -(u_center + x_off)
+
         # 1. 壁面領域 (u <= -14.60)
-        wall_box = Pos(-RAIL_DEPTH - 20.0 + x_off, -40.0 + y_off, STAND_WIDTH / 2.0) * Box(
+        wall_box = Pos(bx(-RAIL_DEPTH - 20.0), -40.0 + y_off, STAND_WIDTH / 2.0) * Box(
             40.0, 220.0, STAND_WIDTH + 10.0
         )
         # 2. 小梁領域 (v >= +20.30, u = -14.60 .. +75.00)
-        beam_box = Pos(30.0 + x_off, RAIL_HEIGHT + 20.0 + y_off, STAND_WIDTH / 2.0) * Box(
+        beam_box = Pos(bx(30.0), RAIL_HEIGHT + 20.0 + y_off, STAND_WIDTH / 2.0) * Box(
             100.0, 40.0, STAND_WIDTH + 10.0
         )
         # 3. ピクチャーレール外寸 (u = -14.60 .. 0.00, v = 0.00 .. +20.30)
         rail_box = Pos(
-            -RAIL_DEPTH / 2.0 + x_off, RAIL_HEIGHT / 2.0 + y_off, STAND_WIDTH / 2.0
+            bx(-RAIL_DEPTH / 2.0), RAIL_HEIGHT / 2.0 + y_off, STAND_WIDTH / 2.0
         ) * Box(RAIL_DEPTH, RAIL_HEIGHT, STAND_WIDTH + 10.0)
 
         for label, obstacle in [("壁面", wall_box), ("上方小梁", beam_box), ("レール外寸", rail_box)]:
@@ -146,11 +150,11 @@ class TestPictureRailHomePodMiniStand(unittest.TestCase):
             self.assertLess(vol, 1e-3, f"本体が {label} と干渉しています (vol={vol})")
 
         # 4. レール前面 (u=0..+0.4)・レール下面受け (v=-0.4..0)・下部壁当てヒール (u=-14.6..-14.2) の密着確認
-        front_probe = Pos(0.2 + x_off, 15.0 + y_off, STAND_WIDTH / 2.0) * Box(0.4, 3.0, 20.0)
+        front_probe = Pos(bx(0.2), 15.0 + y_off, STAND_WIDTH / 2.0) * Box(0.4, 3.0, 20.0)
         under_probe = Pos(
-            -RAIL_UNDER_LEDGE_DEPTH / 2.0 + x_off, -0.2 + y_off, STAND_WIDTH / 2.0
+            bx(-RAIL_UNDER_LEDGE_DEPTH / 2.0), -0.2 + y_off, STAND_WIDTH / 2.0
         ) * Box(RAIL_UNDER_LEDGE_DEPTH - 2.0, 0.4, 20.0)
-        heel_probe = Pos(-RAIL_DEPTH + 0.2 + x_off, -95.0 + y_off, STAND_WIDTH / 2.0) * Box(
+        heel_probe = Pos(bx(-RAIL_DEPTH + 0.2), -95.0 + y_off, STAND_WIDTH / 2.0) * Box(
             0.4, 15.0, 20.0
         )
         for label, probe in [
@@ -161,7 +165,7 @@ class TestPictureRailHomePodMiniStand(unittest.TestCase):
             self.assertGreater((self.stand & probe).volume, 1.0, f"{label} が接触していません")
 
         # 5. 中間背面リリーフ (壁紙不陸逃げ u = -14.60 .. -14.10, v = -45.0) が空いていること
-        mid_relief_probe = Pos(-RAIL_DEPTH + 0.25 + x_off, -45.0 + y_off, STAND_WIDTH / 2.0) * Box(
+        mid_relief_probe = Pos(bx(-RAIL_DEPTH + 0.25), -45.0 + y_off, STAND_WIDTH / 2.0) * Box(
             0.5, 20.0, 20.0
         )
         mid_inter = self.stand & mid_relief_probe
@@ -183,7 +187,9 @@ class TestPictureRailHomePodMiniStand(unittest.TestCase):
         ]:
             z_center = (STAND_WIDTH if model_name == "stand" else FIT_TEST_WIDTH) / 2.0
             for u_c, v_c in neck_load_path_uv:
-                cyl = Pos(u_c + u_off, v_c + v_off, z_center) * Cylinder(
+                px = -(u_c + u_off)
+                py = v_c + v_off
+                cyl = Pos(px, py, z_center) * Cylinder(
                     radius=probe_radius, height=z_span
                 )
                 inter = part & cyl
@@ -280,20 +286,20 @@ class TestPictureRailHomePodMiniStand(unittest.TestCase):
         self.assertGreaterEqual(bolt_tip_u, t_anchor_rear_u)  # Tアンカー背面から突き出さない
 
     def test_tilted_deck_pocket_homepod_sphere_and_cable_clip(self) -> None:
-        """2軸傾斜天板・浅溝・オーバーハング<=45°・HomePod球体＆ドライバー非干渉・コードクリップを検証."""
+        """ケーブルロックZ=0完全接地・2軸傾斜順テーパー・浅溝・M3涙滴+Z向き・球体非干渉を検証."""
         x_off = MAIN_U_OFFSET
         y_off = MAIN_V_OFFSET
+
+        def bx(u_center: float) -> float:
+            return -(u_center + x_off)
 
         deck_plane = get_tilted_deck_plane(u_offset=x_off, v_offset=y_off)
         n = deck_plane.z_dir
         self.assertGreater(n.Y, 0.98)
-        self.assertGreater(n.X, 0.12)  # +u (手前) へ 7.5° 傾斜
-        self.assertLess(n.Z, -0.03)    # -z (部屋中央側) へ 2.5° 傾斜
+        self.assertLess(n.X, -0.12)    # +u (= -X方向: 手前) へ 7.5° 傾斜
+        self.assertGreater(n.Z, 0.03)  # +Z方向 (= 部屋中央側・造形上向き順テーパー) へ 2.5° 傾斜
 
         # 浅溝の中央が空洞 (深さ 1.80mm) であり、その直下に十分なソリッド反射床があること
-        pocket_air = Pos(*deck_plane.origin) * Rot(
-            0, 0, 0
-        )  # deck_plane 基準で検証
         with BuildPart() as air_bp:
             with BuildSketch(deck_plane.offset(-POCKET_DEPTH + 0.25)):
                 Locations((0, 0))
@@ -327,7 +333,7 @@ class TestPictureRailHomePodMiniStand(unittest.TestCase):
 
         # 1) 背面スパイン (u <= SPINE_FRONT_U) から 7.5mm 手前に膨らませた境界ボックスとも非干渉であること
         spine_clearance_box = Pos(
-            (SPINE_FRONT_U + 7.5 - 20.0) + x_off, -45.0 + y_off, STAND_WIDTH / 2.0
+            bx(SPINE_FRONT_U + 7.5 - 20.0), -45.0 + y_off, STAND_WIDTH / 2.0
         ) * Box(40.0, 90.0, STAND_WIDTH + 40.0)
         sp_inter = hp_sphere & spine_clearance_box
         self.assertLess(
@@ -336,9 +342,9 @@ class TestPictureRailHomePodMiniStand(unittest.TestCase):
             "HomePod mini 2 球体背面とスパインの音響クリアランスが 7.5mm 未満です",
         )
 
-        # 2) 上方小梁 (v >= RAIL_HEIGHT) から下へ 24mm 下げた安全面とも非干渉であること (実クリアランス約26〜29mm)
+        # 2) 上方小梁 (v >= RAIL_HEIGHT) から下へ 24mm 下げた安全面とも非干渉であること (実クリアランス約27〜30mm)
         beam_clearance_box = Pos(
-            40.0 + x_off, RAIL_HEIGHT - 24.0 + 25.0 + y_off, STAND_WIDTH / 2.0
+            bx(40.0), RAIL_HEIGHT - 24.0 + 25.0 + y_off, STAND_WIDTH / 2.0
         ) * Box(120.0, 50.0, STAND_WIDTH + 40.0)
         bm_inter = hp_sphere & beam_clearance_box
         self.assertLess(
@@ -347,10 +353,11 @@ class TestPictureRailHomePodMiniStand(unittest.TestCase):
             "HomePod mini 2 天面と小梁下端のクリアランスが 24mm 未満です",
         )
 
-        # 3) M3ボルト2本の正面ストレートドライバー動線 (φ6.0mm × 長さ180mm) が球体と一切干渉しないこと
-        for bz in BOLT_Z_POSITIONS:
+        # 3) M3ボルト2本の正面ストレートドライバー動線 + ティアドロップ屋根が +Z (造形上向き) を向いていること
+        for bz_raw in BOLT_Z_POSITIONS:
+            bz = STAND_WIDTH - bz_raw
             driver = (
-                Pos(100.0 + x_off, M3_AXIS_V + y_off, bz)
+                Pos(bx(100.0), M3_AXIS_V + y_off, bz)
                 * Rot(0, 90, 0)
                 * Cylinder(radius=3.0, height=190.0)
             )
@@ -358,11 +365,11 @@ class TestPictureRailHomePodMiniStand(unittest.TestCase):
             self.assertLess(
                 dr_inter.volume if (dr_inter is not None and dr_inter.solids()) else 0.0,
                 1e-2,
-                f"z={bz} のM3ボルト正面ドライバー動線がHomePod球体と干渉しています",
+                f"Z={bz} のM3ボルト正面ドライバー動線がHomePod球体と干渉しています",
             )
-            # ボルト穴自体も本体クランプ部をしっかり貫通していること
+            # ボルト穴貫通確認
             shank_probe = (
-                Pos(CLAMP_FRONT_U / 2.0 + x_off, M3_AXIS_V + y_off, bz)
+                Pos(bx(CLAMP_FRONT_U / 2.0), M3_AXIS_V + y_off, bz)
                 * Rot(0, 90, 0)
                 * Cylinder(radius=1.45, height=CLAMP_FRONT_U + 2.0)
             )
@@ -370,10 +377,34 @@ class TestPictureRailHomePodMiniStand(unittest.TestCase):
             self.assertLess(
                 sh_inter.volume if (sh_inter is not None and sh_inter.solids()) else 0.0, 1e-2
             )
+            # ザグリ穴のティアドロップ頂点が +Z 側 (bz + 3.85mm) に開いており、逆側 (-Z: bz - 3.85mm) はソリッドであること
+            cb_x = bx(CLAMP_FRONT_U - M3_CBORE_DEPTH / 2.0)
+            top_apex_probe = Pos(cb_x, M3_AXIS_V + y_off, bz + 3.85) * Box(1.0, 0.4, 0.4)
+            bot_solid_probe = Pos(cb_x, M3_AXIS_V + y_off, bz - 3.85) * Box(1.0, 0.4, 0.4)
+            top_inter = self.stand & top_apex_probe
+            self.assertLess(
+                top_inter.volume if (top_inter is not None and top_inter.solids()) else 0.0,
+                1e-3,
+                "M3ザグリ穴のティアドロップ垂れ防止屋根が +Z (上側) を向いていません",
+            )
+            self.assertGreater(
+                (self.stand & bot_solid_probe).volume,
+                0.10,
+                "M3ザグリ穴のティアドロップが逆さま (-Z下向き) になっています",
+            )
 
-        # 4) 左側面下部 (z = 56..66mm) の電源コードクリップ (φ4.5mm ボア + 2.9mm スリット) 開通確認
+        # 4) 電源コードクリップが Z = 0.0 .. 10.0mm (ビルドプレート直置き!) に配置され、開通・接地していること
+        clip_z0_contact = Pos(
+            bx(CABLE_CLIP_CENTER_U - 3.4), CABLE_CLIP_CENTER_V + y_off, 0.25
+        ) * Box(1.2, 2.0, 0.5)
+        self.assertGreater(
+            (self.stand & clip_z0_contact).volume,
+            0.8,
+            "電源コードクリップが Z=0 ビルドプレート面にベタ置き接地していません",
+        )
+
         clip_bore_probe = Pos(
-            CABLE_CLIP_CENTER_U + x_off, CABLE_CLIP_CENTER_V + y_off, STAND_WIDTH - 5.0
+            bx(CABLE_CLIP_CENTER_U), CABLE_CLIP_CENTER_V + y_off, 5.0
         ) * Cylinder(radius=CABLE_CLIP_BORE_DIA / 2.0 - 0.15, height=9.0)
         cb_inter = self.stand & clip_bore_probe
         self.assertLess(
@@ -381,17 +412,17 @@ class TestPictureRailHomePodMiniStand(unittest.TestCase):
         )
 
         clip_slit_probe = Pos(
-            CABLE_CLIP_CENTER_U + x_off,
+            bx(CABLE_CLIP_CENTER_U),
             CABLE_CLIP_CENTER_V - 3.0 + y_off,
-            STAND_WIDTH - 5.0,
+            5.0,
         ) * Box(CABLE_CLIP_SLIT_GAP - 0.25, 4.0, 9.0)
         cs_inter = self.stand & clip_slit_probe
         self.assertLess(
             cs_inter.volume if (cs_inter is not None and cs_inter.solids()) else 0.0, 1e-2
         )
 
-        # 5) 全体メッシュの下向き急角度オーバーハング (>46.5°) がほぼゼロ (サポート完全不要) であること
-        verts, tris = self.stand.tessellate(tolerance=0.1)
+        # 5) Z=0 接地面積が 3,000mm^2 超であり、Z>0 の下向きオーバーハング面 (>45.1°) が完全ゼロであること
+        verts, tris = self.stand.tessellate(tolerance=0.05)
         v = np.array([[p.X, p.Y, p.Z] for p in verts])
         t = np.array(tris)
         p0, p1, p2 = v[t[:, 0]], v[t[:, 1]], v[t[:, 2]]
@@ -401,14 +432,18 @@ class TestPictureRailHomePodMiniStand(unittest.TestCase):
         normals = cross[valid] / (2.0 * areas[valid, None])
         areas = areas[valid]
         centers = (p0[valid] + p1[valid] + p2[valid]) / 3.0
+
+        z0_bed_area = float(areas[(normals[:, 2] < -0.99) & (np.abs(centers[:, 2]) < 0.05)].sum())
+        self.assertGreater(z0_bed_area, 3000.0, f"Z=0 接地面積が想定より小さいです ({z0_bed_area:.1f} mm^2)")
+
         down = (normals[:, 2] < -1e-4) & (centers[:, 2] > 0.2)
         if np.any(down):
             deg_from_vert = np.degrees(np.arccos(np.clip(-normals[down, 2], 0.0, 1.0)))
-            steep_area = float(areas[down][deg_from_vert < 43.5].sum())
+            steep_area = float(areas[down][deg_from_vert < 44.5].sum())
             self.assertLess(
                 steep_area,
-                2.0,
-                f"サポートが必要な下向き急オーバーハング面が存在します (area={steep_area:.2f} mm^2)",
+                0.5,
+                f"45°を超える下向きオーバーハング面が存在します (area={steep_area:.2f} mm^2)",
             )
 
     def test_fit_test_kit_and_step_export_roundtrip(self) -> None:

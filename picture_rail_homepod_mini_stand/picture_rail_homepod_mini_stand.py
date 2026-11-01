@@ -22,8 +22,10 @@
       横ガード0mmで音響メッシュを100%開放しつつ、位置合わせ兼「魔法のテープ」厚み吸収用の精密浅溝
       （底面φ43.70mm × 深さ1.80mm・造形時オーバーハング45.0°以下を保つ47.5°テーパー縁）を設ける。
     - 左側面下部（左入隅壁・コンセント側）に45°ガセット一体型の電源コード抜け止めC字クリップ（内径φ4.5mm）を配置。
-    - 右側面（部屋中央側端面）をZ=0にした横向き一体造形でサポート材完全ゼロ（0g）・層間剥離リスクゼロを達成し、
-      本番造形前に約8分で溝への挿入とカム回転ロックを実機確認できる薄切り嵌合テストキットも同時出力する。
+    - 左側面（左入隅壁・電源コードロック側）を Z=0 ビルドプレートへ完全ベタ置きにした横向き一体造形により、
+      ケーブルロックの浮き・オーバーハングを完全ゼロ（0°）にし、天板も下広の順テーパー（2.5°）とすることで
+      サポート材完全ゼロ（0g）・層間剥離リスクゼロを達成。あわせて本番造形前に溝挿入とカム回転ロックを
+      実機確認できる薄切り嵌合テストキットも同時出力する。
 
 推奨フィラメント:
     - 非CFの純粋な PETG（Bambu PETG HF / Bambu PETG Basic 等 — 右側スタンドと同色ブルーPETG推奨）
@@ -64,7 +66,7 @@ except ImportError:  # pragma: no cover
 # 定数パラメーター定義 (単位: mm / 角度: deg)
 # ==============================================================================
 
-# --- 積層ピッチ・造形幅 (Z軸: 右側面・部屋中央側 Z=0 → 左側面・入隅壁側 Z=STAND_WIDTH) ---
+# --- 積層ピッチ・造形幅 (造形Z軸: 左側面・入隅壁・ケーブルロック側 Z=0 → 右側面・部屋中央側 Z=STAND_WIDTH) ---
 LAYER_HEIGHT = 0.30
 STAND_WIDTH = 220 * LAYER_HEIGHT            # 66.00mm (カーテンレール側スタンドと完全統一)
 FIT_TEST_WIDTH = 54 * LAYER_HEIGHT          # 16.20mm (M3ザグリ穴1箇所＋レール下面受け確認用テスト幅)
@@ -114,9 +116,7 @@ DECK_TILT_ROOM_CENTER_Z_DEG = 2.5           # 部屋中央方向 (-z: ピアノ�
 POCKET_FLOOR_CLEARANCE = 0.80               # PETG造形公差クリアランス (片側0.40mm)
 POCKET_FLOOR_DIA = HOMEPOD_FOOT_DIA + POCKET_FLOOR_CLEARANCE  # 43.70mm
 POCKET_DEPTH = 1.80                         # 位置合わせ＆魔法のテープ厚みを吸収する浅溝深さ
-POCKET_BEVEL_TAPER_DEG = (
-    45.0 + DECK_TILT_ROOM_CENTER_Z_DEG
-)  # 47.5° (+Z最頂部でもビルドプレート基準オーバーハング角<=45.0°を厳守)
+POCKET_BEVEL_TAPER_DEG = 45.0               # 45.0° (天板の+2.5°上向き順テーパーにより最大オーバーハング42.5°<=45.0°)
 POCKET_CENTER_U = 48.00                     # スピーカー載置中心u座標 (小梁下約27〜30mm・ドライバー動線クリア)
 
 # --- 左側面下部 電源コード抜け止めC字クリップ (左入隅壁・コンセント側) ---
@@ -165,15 +165,13 @@ def deck_top_v_at(u: float, z: float) -> float:
     )
 
 
-def get_tilted_deck_plane(
+def _get_raw_tilted_deck_plane(
     u_offset: float = MAIN_U_OFFSET, v_offset: float = MAIN_V_OFFSET
 ) -> Plane:
-    """スピーカー載置中心を原点とし、間取り最適化2軸傾斜天板の法線を +Z とする Plane を返す."""
+    """内部設計座標 (X_raw=u+u_off, Y_raw=v+v_off, Z_raw=z_left) における2軸傾斜天板 Plane を返す."""
     alpha_u = math.radians(DECK_TILT_FORWARD_U_DEG)
     alpha_z = math.radians(DECK_TILT_ROOM_CENTER_Z_DEG)
 
-    # 天板方程式: Y - (v0 + v_offset) = -(X - x_front)*tan(alpha_u) + Z*tan(alpha_z)
-    # 整理すると: sin/tan 成分より外向き法線ベクトルは (+tan(alpha_u), +1.0, -tan(alpha_z)) を正規化した方向
     nx = math.tan(alpha_u)
     ny = 1.0
     nz = -math.tan(alpha_z)
@@ -185,6 +183,17 @@ def get_tilted_deck_plane(
     origin = Vector(POCKET_CENTER_U + u_offset, center_y, center_z)
 
     x_tangent = Vector(math.cos(alpha_u), -math.sin(alpha_u), 0.0)
+    return Plane(origin=origin, x_dir=x_tangent, z_dir=normal)
+
+
+def get_tilted_deck_plane(
+    u_offset: float = MAIN_U_OFFSET, v_offset: float = MAIN_V_OFFSET
+) -> Plane:
+    """造形配置後 (左壁・ケーブルロック側 Z=0 接地、Y軸180°剛体回転後) の2軸傾斜天板 Plane を返す."""
+    raw = _get_raw_tilted_deck_plane(u_offset=u_offset, v_offset=v_offset)
+    origin = Vector(-raw.origin.X, raw.origin.Y, STAND_WIDTH - raw.origin.Z)
+    normal = Vector(-raw.z_dir.X, raw.z_dir.Y, -raw.z_dir.Z)
+    x_tangent = Vector(-raw.x_dir.X, raw.x_dir.Y, -raw.x_dir.Z)
     return Plane(origin=origin, x_dir=x_tangent, z_dir=normal)
 
 
@@ -213,13 +222,14 @@ def _build_teardrop_x_cutter(
     radius: float,
     u_offset: float,
     v_offset: float,
+    teardrop_z_sign: float = -1.0,
 ) -> Part:
-    """横向き造形時に +Z 上縁オーバーハングを 45° 以下に抑える X 軸方向ティアドロップ穴カッター."""
+    """Y軸180°回転後に造形 +Z 上縁オーバーハングを 45° 以下に抑える X 軸方向ティアドロップ穴カッター."""
     length = u_end - u_start
     cy = center_v + v_offset
     cz = center_z
-    apex_z = radius * math.sqrt(2.0)
-    tan_z = radius / math.sqrt(2.0)
+    apex_z = teardrop_z_sign * radius * math.sqrt(2.0)
+    tan_z = teardrop_z_sign * radius / math.sqrt(2.0)
     tan_y = radius / math.sqrt(2.0)
 
     plane = Plane(
@@ -431,7 +441,7 @@ def build_stand() -> Part:
     part = bp.part - dogbone
 
     # 1. 間取り最適化 2軸緩傾斜アコースティック天板の平面カット
-    deck_plane = get_tilted_deck_plane(u_offset=u_off, v_offset=v_off)
+    deck_plane = _get_raw_tilted_deck_plane(u_offset=u_off, v_offset=v_off)
     # スパイン前面 (u = SPINE_FRONT_U) より手前側のみを傾斜平面でカットするための半空間カッター
     # deck_plane の +x_dir は手前下り方向。u >= SPINE_FRONT_U 領域だけを綺麗に切り取るため、
     # u >= SPINE_FRONT_U のバウンディングボックスと傾斜上空ボックスの積集合を減算する。
@@ -505,6 +515,10 @@ def build_stand() -> Part:
     clip_ear, clip_cutter = _build_cable_clip_ear_and_cutter(u_offset=u_off, v_offset=v_off)
     part = (part + clip_ear) - clip_cutter
 
+    # 5. Y軸周り180°の剛体回転 (鏡像反転なし・実機左右形状100%保持) により、
+    #    ケーブルロックを含むフラットな左壁側端面を Z=0 ビルドプレートへ完全ベタ置きする。
+    part = Pos(0.0, 0.0, STAND_WIDTH) * Rot(0.0, 180.0, 0.0) * part
+
     part.label = "picture_rail_homepod_mini_stand"
     return part
 
@@ -570,6 +584,8 @@ def build_fit_test_clamp() -> Part:
         v_offset=v_off,
     )
     part = part - shank - cbore
+    # 本体と同じY軸周り180°剛体回転で向きを揃え、ティアドロップ屋根を +Z 上向きにする
+    part = Pos(0.0, 0.0, FIT_TEST_WIDTH) * Rot(0.0, 180.0, 0.0) * part
     part.label = "picture_rail_fit_test_clamp"
     return part
 
@@ -579,9 +595,10 @@ def build_print_plate() -> Compound:
     stand = build_stand()
     anchor = build_t_anchor()
 
-    # L字の内側空き空間 (u ≈ +45mm, v ≈ -25mm / -45mm) の Z=0 ビルドプレート面へ Tアンカー2個を見やすく整列配置
-    a1 = Pos(45.0 + MAIN_U_OFFSET, -22.0 + MAIN_V_OFFSET, 0.0) * anchor
-    a2 = Pos(45.0 + MAIN_U_OFFSET, -42.0 + MAIN_V_OFFSET, 0.0) * anchor
+    # L字の内側空き空間 (X = -(45.0 + MAIN_U_OFFSET) = -11.30mm) の Z=0 ビルドプレート面へ Tアンカー2個を整列配置
+    anchor_x = -(45.0 + MAIN_U_OFFSET)
+    a1 = Pos(anchor_x, -22.0 + MAIN_V_OFFSET, 0.0) * anchor
+    a2 = Pos(anchor_x, -42.0 + MAIN_V_OFFSET, 0.0) * anchor
     a1.label = "picture_rail_cam_t_anchor_1"
     a2.label = "picture_rail_cam_t_anchor_2"
 
