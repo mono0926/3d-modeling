@@ -35,6 +35,8 @@ from picture_rail_homepod_mini_stand.picture_rail_homepod_mini_stand import (
     DECK_TILT_FORWARD_U_DEG,
     DECK_TILT_ROOM_CENTER_Z_DEG,
     FIT_TEST_WIDTH,
+    FIT_U_OFFSET,
+    FIT_V_OFFSET,
     HOMEPOD_FOOT_DIA,
     HOMEPOD_HEIGHT,
     HOMEPOD_SPHERE_DIA,
@@ -165,6 +167,36 @@ class TestPictureRailHomePodMiniStand(unittest.TestCase):
         mid_inter = self.stand & mid_relief_probe
         mid_vol = mid_inter.volume if (mid_inter is not None and mid_inter.solids()) else 0.0
         self.assertLess(mid_vol, 1e-3, "背面スパイン中間の壁紙不陸逃げが形成されていません")
+
+    def test_clamp_neck_minimum_structural_thickness(self) -> None:
+        """クランプ〜垂直スパイン首元の最小肉厚が約9mm以上確保され、くびれ弱点が存在しないこと."""
+        probe_radius = 4.30  # 直径 8.60mm の連続ソリッド円柱が首元全域に100%内包されること
+        neck_load_path_uv = [
+            (5.40, 1.00),    # クランプ下部 (M3ザグリ下端 v=+6.85 より下)
+            (5.20, -3.50),   # レール角 (0,0) 斜め手前下の首元中央
+            (1.00, -6.50),   # レール下面受け直下〜ガセット中央
+            (-5.00, -6.00),  # 垂直スパイン上部肩口
+        ]
+        for model_name, part, u_off, v_off, z_span in [
+            ("stand", self.stand, MAIN_U_OFFSET, MAIN_V_OFFSET, STAND_WIDTH - 4.0),
+            ("fit_clamp", self.fit_clamp, FIT_U_OFFSET, FIT_V_OFFSET, FIT_TEST_WIDTH - 2.0),
+        ]:
+            z_center = (STAND_WIDTH if model_name == "stand" else FIT_TEST_WIDTH) / 2.0
+            for u_c, v_c in neck_load_path_uv:
+                cyl = Pos(u_c + u_off, v_c + v_off, z_center) * Cylinder(
+                    radius=probe_radius, height=z_span
+                )
+                inter = part & cyl
+                vol = inter.volume if (inter is not None and inter.solids()) else 0.0
+                self.assertAlmostEqual(
+                    vol,
+                    cyl.volume,
+                    delta=cyl.volume * 0.01,
+                    msg=(
+                        f"{model_name} の首元 (u={u_c}, v={v_c}) の肉厚が不足しています "
+                        f"(内包率 {vol / cyl.volume * 100:.1f}% < 99%)"
+                    ),
+                )
 
     def test_cam_t_anchor_slot_insertion_auto_stop_and_wall_screw_clearance(self) -> None:
         """カムTアンカーの7.5mm溝通過・自動回転ストップ・M3ナット保持・内部ビス頭非干渉を検証."""

@@ -40,8 +40,8 @@
     - ブリム (Brim): 不要（Z=0に広いフラットL字接地面があるため安定）
 
 印刷統計（予想）:
-    - picture_rail_homepod_mini_stand.step (本体 + カムTアンカー2個): 印刷時間 約85〜95分、フィラメント使用量 約84g
-    - picture_rail_homepod_mini_stand_fit_test.step (テストクランプ + カムTアンカー1個): 印刷時間 約8〜10分、フィラメント使用量 約6g
+    - picture_rail_homepod_mini_stand.step (本体 + カムTアンカー2個): 印刷時間 約90〜100分、フィラメント使用量 約89g
+    - picture_rail_homepod_mini_stand_fit_test.step (テストクランプ + カムTアンカー1個): 印刷時間 約11〜13分、フィラメント使用量 約9g
 
 履歴とプロンプト経緯:
     - 詳細は同ディレクトリの history.md を参照。
@@ -79,7 +79,9 @@ RAIL_UNDER_LEDGE_DEPTH = 13.00              # レール下面を直接受ける�
 # --- 上部レール前面クランプヘッド & M3×12mm ダブルボルト締結部 ---
 CLAMP_TOP_V = RAIL_HEIGHT - 1.00            # +19.30mm (上方小梁下端 v=+20.30 に対し 1.00mm の不陸逃げ)
 CLAMP_FRONT_U = 10.00                       # クランプ前面u座標 (u = 0.00 〜 +10.00mm の肉厚10.0mm)
-CLAMP_CORNER_RELIEF = 0.60                  # レール下前角 (u=0, v=0) の外側ダイヤモンド逃げ寸法 (レール外寸干渉ゼロ)
+CLAMP_CHIN_V = -9.50                        # クランプ前面下端v座標 (首元最小肉厚 >9.2mm を確保する高剛性アゴ)
+DOGBONE_RELIEF_OFFSET = 0.20                # レール下前角(0,0)丸R逃げ中心オフセット (+0.20, -0.20)
+DOGBONE_RELIEF_RADIUS = 0.60                # 応力集中ゼロの滑らかな円弧角逃げ半径 (R0.60mm)
 
 M3_AXIS_V = RAIL_HEIGHT / 2.0               # +10.15mm (正面水平スリット中央高さ)
 BOLT_Z_MARGIN = 15.00                       # 左右端からのボルト中心距離
@@ -91,6 +93,9 @@ M3_CBORE_DEPTH = 4.80                       # ザグリ深さ (座面 u=+5.20mm 
 
 # --- 二点接地式 背面壁当てスパイン & L字デッキ骨格 ---
 SPINE_FRONT_U = -3.60                       # 垂直スパイン前面u座標 (球体メッシュ背面に8.15mmの音響空間を確保)
+CLAMP_GUSSET_ROOT_V = CLAMP_CHIN_V - (
+    CLAMP_FRONT_U - SPINE_FRONT_U
+)                                           # -23.10mm (クランプ下端からスパイン前面へ45°で繋がる高剛性ガセット根元)
 SPINE_MID_RELIEF_DEPTH = 0.80               # 壁紙の中間不陸を逃がす背面リリーフ深さ (u = -13.80mm)
 HEEL_PAD_TOP_V = -82.00                     # 下部壁当てヒールパッド (u = -14.60mm) の上端v座標
 DECK_BOTTOM_V = -108.00                     # L字ブラケット本体底面v座標 (スパイン全長 108.0mm)
@@ -146,9 +151,9 @@ TOTAL_HEIGHT_WITH_CLIP = CLAMP_TOP_V - CLIP_BOTTOM_V     # 134.50mm (v = -115.20
 MAIN_U_OFFSET = -(DECK_FRONT_U - RAIL_DEPTH) / 2.0       # -33.70mm
 MAIN_V_OFFSET = -(CLAMP_TOP_V + CLIP_BOTTOM_V) / 2.0     # +47.95mm
 
-FIT_TEST_BOTTOM_V = -12.00                               # テストピース下端v座標 (レール下面受け+下部壁基準確認)
+FIT_TEST_BOTTOM_V = -27.50                               # テストピース下端v座標 (補強ガセット全域+下部壁基準確認)
 FIT_U_OFFSET = -(CLAMP_FRONT_U - RAIL_DEPTH) / 2.0       # +2.30mm
-FIT_V_OFFSET = -(CLAMP_TOP_V + FIT_TEST_BOTTOM_V) / 2.0  # -3.65mm
+FIT_V_OFFSET = -(CLAMP_TOP_V + FIT_TEST_BOTTOM_V) / 2.0  # +4.10mm
 
 
 def deck_top_v_at(u: float, z: float) -> float:
@@ -385,13 +390,10 @@ def build_stand() -> Part:
     raw_deck_top_v = deck_top_v_at(SPINE_FRONT_U, STAND_WIDTH) + 4.0
     mid_relief_u = -RAIL_DEPTH + SPINE_MID_RELIEF_DEPTH  # -13.80mm
 
-    # L字ブラケット u-v 外周プロファイル (レール領域 u<=0, v>=0 に一切侵入しない外側角逃げノッチ付き)
+    # L字ブラケット u-v 外周プロファイル (首元に45°分厚い補強ガセットを備え、内角は円弧ドッグボーンで応力集中を排除)
     profile_pts = [
-        pt(0.0, CLAMP_TOP_V),                                          # レール前面座 上端
-        pt(0.0, CLAMP_CORNER_RELIEF),                                  # レール前面座 下端 (0.0, +0.60)
-        pt(CLAMP_CORNER_RELIEF, 0.0),                                  # レール下前角 外側逃げ頂点 (+0.60, 0.0)
-        pt(0.0, -CLAMP_CORNER_RELIEF),                                 # レール下前角 外側逃げ下点 (0.0, -0.60)
-        pt(-CLAMP_CORNER_RELIEF, 0.0),                                 # レール下面受け 前端 (-0.60, 0.0)
+        pt(0.0, CLAMP_TOP_V),                                          # レール前面座 上端 (0.0, +19.30)
+        pt(0.0, 0.0),                                                  # レール下前角 基準点 (後段でR0.60円弧逃げ加工)
         pt(-RAIL_UNDER_LEDGE_DEPTH, 0.0),                              # レール下面受け段差 奥端 (-13.00, 0.0)
         pt(mid_relief_u, -SPINE_MID_RELIEF_DEPTH),                     # 中間背面リリーフ上端 (-13.80, -0.80)
         pt(mid_relief_u, HEEL_PAD_TOP_V + SPINE_MID_RELIEF_DEPTH),     # 中間背面リリーフ下端 (-13.80, -81.20)
@@ -400,16 +402,16 @@ def build_stand() -> Part:
         pt(DECK_FRONT_U, DECK_BOTTOM_V),                               # デッキ前端下部 (+82.00, -108.00)
         pt(DECK_FRONT_U, raw_deck_top_v),                              # デッキ前端上部 (傾斜カット前)
         pt(SPINE_FRONT_U, raw_deck_top_v),                             # スパイン前面〜デッキ交点 (傾斜カット前)
-        pt(SPINE_FRONT_U, -3.60),                                      # スパイン前面上端 (-3.60, -3.60)
-        pt(CLAMP_FRONT_U, 2.00),                                       # クランプ顎部下面 (+10.00, +2.00)
+        pt(SPINE_FRONT_U, CLAMP_GUSSET_ROOT_V),                        # 首元45°補強ガセット根元 (-3.60, -23.10)
+        pt(CLAMP_FRONT_U, CLAMP_CHIN_V),                               # クランプ前面高剛性アゴ下端 (+10.00, -9.50)
         pt(CLAMP_FRONT_U, CLAMP_TOP_V),                                # クランプ前面上端 (+10.00, +19.30)
     ]
 
     profile_fillets = [
         (*pt(-RAIL_DEPTH, DECK_BOTTOM_V), 2.0),
         (*pt(DECK_FRONT_U, DECK_BOTTOM_V), 3.0),
-        (*pt(SPINE_FRONT_U, -3.60), 4.0),
-        (*pt(CLAMP_FRONT_U, 2.00), 2.5),
+        (*pt(SPINE_FRONT_U, CLAMP_GUSSET_ROOT_V), 8.0),
+        (*pt(CLAMP_FRONT_U, CLAMP_CHIN_V), 5.0),
         (*pt(CLAMP_FRONT_U, CLAMP_TOP_V), 1.6),
     ]
 
@@ -421,7 +423,12 @@ def build_stand() -> Part:
             _fillet_2d_vertices_by_coords(profile_fillets)
         extrude(amount=STAND_WIDTH)
 
-    part = bp.part
+    dogbone = Pos(
+        DOGBONE_RELIEF_OFFSET + u_off,
+        -DOGBONE_RELIEF_OFFSET + v_off,
+        STAND_WIDTH / 2.0,
+    ) * Cylinder(radius=DOGBONE_RELIEF_RADIUS, height=STAND_WIDTH + 2.0)
+    part = bp.part - dogbone
 
     # 1. 間取り最適化 2軸緩傾斜アコースティック天板の平面カット
     deck_plane = get_tilted_deck_plane(u_offset=u_off, v_offset=v_off)
@@ -512,22 +519,20 @@ def build_fit_test_clamp() -> Part:
 
     pts = [
         pt(0.0, CLAMP_TOP_V),
-        pt(0.0, CLAMP_CORNER_RELIEF),
-        pt(CLAMP_CORNER_RELIEF, 0.0),
-        pt(0.0, -CLAMP_CORNER_RELIEF),
-        pt(-CLAMP_CORNER_RELIEF, 0.0),
+        pt(0.0, 0.0),
         pt(-RAIL_UNDER_LEDGE_DEPTH, 0.0),
         pt(-RAIL_DEPTH, -1.60),
         pt(-RAIL_DEPTH, FIT_TEST_BOTTOM_V),
         pt(SPINE_FRONT_U, FIT_TEST_BOTTOM_V),
-        pt(SPINE_FRONT_U, -3.60),
-        pt(CLAMP_FRONT_U, 2.00),
+        pt(SPINE_FRONT_U, CLAMP_GUSSET_ROOT_V),
+        pt(CLAMP_FRONT_U, CLAMP_CHIN_V),
         pt(CLAMP_FRONT_U, CLAMP_TOP_V),
     ]
     fillets = [
         (*pt(-RAIL_DEPTH, FIT_TEST_BOTTOM_V), 1.2),
-        (*pt(SPINE_FRONT_U, FIT_TEST_BOTTOM_V), 1.5),
-        (*pt(CLAMP_FRONT_U, 2.00), 2.0),
+        (*pt(SPINE_FRONT_U, FIT_TEST_BOTTOM_V), 1.2),
+        (*pt(SPINE_FRONT_U, CLAMP_GUSSET_ROOT_V), 4.0),
+        (*pt(CLAMP_FRONT_U, CLAMP_CHIN_V), 5.0),
         (*pt(CLAMP_FRONT_U, CLAMP_TOP_V), 1.5),
     ]
 
@@ -539,7 +544,12 @@ def build_fit_test_clamp() -> Part:
             _fillet_2d_vertices_by_coords(fillets)
         extrude(amount=FIT_TEST_WIDTH)
 
-    part = bp.part
+    dogbone = Pos(
+        DOGBONE_RELIEF_OFFSET + u_off,
+        -DOGBONE_RELIEF_OFFSET + v_off,
+        FIT_TEST_WIDTH / 2.0,
+    ) * Cylinder(radius=DOGBONE_RELIEF_RADIUS, height=FIT_TEST_WIDTH + 2.0)
+    part = bp.part - dogbone
     z_mid = FIT_TEST_WIDTH / 2.0
     shank = _build_teardrop_x_cutter(
         u_start=-1.0,
