@@ -21,50 +21,104 @@ from build123d import (
     import_step,
 )
 
-from picture_rail_homepod_mini_stand.picture_rail_homepod_mini_stand import (
-    BOLT_Z_POSITIONS,
-    CABLE_CLIP_BORE_DIA,
-    CABLE_CLIP_CENTER_U,
-    CABLE_CLIP_CENTER_V,
-    CABLE_CLIP_SLIT_GAP,
-    CLAMP_FRONT_U,
-    CLAMP_TOP_V,
-    DECK_BOTTOM_V,
-    DECK_FRONT_U,
-    DECK_MIN_TOP_V,
-    DECK_TILT_FORWARD_U_DEG,
-    DECK_TILT_ROOM_CENTER_Z_DEG,
-    FIT_TEST_WIDTH,
-    FIT_U_OFFSET,
-    FIT_V_OFFSET,
-    HOMEPOD_FOOT_DIA,
-    HOMEPOD_HEIGHT,
-    HOMEPOD_SPHERE_DIA,
-    M3_AXIS_V,
-    M3_CBORE_DEPTH,
-    MAIN_U_OFFSET,
-    MAIN_V_OFFSET,
-    POCKET_CENTER_U,
-    POCKET_DEPTH,
-    POCKET_FLOOR_DIA,
-    RAIL_DEPTH,
-    RAIL_HEIGHT,
-    RAIL_INNER_DEPTH,
-    RAIL_UNDER_LEDGE_DEPTH,
-    SPINE_FRONT_U,
-    STAND_WIDTH,
-    T_ANCHOR_BOSS_HEIGHT,
-    T_ANCHOR_SLOT_WIDTH,
-    T_ANCHOR_TOTAL_HEIGHT,
-    T_ANCHOR_WING_THICKNESS,
-    build_fit_test_clamp,
-    build_fit_test_kit,
-    build_print_plate,
-    build_stand,
-    build_t_anchor,
-    export_models,
-    get_tilted_deck_plane,
-)
+try:
+    from picture_rail_homepod_mini_stand.picture_rail_homepod_mini_stand import (
+        BOLT_Z_POSITIONS,
+        CABLE_CLIP_BORE_DIA,
+        CABLE_CLIP_CENTER_U,
+        CABLE_CLIP_CENTER_V,
+        CABLE_CLIP_SLIT_GAP,
+        CLAMP_FRONT_U,
+        CLAMP_TOP_V,
+        DECK_BOTTOM_V,
+        DECK_FRONT_U,
+        DECK_MIN_TOP_V,
+        DECK_TILT_FORWARD_U_DEG,
+        DECK_TILT_ROOM_CENTER_Z_DEG,
+        FIT_TEST_WIDTH,
+        FIT_U_OFFSET,
+        FIT_V_OFFSET,
+        HOMEPOD_FOOT_DIA,
+        HOMEPOD_HEIGHT,
+        HOMEPOD_SPHERE_DIA,
+        LAYER_HEIGHT,
+        M3_AXIS_V,
+        M3_CBORE_DEPTH,
+        MAIN_U_OFFSET,
+        MAIN_V_OFFSET,
+        POCKET_CENTER_U,
+        POCKET_DEPTH,
+        POCKET_FLOOR_DIA,
+        RAIL_DEPTH,
+        RAIL_FRONT_LIP_THICKNESS_MAX,
+        RAIL_FRONT_LIP_THICKNESS_MIN,
+        RAIL_HEIGHT,
+        RAIL_INNER_DEPTH,
+        RAIL_UNDER_LEDGE_DEPTH,
+        RAIL_WALL_SCREW_HEAD_HEIGHT,
+        SPINE_FRONT_U,
+        STAND_WIDTH,
+        T_ANCHOR_BOSS_HEIGHT,
+        T_ANCHOR_SLOT_WIDTH,
+        T_ANCHOR_TOTAL_HEIGHT,
+        T_ANCHOR_WING_THICKNESS,
+        build_fit_test_clamp,
+        build_fit_test_kit,
+        build_print_plate,
+        build_stand,
+        build_t_anchor,
+        export_models,
+        get_tilted_deck_plane,
+    )
+except ModuleNotFoundError:
+    from picture_rail_homepod_mini_stand import (
+        BOLT_Z_POSITIONS,
+        CABLE_CLIP_BORE_DIA,
+        CABLE_CLIP_CENTER_U,
+        CABLE_CLIP_CENTER_V,
+        CABLE_CLIP_SLIT_GAP,
+        CLAMP_FRONT_U,
+        CLAMP_TOP_V,
+        DECK_BOTTOM_V,
+        DECK_FRONT_U,
+        DECK_MIN_TOP_V,
+        DECK_TILT_FORWARD_U_DEG,
+        DECK_TILT_ROOM_CENTER_Z_DEG,
+        FIT_TEST_WIDTH,
+        FIT_U_OFFSET,
+        FIT_V_OFFSET,
+        HOMEPOD_FOOT_DIA,
+        HOMEPOD_HEIGHT,
+        HOMEPOD_SPHERE_DIA,
+        LAYER_HEIGHT,
+        M3_AXIS_V,
+        M3_CBORE_DEPTH,
+        MAIN_U_OFFSET,
+        MAIN_V_OFFSET,
+        POCKET_CENTER_U,
+        POCKET_DEPTH,
+        POCKET_FLOOR_DIA,
+        RAIL_DEPTH,
+        RAIL_FRONT_LIP_THICKNESS_MAX,
+        RAIL_FRONT_LIP_THICKNESS_MIN,
+        RAIL_HEIGHT,
+        RAIL_INNER_DEPTH,
+        RAIL_UNDER_LEDGE_DEPTH,
+        RAIL_WALL_SCREW_HEAD_HEIGHT,
+        SPINE_FRONT_U,
+        STAND_WIDTH,
+        T_ANCHOR_BOSS_HEIGHT,
+        T_ANCHOR_SLOT_WIDTH,
+        T_ANCHOR_TOTAL_HEIGHT,
+        T_ANCHOR_WING_THICKNESS,
+        build_fit_test_clamp,
+        build_fit_test_kit,
+        build_print_plate,
+        build_stand,
+        build_t_anchor,
+        export_models,
+        get_tilted_deck_plane,
+    )
 
 
 class TestPictureRailHomePodMiniStand(unittest.TestCase):
@@ -274,16 +328,56 @@ class TestPictureRailHomePodMiniStand(unittest.TestCase):
         spun_nut = Rot(0, 0, 30.0) * nut_bp.part
         self.assertGreater((self.t_anchor & spun_nut).volume, 1.0, "M3六角ナットの回り止めが効いていません")
 
-        # 6. 実機締結時 (前リップ厚 2.0mm -> ウイング前面 u=-2.0mm -> Tアンカー後端 u=-7.0mm、
-        #    M3×12mm ボルト座面 u=+5.20mm -> 先端 u=-6.80mm) に、奥壁(u=-12.6mm)の鍋ビス頭(u<=-9.8mm)まで3mm近い余裕があること
-        lip_thickness = 2.00
-        t_anchor_rear_u = -(lip_thickness + T_ANCHOR_WING_THICKNESS)
+        # 6. 想定前リップ厚の全範囲 (2.00mm 〜 2.20mm) にわたり:
+        #    - ウイング厚(4.80mm=16層)とボス高(1.80mm=6層)が0.30mmレイヤー厚の整数倍であること
+        #    - 円筒ガイドボス高さ(1.80mm)が最小リップ厚(2.00mm)未満でクランプ前面座に底突きしないこと
+        #    - Tアンカー後端および M3×12mm ボルト先端(u=-6.80mm)のレール内突入量が最大 7.00mm 以内であり、
+        #      奥壁(u=-12.60mm)の壁固定鍋ビス頭(高さ2.50mm -> u=-10.10mm)との間に 3.10mm 以上の余裕があること
+        self.assertAlmostEqual(
+            T_ANCHOR_WING_THICKNESS / LAYER_HEIGHT,
+            round(T_ANCHOR_WING_THICKNESS / LAYER_HEIGHT),
+            places=5,
+        )
+        self.assertAlmostEqual(
+            T_ANCHOR_BOSS_HEIGHT / LAYER_HEIGHT,
+            round(T_ANCHOR_BOSS_HEIGHT / LAYER_HEIGHT),
+            places=5,
+        )
+        self.assertLess(T_ANCHOR_BOSS_HEIGHT, RAIL_FRONT_LIP_THICKNESS_MIN)
+
         bolt_seat_u = CLAMP_FRONT_U - M3_CBORE_DEPTH
         bolt_tip_u = bolt_seat_u - 12.00
-        wall_screw_front_u = -RAIL_INNER_DEPTH + 2.80  # -9.80mm (高さ2.8mmの余裕見た鍋ビス頭)
-        self.assertGreater(t_anchor_rear_u - wall_screw_front_u, 2.50)
-        self.assertGreater(bolt_tip_u - wall_screw_front_u, 2.50)
-        self.assertGreaterEqual(bolt_tip_u, t_anchor_rear_u)  # Tアンカー背面から突き出さない
+        spec_screw_front_u = -RAIL_INNER_DEPTH + RAIL_WALL_SCREW_HEAD_HEIGHT  # -10.10mm
+        conservative_screw_front_u = -RAIL_INNER_DEPTH + 2.80                 # -9.80mm
+
+        for lip_thickness in (
+            RAIL_FRONT_LIP_THICKNESS_MIN,
+            (RAIL_FRONT_LIP_THICKNESS_MIN + RAIL_FRONT_LIP_THICKNESS_MAX) / 2.0,
+            RAIL_FRONT_LIP_THICKNESS_MAX,
+        ):
+            insertion_depth = lip_thickness + T_ANCHOR_WING_THICKNESS
+            t_anchor_rear_u = -insertion_depth
+            self.assertLessEqual(
+                insertion_depth,
+                7.00 + 1e-6,
+                f"前リップ厚 {lip_thickness:.2f}mm 時のレール内突入量 ({insertion_depth:.2f}mm) が 7.00mm を超えています",
+            )
+            self.assertGreaterEqual(
+                t_anchor_rear_u - spec_screw_front_u,
+                3.10 - 1e-6,
+                f"前リップ厚 {lip_thickness:.2f}mm 時の壁固定ビス頭クリアランスが 3.10mm 未満です",
+            )
+            self.assertGreaterEqual(
+                bolt_tip_u - spec_screw_front_u,
+                3.10 - 1e-6,
+            )
+            self.assertGreater(t_anchor_rear_u - conservative_screw_front_u, 2.50)
+            self.assertGreater(bolt_tip_u - conservative_screw_front_u, 2.50)
+            self.assertGreaterEqual(
+                bolt_tip_u,
+                t_anchor_rear_u - 1e-6,
+                f"前リップ厚 {lip_thickness:.2f}mm 時に M3×12mm ボルト先端が Tアンカー背面から突き出しています",
+            )
 
     def test_tilted_deck_pocket_homepod_sphere_and_cable_clip(self) -> None:
         """ケーブルロックZ=0完全接地・2軸傾斜順テーパー・浅溝・M3涙滴+Z向き・球体非干渉を検証."""

@@ -76,6 +76,9 @@ RAIL_DEPTH = 14.60                          # 壁からレール前面までの�
 RAIL_HEIGHT = 20.30                         # レール縦外寸高さ (ノギス実測値、上端 v=+20.30 は小梁下端に密着)
 RAIL_INNER_DEPTH = 12.60                    # レール前面から内部奥背板までの深さ (ノギス実測値、背板厚 2.00mm)
 RAIL_SLOT_OPENING_NOMINAL = 7.80            # 正面水平スリット開口幅 (実測約7.8mm)
+RAIL_FRONT_LIP_THICKNESS_MIN = 2.00         # 正面リップ最小想定厚み (ノギス実測基準 2.00mm)
+RAIL_FRONT_LIP_THICKNESS_MAX = 2.20         # 正面リップ最大想定厚み (押出公差上限 2.20mm)
+RAIL_WALL_SCREW_HEAD_HEIGHT = 2.50          # レール奥背板(u=-12.60)から突出する壁固定用鍋ビス頭高さ
 RAIL_UNDER_LEDGE_DEPTH = 13.00              # レール下面を直接受ける水平段差奥行 (壁入隅1.60mmクロス逃げ確保)
 
 # --- 上部レール前面クランプヘッド & M3×12mm ダブルボルト締結部 ---
@@ -137,8 +140,8 @@ T_ANCHOR_SLOT_WIDTH = 7.20                  # 7.8mm正面スリットへ余裕�
 T_ANCHOR_HALF_SPAN_X = 8.65                 # ロック方向半長 (全長17.30mm > 最大想定キャビティ17.0mmで確実ストップ)
 T_ANCHOR_PASS_FILLET_R = 6.00               # 右回し通過対角2角の大径カムR (最小キャビティ15.6mm内を無干渉回転)
 T_ANCHOR_STOP_FILLET_R = 0.60               # ストッパー対角2角の小径エッジ保護R
-T_ANCHOR_BOSS_HEIGHT = 1.60                 # 正面スリット内ガイド円筒ボス高さ (2.0mm前リップ内で底突きしない高さ)
-T_ANCHOR_WING_THICKNESS = 5.00              # 前リップ裏に掛かるカムウイング厚
+T_ANCHOR_BOSS_HEIGHT = 6 * LAYER_HEIGHT     # 1.80mm (0.30mm × 6層、最小リップ厚2.00mmでも底突きしないガイド高さ)
+T_ANCHOR_WING_THICKNESS = 16 * LAYER_HEIGHT # 4.80mm (0.30mm × 16層、最大リップ厚2.20mmでも突入7.00mm・ビス頭余裕3.10mmを確保)
 T_ANCHOR_TOTAL_HEIGHT = T_ANCHOR_BOSS_HEIGHT + T_ANCHOR_WING_THICKNESS  # 6.60mm (0.30mm × 22層)
 T_ANCHOR_NUT_ACROSS_FLATS = 5.62            # M3六角ナット(二面幅5.50mm)圧入回り止め幅
 T_ANCHOR_NUT_POCKET_DEPTH = 2.80            # 背面からの六角ナットポケット深さ (手前に3.80mmのソリッド肉厚確保)
@@ -334,7 +337,7 @@ def build_t_anchor() -> Part:
     bolt_d = M3_SHANK_CLEARANCE_RADIUS * 2.0
 
     with BuildPart() as bp:
-        # 1. 非対称カムロックTウイング (Z = 0.00 〜 5.00mm、ビルドプレート全面ベタ置き)
+        # 1. 非対称カムロックTウイング (Z = 0.00 〜 4.80mm = 16層、ビルドプレート全面ベタ置き)
         #    右回し締結 Rot(0, 0, -deg) に対し:
         #    第2象限(-hx,+hy)・第4象限(+hx,-hy)が通過角となるため大径カムR(6.00mm)、
         #    第1象限(+hx,+hy)・第3象限(-hx,-hy)がストッパー角となるため小径R(0.60mm)とする。
@@ -358,7 +361,7 @@ def build_t_anchor() -> Part:
             )
         extrude(amount=T_ANCHOR_WING_THICKNESS)
 
-        # 2. スリット内回転ガイド円筒ボス (Z = 5.00 〜 6.60mm, φ7.20mm)
+        # 2. スリット内回転ガイド円筒ボス (Z = 4.80 〜 6.60mm = 6層, φ7.20mm)
         with BuildSketch(Plane.XY.offset(T_ANCHOR_WING_THICKNESS)):
             Circle(radius=hy)
         extrude(amount=T_ANCHOR_BOSS_HEIGHT)
