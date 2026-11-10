@@ -35,6 +35,7 @@ from build123d import *
 BUG_DIMENSIONS: list[tuple[float, float]] = [
     (54.0, 43.0),
     (56.0, 51.0),
+    (67.0, 47.0),
 ]
 
 # 下端のラベル1行分スペース (10pt文字高さ約3.5〜4.0mm + 下余白2.0mm = +6.0mm)
