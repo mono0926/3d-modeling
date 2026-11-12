@@ -32,7 +32,8 @@
 
 ## 3. 主要寸法・ジオメトリ仕様
 
-### 3.1 スチールラック取付コア（実機検証済み v4 ロック機構の100%継承）
+### 3.1 スチールラック取付コア（共通モジュール `steel_rack_base_hook` による v4 ロック機構の100%共有）
+- 共通パッケージ: `steel_rack_base_hook/` の `build_steel_rack_mounting_core` をインポートし、ラケット掛け（`steel_rack_tennis_racket_holder`）と単一の実装（Single Source of Truth）を共有する。
 - ラック実測基準:
   - 薄鉄板フチ: 前面 `u = 0.00 mm`、板厚基準 `1.05 mm`、高さ `v = 0.00 〜 +18.10 mm`
   - 水平丸パイプ: 外径 `φ7.20 mm`、中心 `(u = +5.60 mm, v = -5.60 mm)`

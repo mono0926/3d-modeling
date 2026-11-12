@@ -19,6 +19,8 @@
       3. 1〜3段目は通常硬式球（ITF規格 φ65.4〜68.6mm / 基準 φ67.0mm）専用テーパー座面、
          最上段（4段目）は内座で通常球を同軸保持しつつ外フレア座で大きめのレッドボール（φ75〜80mm）も
          安定保持できる連続2段凹面座とする。
+    - 実機テスト検証済みの共通ロックモジュール `steel_rack_base_hook`（段付き丸パイプ専用ポケット幅7.70mm ＋
+      頂点越えu=+4.55mm常時予圧35°ディープフック ＋ v=+9.60mm指掛けリリースタブ）をインポートして100%共有する。
     - モデルごとに専用ディレクトリで管理し、本番モデルと最上段2サイズ兼用座テストゲージの2つのSTEPファイルを同時出力する。
 
 推奨フィラメント:
@@ -33,7 +35,7 @@
     - ブリム (Brim): 不要（Z=0に横77mm×奥行93.3mmの広いU字接地面があるため安定）
 
 印刷統計（予想）:
-    - steel_rack_tennis_ball_holder.step: 印刷時間 約3時間50分〜4時間45分、フィラメント使用量 約180〜230g（ソリッド体積 359.95cm³）
+    - steel_rack_tennis_ball_holder.step: 印刷時間 約3時間50分〜4時間45分、フィラメント使用量 約180〜230g（ソリッド体積 359.94cm³）
     - steel_rack_tennis_ball_holder_fit_test.step: 印刷時間 約22〜28分、フィラメント使用量 約16〜20g（ソリッド体積 26.83cm³）
 
 履歴とプロンプト経緯:
@@ -43,6 +45,46 @@
 import math
 from pathlib import Path
 from build123d import *
+
+from steel_rack_base_hook import (
+    HOLDER_BOTTOM_V,
+    HOOK_INNER_HALF_GAP,
+    HOOK_REAR_BACK_U,
+    J_DECK_TOP_V,
+    J_FLOOR_TOP_V,
+    J_FRONT_FUNNEL,
+    J_FRONT_INNER_U,
+    LATCH_ANCHOR_U,
+    LATCH_LEAF_THICKNESS,
+    LATCH_NOSE_BLUNT_H,
+    LATCH_OVERHANG_DEG,
+    LATCH_POCKET_GAP,
+    LATCH_POCKET_REAR_U,
+    LATCH_RELEASE_TOP_V,
+    LATCH_SIDE_GAP,
+    LATCH_STEM_BACK_U,
+    LATCH_STEM_FRONT_U,
+    LATCH_STEM_THICKNESS,
+    LATCH_TIP_U,
+    LATCH_TIP_V,
+    LATCH_TOP_TAPER_U,
+    LATCH_WIDTH,
+    PIPE_CENTER_U,
+    PIPE_CENTER_V,
+    PIPE_CLEARANCE_FROM_SKIRT_U,
+    PIPE_DIA,
+    PIPE_GAP_TO_SKIRT_V,
+    PIPE_RADIUS,
+    PIPE_REAR_SEAT_U,
+    PIPE_STEP_BOTTOM_V,
+    SKIRT_HEIGHT,
+    SKIRT_STEP_TOP_V,
+    SKIRT_THICKNESS_MAX,
+    STOPPER_FRONT_U,
+    STOPPER_LEADIN_CHAMFER,
+    STOPPER_TOP_V,
+    build_steel_rack_mounting_core,
+)
 
 try:
     from ocp_vscode import show_object
@@ -59,6 +101,7 @@ except ImportError:  # pragma: no cover
 #   u: 前後方向 (棚板の垂直面[前面] u = 0.00, 室内手前 +u, 棚奥側 -u)
 #   v: ラック基準上下方向 (棚板前垂れ下端 v = 0.00, ビルドプレート接地 v = -15.00)
 #   z: ビルドプレート基準高さ (z = v - HOLDER_BOTTOM_V = 0.00 〜 246.00mm)
+#   ※ ラック実測値・段付きパイプ専用座・ディープフック板バネ定数は steel_rack_base_hook から共有
 # ==============================================================================
 
 NUM_BALL_TIERS = 4
@@ -68,56 +111,13 @@ STANDARD_BALL_DIA = 67.00  # 通常硬式テニスボール基準径 (ITF公差 
 RED_FELT_BALL_DIA = 75.00  # ステージ3 レッドボール (フェルト基準径 φ75mm)
 RED_FOAM_BALL_DIA = 80.00  # ステージ3 レッドボール (スポンジ基準径 φ80mm)
 
-# --- スチールラック実測基準寸法 (ラケット掛け v4 で実機検証済み) ---
-PIPE_DIA = 7.20  # 水平丸パイプ外径
-PIPE_RADIUS = PIPE_DIA / 2.0  # 3.60mm
-PIPE_CLEARANCE_FROM_SKIRT_U = 2.00  # 棚板垂直面(u=0.0)から丸パイプ奥面(u=+2.0)までの前後クリアランス
-PIPE_GAP_TO_SKIRT_V = 2.00  # 棚板下端(v=0.0)から丸パイプ上端(v=-2.0)までの上下クリアランス
-PIPE_CENTER_U = PIPE_CLEARANCE_FROM_SKIRT_U + PIPE_RADIUS  # +5.60mm
-PIPE_CENTER_V = -(PIPE_GAP_TO_SKIRT_V + PIPE_RADIUS)  # -5.60mm
-
-SKIRT_HEIGHT = 18.10  # 棚板垂直面の縦高さ (v = 0.00 〜 +18.10mm)
-SKIRT_THICKNESS_MAX = 1.05  # 約1.0mm薄鉄板の実測基準板厚
-
 # --- 造形全体高さ設定 (0.20mm / 0.30mm レイヤー両対応の 0.60mm 整数倍) ---
-HOLDER_BOTTOM_V = -15.00  # ビルドプレート接地面 (z = 0.00mm)
 TOWER_TOTAL_HEIGHT = 246.00  # 本番モデル全高 (0.60mm * 410 <= Bambu P2S 上限 256.0mm)
 HOLDER_TOP_V = HOLDER_BOTTOM_V + TOWER_TOTAL_HEIGHT  # +231.00mm
 MOUNT_CORE_TOP_Z = 28.80  # 下部マウントコアおよび第1窓下端高さ (v = +13.80mm)
 
-# --- v4 段付き丸パイプ専用座 ＋ 頂点越えディープフック寸法 (100%継承) ---
-LATCH_WIDTH = 16.00
-LATCH_SIDE_GAP = 1.80
-HOOK_INNER_HALF_GAP = LATCH_WIDTH / 2.0 + LATCH_SIDE_GAP  # 9.80mm
+# --- デュアル剛体Jフック外幅 ---
 HOOK_OUTER_HALF_SPAN = 34.00  # 全幅 68.00mm のワイド剛体デュアルJフック
-
-HOOK_REAR_BACK_U = -6.80
-STOPPER_FRONT_U = -1.06
-STOPPER_LEADIN_CHAMFER = 0.80
-STOPPER_TOP_V = 12.60
-
-SKIRT_STEP_TOP_V = -0.80
-PIPE_REAR_SEAT_U = 1.62
-PIPE_STEP_BOTTOM_V = SKIRT_STEP_TOP_V - (PIPE_REAR_SEAT_U - STOPPER_FRONT_U)  # -3.48mm
-J_FLOOR_TOP_V = -9.55
-J_FRONT_INNER_U = 9.32
-J_FRONT_FUNNEL = 1.15
-J_DECK_TOP_V = 8.40
-
-LATCH_ANCHOR_U = -4.30
-LATCH_LEAF_THICKNESS = 1.80
-LATCH_STEM_FRONT_U = 8.95
-LATCH_STEM_THICKNESS = 3.60
-LATCH_STEM_BACK_U = LATCH_STEM_FRONT_U + LATCH_STEM_THICKNESS  # +12.55mm
-
-LATCH_OVERHANG_DEG = 55.0
-LATCH_TIP_U = 4.55
-LATCH_TIP_V = -1.42
-LATCH_NOSE_BLUNT_H = 0.45
-LATCH_RELEASE_TOP_V = 9.60
-LATCH_TOP_TAPER_U = 0.80
-LATCH_POCKET_GAP = 9.35
-LATCH_POCKET_REAR_U = LATCH_STEM_BACK_U + LATCH_POCKET_GAP  # +21.90mm
 
 # --- ラダーフレーム縦スパイン ＆ 45°切妻アーチ窓寸法 ---
 SPINE_REAR_U = LATCH_POCKET_REAR_U  # +21.90mm
@@ -201,122 +201,6 @@ def compute_ball_center_z(tier_idx: int, ball_radius: float = STANDARD_BALL_DIA 
         TOP_SEAT_R_TOP,
     )
     return max(z_stage_a, z_stage_b)
-
-
-def _build_j_hook_2d_face() -> Face:
-    """v4 実機検証済みの段付き丸パイプ専用ポケット付き剛体Jフック断面 Face (u, v) を生成する."""
-    rear_outer_chamfer = 1.40
-    pts = [
-        (HOOK_REAR_BACK_U, HOLDER_BOTTOM_V),
-        (SPINE_FRONT_U, HOLDER_BOTTOM_V),
-        (SPINE_FRONT_U, HOLDER_BOTTOM_V + MOUNT_CORE_TOP_Z),
-        (SPINE_REAR_U, HOLDER_BOTTOM_V + MOUNT_CORE_TOP_Z),
-        (SPINE_REAR_U, J_DECK_TOP_V),
-        (J_FRONT_INNER_U + J_FRONT_FUNNEL, J_DECK_TOP_V),
-        (J_FRONT_INNER_U, J_DECK_TOP_V - J_FRONT_FUNNEL),
-        (J_FRONT_INNER_U, J_FLOOR_TOP_V),
-        (PIPE_REAR_SEAT_U, J_FLOOR_TOP_V),
-        (PIPE_REAR_SEAT_U, PIPE_STEP_BOTTOM_V),
-        (STOPPER_FRONT_U, SKIRT_STEP_TOP_V),
-        (STOPPER_FRONT_U, STOPPER_TOP_V - STOPPER_LEADIN_CHAMFER),
-        (STOPPER_FRONT_U - STOPPER_LEADIN_CHAMFER, STOPPER_TOP_V),
-        (HOOK_REAR_BACK_U + rear_outer_chamfer, STOPPER_TOP_V),
-        (HOOK_REAR_BACK_U, STOPPER_TOP_V - rear_outer_chamfer),
-        (HOOK_REAR_BACK_U, HOLDER_BOTTOM_V),
-    ]
-
-    with BuildSketch(Plane.YZ) as sk:
-        with BuildLine():
-            Polyline(*pts)
-        make_face()
-        floor_corners = [
-            vtx
-            for vtx in sk.vertices()
-            if abs(vtx.Y - J_FLOOR_TOP_V) < 0.05
-            and (abs(vtx.X - PIPE_REAR_SEAT_U) < 0.05 or abs(vtx.X - J_FRONT_INNER_U) < 0.05)
-        ]
-        if floor_corners:
-            fillet(floor_corners, 0.80)
-    return sk.sketch.faces()[0]
-
-
-def _build_center_latch_2d_face() -> Face:
-    """v4 実機検証済みの頂点越え常時予圧35°ディープフック板バネラッチ断面 Face (u, v) を生成する."""
-    v_leaf_top = HOLDER_BOTTOM_V + LATCH_LEAF_THICKNESS  # -13.20mm
-    u_overlap_back = LATCH_ANCHOR_U - 1.00
-
-    du_nose = LATCH_STEM_FRONT_U - LATCH_TIP_U  # 4.40mm
-    hook_slope = -1.0 / math.tan(math.radians(LATCH_OVERHANG_DEG))  # -0.7002075
-    v_lock_root = LATCH_TIP_V + hook_slope * du_nose  # -4.50mm
-
-    v_tip_top = LATCH_TIP_V + LATCH_NOSE_BLUNT_H  # -0.97mm
-    v_bevel_top = v_tip_top + du_nose  # +3.43mm
-
-    gusset_front = 1.20
-    taper_start_v = 2.00
-
-    pts = [
-        (u_overlap_back, HOLDER_BOTTOM_V),
-        (LATCH_STEM_BACK_U, HOLDER_BOTTOM_V),
-        (LATCH_STEM_BACK_U, taper_start_v),
-        (LATCH_STEM_BACK_U - LATCH_TOP_TAPER_U, LATCH_RELEASE_TOP_V),
-        (LATCH_STEM_FRONT_U, LATCH_RELEASE_TOP_V),
-        (LATCH_STEM_FRONT_U, v_bevel_top),
-        (LATCH_TIP_U, v_tip_top),
-        (LATCH_TIP_U, LATCH_TIP_V),
-        (LATCH_STEM_FRONT_U, v_lock_root),
-        (LATCH_STEM_FRONT_U, v_leaf_top + gusset_front),
-        (LATCH_STEM_FRONT_U - gusset_front, v_leaf_top),
-        (u_overlap_back, v_leaf_top),
-        (u_overlap_back, HOLDER_BOTTOM_V),
-    ]
-
-    with BuildSketch(Plane.YZ) as sk:
-        with BuildLine():
-            Polyline(*pts)
-        make_face()
-    return sk.sketch.faces()[0]
-
-
-def _build_mounting_core() -> Part:
-    """ラケット掛け v4 と100%同一断面・同一予圧の段付き丸パイプ専用マウントコア (z>=0 配置) を生成する."""
-    side_hook_w = HOOK_OUTER_HALF_SPAN - HOOK_INNER_HALF_GAP
-    j_face = _build_j_hook_2d_face()
-
-    hook_right = extrude(
-        Pos(HOOK_INNER_HALF_GAP, 0.0, 0.0) * j_face,
-        amount=side_hook_w,
-        dir=(1, 0, 0),
-    )
-    hook_left = extrude(
-        Pos(-HOOK_OUTER_HALF_SPAN, 0.0, 0.0) * j_face,
-        amount=side_hook_w,
-        dir=(1, 0, 0),
-    )
-
-    rear_bar_u_len = LATCH_ANCHOR_U - HOOK_REAR_BACK_U  # 2.50mm
-    rear_bar_h = J_FLOOR_TOP_V - HOLDER_BOTTOM_V  # 5.45mm
-    rear_crossbar = Pos(
-        0.0,
-        0.5 * (HOOK_REAR_BACK_U + LATCH_ANCHOR_U),
-        HOLDER_BOTTOM_V + 0.5 * rear_bar_h,
-    ) * Box(2.0 * HOOK_OUTER_HALF_SPAN, rear_bar_u_len, rear_bar_h)
-
-    front_spine = Pos(
-        0.0,
-        0.5 * (SPINE_REAR_U + SPINE_FRONT_U),
-        HOLDER_BOTTOM_V + 0.5 * MOUNT_CORE_TOP_Z,
-    ) * Box(2.0 * HOOK_OUTER_HALF_SPAN, SPINE_THICKNESS, MOUNT_CORE_TOP_Z)
-
-    latch_face = _build_center_latch_2d_face()
-    center_latch = extrude(
-        Pos(-LATCH_WIDTH / 2.0, 0.0, 0.0) * latch_face,
-        amount=LATCH_WIDTH,
-        dir=(1, 0, 0),
-    )
-
-    core = (hook_right + hook_left + rear_crossbar + front_spine + center_latch).clean()
-    return Pos(0.0, 0.0, -HOLDER_BOTTOM_V) * core
 
 
 def _build_teardrop_clearance_dome(z_ball_center: float) -> Part:
@@ -519,7 +403,14 @@ def _build_ladder_spine() -> Part:
 
 def build_holder() -> Part:
     """4段C字リング皿 ＋ 最上段レッドボール兼用座 ＋ v4高保持ロック搭載の1ピース本番モデルを生成する."""
-    part = _build_mounting_core() + _build_ladder_spine()
+    mounting_core = build_steel_rack_mounting_core(
+        outer_half_span=HOOK_OUTER_HALF_SPAN,
+        spine_thickness=SPINE_THICKNESS,
+        spine_height=MOUNT_CORE_TOP_Z,
+        add_front_notch=False,
+        align_bottom_to_z0=True,
+    )
+    part = mounting_core + _build_ladder_spine()
     for idx in range(NUM_BALL_TIERS):
         part = part + _build_dish_tier(idx)
 
