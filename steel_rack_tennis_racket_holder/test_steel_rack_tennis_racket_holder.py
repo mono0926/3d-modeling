@@ -1,4 +1,4 @@
-"""スチールラック用 テニスラケット掛け（2機種兼用・v3高保持タイトロック版）の自動幾何・予圧・ばね力学・運動学検証テスト."""
+"""スチールラック用 テニスラケット掛け（2機種兼用・v4段付きパイプ専用座＆全角度アンチスリップアウト版）自動検証テスト."""
 
 import math
 from pathlib import Path
@@ -15,6 +15,7 @@ from build123d import (
 
 try:
     from steel_rack_tennis_racket_holder.steel_rack_tennis_racket_holder import (
+        CRADLE_BACKPLATE_REAR_U,
         CRADLE_GROOVE_DEPTH,
         CRADLE_INNER_BACK_U,
         CRADLE_TOTAL_HEIGHT,
@@ -30,11 +31,12 @@ try:
         LATCH_LEAF_SPAN_U,
         LATCH_LEAF_THICKNESS,
         LATCH_OVERHANG_DEG,
-        LATCH_POCKET_REAR_U,
+        LATCH_RELEASE_TOP_V,
         LATCH_STEM_BACK_U,
         LATCH_STEM_THICKNESS,
         LATCH_TIP_U,
         LATCH_TIP_V,
+        LATCH_TOP_TAPER_U,
         LATCH_WIDTH,
         MAIN_U_OFFSET,
         PIPE_CENTER_U,
@@ -42,6 +44,7 @@ try:
         PIPE_CLEARANCE_FROM_SKIRT_U,
         PIPE_DIA,
         PIPE_GAP_TO_SKIRT_V,
+        PIPE_REAR_SEAT_U,
         SKIRT_HEIGHT,
         STOPPER_FRONT_U,
         STOPPER_TOP_V,
@@ -51,6 +54,7 @@ try:
     )
 except ModuleNotFoundError:
     from steel_rack_tennis_racket_holder import (  # type: ignore[no-redef]
+        CRADLE_BACKPLATE_REAR_U,
         CRADLE_GROOVE_DEPTH,
         CRADLE_INNER_BACK_U,
         CRADLE_TOTAL_HEIGHT,
@@ -66,11 +70,12 @@ except ModuleNotFoundError:
         LATCH_LEAF_SPAN_U,
         LATCH_LEAF_THICKNESS,
         LATCH_OVERHANG_DEG,
-        LATCH_POCKET_REAR_U,
+        LATCH_RELEASE_TOP_V,
         LATCH_STEM_BACK_U,
         LATCH_STEM_THICKNESS,
         LATCH_TIP_U,
         LATCH_TIP_V,
+        LATCH_TOP_TAPER_U,
         LATCH_WIDTH,
         MAIN_U_OFFSET,
         PIPE_CENTER_U,
@@ -78,6 +83,7 @@ except ModuleNotFoundError:
         PIPE_CLEARANCE_FROM_SKIRT_U,
         PIPE_DIA,
         PIPE_GAP_TO_SKIRT_V,
+        PIPE_REAR_SEAT_U,
         SKIRT_HEIGHT,
         STOPPER_FRONT_U,
         STOPPER_TOP_V,
@@ -142,26 +148,42 @@ def _make_rack_3d(
 
 
 class TestSteelRackTennisRacketHolder(unittest.TestCase):
-    """v3 実機装着写真フィードバック反映（ゼロガタ精密スロット＋常時予圧ディープフック＋高保持ばね）検証スイート."""
+    """v4 実機テスト写真(1枚目・2枚目)反映（段付きパイプ専用ポケット＋頂点越えディープフックによる全角度抜け防止）検証スイート."""
 
     @classmethod
     def setUpClass(cls) -> None:
         cls.holder = build_holder()
         cls.fit_test = build_fit_test_piece()
 
-    def test_01_true_rack_constants_and_tight_slot_geometry(self) -> None:
-        """丸パイプ前方配置とタイト化された前後・上下寸法、単一有効ソリッドZ=0接地を検証する."""
+    def test_01_stepped_pipe_pocket_and_over_crown_hook_constants(self) -> None:
+        """丸パイプ専用下部ポケット(前後ガタ解消)と頂点越えフック先端位置、Z=0単一閉ソリッドを検証する."""
         self.assertAlmostEqual(PIPE_CLEARANCE_FROM_SKIRT_U, 2.00, places=2)
         self.assertAlmostEqual(PIPE_GAP_TO_SKIRT_V, 2.00, places=2)
         self.assertAlmostEqual(PIPE_CENTER_U, +5.60, places=2)
         self.assertAlmostEqual(PIPE_CENTER_V, -5.60, places=2)
 
-        # v2 で緩かった前後開口(11.25mm)および底面深さ(-11.00mm)が実機に合わせてタイト化されていること
-        slot_width = J_FRONT_INNER_U - STOPPER_FRONT_U
-        self.assertGreaterEqual(slot_width, 10.35)
-        self.assertLessEqual(slot_width, 10.60, "J-slot width must be tightened to eliminate ~1.1mm play")
-        self.assertGreaterEqual(J_FLOOR_TOP_V, -9.80, "J-floor must sit close under pipe to eliminate 1.8mm vertical rattle")
-        self.assertGreaterEqual(STOPPER_TOP_V, 11.00, "Rear stopper must extend deeply behind steel skirt")
+        # v3で丸パイプ裏に約3.0mm残っていた遊びを埋め、φ7.20mmパイプ自体を前後約7.70mmでタイトに抱えること
+        pipe_pocket_width = J_FRONT_INNER_U - PIPE_REAR_SEAT_U
+        self.assertGreaterEqual(pipe_pocket_width, 7.55)
+        self.assertLessEqual(
+            pipe_pocket_width,
+            7.80,
+            "Lower pipe pocket must cradle the 7.20mm pipe directly to eliminate horizontal play",
+        )
+        self.assertGreaterEqual(J_FLOOR_TOP_V, -9.60)
+        self.assertGreaterEqual(STOPPER_TOP_V, 12.00)
+
+        # 2枚目写真(約25°傾斜)でのスルッと抜けを防ぐため、ラッチ先端がパイプ頂点(+5.55mm)を越えて u<=+4.65mm まで伸びていること
+        self.assertLessEqual(
+            LATCH_TIP_U,
+            4.65,
+            "Latch tip must reach past pipe crown (<= +4.65mm) so 25-deg tilt cannot slip off",
+        )
+        self.assertLessEqual(
+            LATCH_TIP_U - STOPPER_FRONT_U,
+            5.70,
+            "Upper throat width must be <=5.70mm vs 7.20mm pipe (>=1.50mm interference even without lower step)",
+        )
 
         for name, part in (("holder", self.holder), ("fit_test", self.fit_test)):
             with self.subTest(part=name):
@@ -178,32 +200,40 @@ class TestSteelRackTennisRacketHolder(unittest.TestCase):
         self.assertAlmostEqual(self.fit_test.bounding_box().size.Z, FIT_TEST_HEIGHT, places=2)
         self.assertAlmostEqual(LATCH_LEAF_THICKNESS % 0.60, 0.0, places=2)
 
-    def test_02_active_clamping_preload_and_anti_pivot_wall(self) -> None:
-        """着座時に丸パイプ底面受けとディープフックで常時クランプ予圧が発生し、下部逃げガタがないこと."""
-        # 1. 薄鉄板下端(v=0.0)高さでも裏ストッパー壁が u=STOPPER_FRONT_U まで詰まっており反時計回り抜けが起きないこと
+    def test_02_active_clamping_preload_and_rear_pipe_seat_presence(self) -> None:
+        """丸パイプ真裏(v=-6mm)に専用リアシート実体が存在し、4公差条件すべてで常時クランプ予圧を維持すること."""
         hook_probe_x = HOOK_INNER_HALF_GAP + 4.0
+        # 1. 薄鉄板下端(v=0.0)高さの裏ストッパー壁存在確認
         anti_pivot_probe = Pos(
             hook_probe_x,
             _u_to_y(STOPPER_FRONT_U - 0.35),
             _v_to_z(0.0),
-        ) * Box(4.0, 0.60, 3.0)
+        ) * Box(4.0, 0.60, 2.0)
+        self.assertGreater(_intersection_volume(self.holder, anti_pivot_probe), 4.0)
+
+        # 2. 丸パイプ真裏(v=-6.0mm, u=+0.50mm)に遊び埋めリアシートの実体が詰まっていること (v3では空洞0だった箇所)
+        rear_pipe_seat_probe = Pos(
+            hook_probe_x,
+            _u_to_y(0.5 * (STOPPER_FRONT_U + PIPE_REAR_SEAT_U)),
+            _v_to_z(-6.0),
+        ) * Box(4.0, 2.0, 4.0)
         self.assertGreater(
-            _intersection_volume(self.holder, anti_pivot_probe),
-            6.5,
-            "Rear J-hook must stay flush behind skirt all the way across v=0mm (no lower relief gap)",
+            _intersection_volume(self.holder, rear_pipe_seat_probe),
+            28.0,
+            "3mm void behind lower pipe must be filled with dedicated rear pipe seat",
         )
 
-        # 2. 実機近傍の公差範囲で、底面着座時に剛体Jフックが無干渉かつ中央フックが常時予圧(>0.20mm)を維持すること
+        # 3. 4公差条件で剛体Jフックが無干渉着座し、中央ディープフックが常時予圧(+0.45〜+1.10mm)で押さえ続けること
         slope = -1.0 / math.tan(math.radians(LATCH_OVERHANG_DEG))
         rad_oh = math.radians(LATCH_OVERHANG_DEG)
         v_tan_clamped = (J_FLOOR_TOP_V + PIPE_DIA / 2.0) + (PIPE_DIA / 2.0) * math.sin(rad_oh)
         u_hook_at_vtan_relaxed = LATCH_TIP_U + (v_tan_clamped - LATCH_TIP_V) / slope
 
         cases = [
-            ("Tight(1.75,1.75)", 0.95, 1.75, 1.75),
+            ("Tight(1.80,1.80)", 0.95, 1.80, 1.80),
             ("Photo(1.95,2.00)", 1.00, 1.95, 2.00),
-            ("Nom  (2.00,2.00)", 1.03, 2.00, 2.00),
-            ("Wide (2.15,2.25)", 1.05, 2.15, 2.25),
+            ("Nom  (2.00,2.00)", 1.02, 2.00, 2.00),
+            ("Wide (2.10,2.20)", 1.05, 2.10, 2.20),
         ]
         for name, part, u_off in (
             ("holder", self.holder, MAIN_U_OFFSET),
@@ -216,7 +246,6 @@ class TestSteelRackTennisRacketHolder(unittest.TestCase):
             for case_label, skirt_t, gap_u, gap_v in cases:
                 with self.subTest(part=name, case=case_label):
                     du_seat = -skirt_t - STOPPER_FRONT_U - 0.02
-                    # パイプ下端が J_FLOOR_TOP_V の 0.02mm 上に接するクランプ着座位置
                     dv_seat = (-(gap_v + PIPE_DIA) - J_FLOOR_TOP_V) - 0.02
                     shelf, pipe = _make_rack_3d(
                         u_off,
@@ -231,17 +260,16 @@ class TestSteelRackTennisRacketHolder(unittest.TestCase):
 
                     pc_u_in_h = (gap_u + PIPE_DIA / 2.0) - du_seat
                     pipe_front_in_h = pc_u_in_h + PIPE_DIA / 2.0
-                    # ディープフックの噛み込み量が 3.00mm 以上あること (v2 の ~2.1mm から大幅拡大)
-                    self.assertGreaterEqual(pipe_front_in_h - LATCH_TIP_U, 3.00)
+                    # 噛み込み深さが 4.20mm 以上あること (v3 の 3.25mm からさらに深爪化)
+                    self.assertGreaterEqual(pipe_front_in_h - LATCH_TIP_U, 4.20)
 
-                    # 着座完了時点でもフックが弛まず +0.20〜+1.00mm の常時クランプ予圧で丸パイプを押さえ続けること
                     u_pipe_tan = pc_u_in_h + (PIPE_DIA / 2.0) * math.cos(rad_oh)
                     clamped_preload = u_pipe_tan - u_hook_at_vtan_relaxed
-                    self.assertGreaterEqual(clamped_preload, 0.20, "Must actively clamp pipe with zero vertical rattle")
-                    self.assertLessEqual(clamped_preload, 1.00)
+                    self.assertGreaterEqual(clamped_preload, 0.45)
+                    self.assertLessEqual(clamped_preload, 1.15)
 
-    def test_03_straight_up_installation_without_excluded_points(self) -> None:
-        """左右の剛体フレーム全体が傾き0°のまま真下(dv=-24mm)から着座位置まで無干渉で直進進入できること."""
+    def test_03_straight_up_installation_with_stepped_pocket(self) -> None:
+        """段付きパイプポケット付きでも左右剛体フレームが傾き0°のまま真下(dv=-24mm)から無干渉で直進進入できること."""
         for name, part, u_off in (
             ("holder", self.holder, MAIN_U_OFFSET),
             ("fit_test", self.fit_test, FIT_TEST_U_OFFSET),
@@ -250,9 +278,9 @@ class TestSteelRackTennisRacketHolder(unittest.TestCase):
             right_mask = Pos(+50.0 + HOOK_INNER_HALF_GAP, 0.0, 50.0) * Box(100.0, 200.0, 120.0)
             rigid_frame = (part & left_mask) + (part & right_mask)
 
-            du_insert = -1.00 - STOPPER_FRONT_U - 0.04  # 実機薄鉄板裏に 0.04mm 沿わせた直進ライン
+            du_insert = -1.00 - STOPPER_FRONT_U - 0.03
             dv_clamped = (-(2.00 + PIPE_DIA) - J_FLOOR_TOP_V) - 0.02
-            for dv in (-24.0, -18.0, -12.0, -6.0, -2.0, dv_clamped):
+            for dv in (-24.0, -18.0, -12.0, -6.0, -3.0, -1.0, dv_clamped):
                 shelf, pipe = _make_rack_3d(
                     u_off,
                     skirt_t=1.00,
@@ -268,8 +296,8 @@ class TestSteelRackTennisRacketHolder(unittest.TestCase):
                     msg=f"{name} rigid frame must slide straight up at dv={dv:.2f}mm with zero collision",
                 )
 
-    def test_04_isolated_deep_latch_pocket_and_high_retention_force(self) -> None:
-        """中央板バネが完全分離され、引き抜き耐力が 6.0kgf (60N) 以上の強力な脱落防止力を持つこと."""
+    def test_04_anti_slipout_at_tilted_25deg_and_release_tab_stroke(self) -> None:
+        """2枚目写真の斜め25°角度でも45N(4.6kgf)以上の抜け抵抗を維持し、かつ上部リリースタブの解除ストロークが底付きしないこと."""
         for name, part, u_off in (
             ("holder", self.holder, MAIN_U_OFFSET),
             ("fit_test", self.fit_test, FIT_TEST_U_OFFSET),
@@ -277,7 +305,7 @@ class TestSteelRackTennisRacketHolder(unittest.TestCase):
             with self.subTest(part=name):
                 slot_x = LATCH_WIDTH / 2.0 + 0.90
                 slot_u_start = LATCH_ANCHOR_U + 0.30
-                slot_u_end = LATCH_POCKET_REAR_U - 0.30
+                slot_u_end = CRADLE_BACKPLATE_REAR_U - 0.30
                 for sgn in (-1.0, 1.0):
                     slot_probe = Pos(
                         sgn * slot_x,
@@ -286,44 +314,67 @@ class TestSteelRackTennisRacketHolder(unittest.TestCase):
                     ) * Box(1.00, slot_u_end - slot_u_start, 24.0)
                     self.assertAlmostEqual(_intersection_volume(part, slot_probe), 0.0, places=2)
 
-                self.assertGreaterEqual(LATCH_POCKET_REAR_U - LATCH_STEM_BACK_U, 5.50)
+                # 上部リリースタブ背面ポケット貫通確認
+                pocket_u_min = LATCH_STEM_BACK_U + 0.25
+                pocket_u_max = CRADLE_BACKPLATE_REAR_U - 0.25
                 pocket_probe = Pos(
                     0.0,
-                    _u_to_y(0.5 * (LATCH_STEM_BACK_U + LATCH_POCKET_REAR_U), u_off),
-                    _v_to_z(-3.0),
-                ) * Box(LATCH_WIDTH, (LATCH_POCKET_REAR_U - LATCH_STEM_BACK_U) - 0.40, 22.0)
+                    _u_to_y(0.5 * (pocket_u_min + pocket_u_max), u_off),
+                    _v_to_z(0.0),
+                ) * Box(LATCH_WIDTH, pocket_u_max - pocket_u_min, 24.0)
                 self.assertAlmostEqual(_intersection_volume(part, pocket_probe), 0.0, places=2)
 
-        # Castigliano エネルギー法による押し込みクリック力・引き抜き耐力・層間応力の検証
+        # Maxwell相反定理によるリリースタブ上端の必要ストローク <= ポケット上端隙間 - 0.80mm の検証
         L_h = LATCH_LEAF_SPAN_U
-        L_v = LATCH_TIP_V - (HOLDER_BOTTOM_V + LATCH_LEAF_THICKNESS / 2.0)
+        v_leaf_mid = HOLDER_BOTTOM_V + LATCH_LEAF_THICKNESS / 2.0
+        L_v = LATCH_TIP_V - v_leaf_mid
+        H_top = LATCH_RELEASE_TOP_V - v_leaf_mid
         I_h = LATCH_WIDTH * (LATCH_LEAF_THICKNESS**3) / 12.0
         I_v = LATCH_WIDTH * (LATCH_STEM_THICKNESS**3) / 12.0
-        delta_click = 9.05 - LATCH_TIP_U  # 実機パイプ手前端(+9.05mm)通過時の押し込み量 (~3.25mm)
+        r_I = I_v / I_h
 
-        alpha = math.radians(90.0 - LATCH_OVERHANG_DEG)  # 水平からのフック角 (35.0°)
+        u_tip_unit = (L_v**2) * L_h + (L_v**3) / (3.0 * r_I)
+        th_tip_unit = L_v * L_h + (L_v**2) / (2.0 * r_I)
+        u_top_unit_from_tip = u_tip_unit + th_tip_unit * (H_top - L_v)
+        u_top_unit_from_tab = (H_top**2) * L_h + (H_top**3) / (3.0 * r_I)
+
+        delta_click = 9.09 - LATCH_TIP_U
+        required_top_stroke = (delta_click + 0.15) * (u_top_unit_from_tab / u_top_unit_from_tip)
+        available_top_pocket = CRADLE_BACKPLATE_REAR_U - (LATCH_STEM_BACK_U - LATCH_TOP_TAPER_U)
+        self.assertGreaterEqual(
+            available_top_pocket,
+            required_top_stroke + 0.80,
+            "Release tab top must have >=0.80mm extra pocket clearance to fully unlock without bottoming out",
+        )
+
+        # 直立(0°)および2枚目写真の斜め25°角度での引き抜き耐力と層間応力の検証
+        # 段付きリアシート(PIPE_REAR_SEAT_U=+1.62)＋頂点越え爪(LATCH_TIP_U=+4.55)により、25°傾斜時でも >=3.10mm の強制たわみが発生する
+        delta_tilted_25deg = 7.80 - LATCH_TIP_U
+        alpha = math.radians(90.0 - LATCH_OVERHANG_DEG)
         mu = 0.22
         pulloff_ratio = (math.cos(alpha) + mu * math.sin(alpha)) / (math.sin(alpha) - mu * math.cos(alpha))
 
         for mat, E_mpa, f_click_min, f_click_max in (
-            ("PETG", 2100.0, 24.0, 38.0),
-            ("PLA Matte", 2350.0, 26.0, 42.0),
-            ("PLA", 3000.0, 32.0, 50.0),
+            ("PETG", 2100.0, 26.0, 38.0),
+            ("PLA Matte", 2350.0, 28.0, 42.0),
+            ("PLA", 3000.0, 35.0, 50.0),
         ):
             comp = (L_v**3) / (3.0 * E_mpa * I_v) + (L_v**2) * L_h / (E_mpa * I_h)
             k = 1.0 / comp
             f_click = k * delta_click
-            f_pulloff = f_click * pulloff_ratio
+            f_pull_0deg = f_click * pulloff_ratio
+            f_pull_25deg = (k * delta_tilted_25deg) * pulloff_ratio
             sig_v_z = (f_click * L_v) * (LATCH_STEM_THICKNESS / 2.0) / I_v
 
-            self.assertGreaterEqual(f_click, f_click_min, f"{mat} click force must feel firm and solid")
-            self.assertLessEqual(f_click, f_click_max, f"{mat} click force must remain hand-installable")
+            self.assertGreaterEqual(f_click, f_click_min)
+            self.assertLessEqual(f_click, f_click_max)
+            self.assertGreaterEqual(f_pull_0deg, 68.0, f"{mat} upright pull-off must exceed 68N (~7.0kgf)")
             self.assertGreaterEqual(
-                f_pulloff,
-                60.0,
-                f"{mat} downward pull-off resistance must exceed 60N (>6.1kgf) so it never falls off",
+                f_pull_25deg,
+                45.0,
+                f"{mat} 25-deg tilted pull-off must exceed 45N (~4.6kgf) to prevent Photo-2 slip-out",
             )
-            self.assertLess(sig_v_z, 17.5, f"{mat} Z-layer tensile stress must stay well below delamination")
+            self.assertLess(sig_v_z, 17.0, f"{mat} Z-layer tensile stress must stay well below delamination")
 
     def test_05_both_rackets_fit_in_cradle_and_clear_shelf(self) -> None:
         """CLASH 26 V3.0 と HEAD EXTREME MP 2026 の双方がV字溝に安定着座し棚板・パイプと十分離れること."""
@@ -376,7 +427,7 @@ class TestSteelRackTennisRacketHolder(unittest.TestCase):
                 v_seat = v_hi
                 self.assertGreater(v_seat + tri_h, HOLDER_TOP_V + 15.0)
                 racket_backmost_u = u_mid - t_max / 2.0
-                self.assertGreaterEqual(racket_backmost_u, PIPE_CENTER_U + PIPE_DIA / 2.0 + 8.0)
+                self.assertGreaterEqual(racket_backmost_u, PIPE_CENTER_U + PIPE_DIA / 2.0 + 10.0)
 
     def test_06_support_free_overhangs_and_step_export_roundtrip(self) -> None:
         """Z>0.15mm の全面がサポート不要範囲(<=55.0°: n.Z >= -0.825)に収まり、STEP往復が正常であること."""
@@ -413,7 +464,7 @@ class TestSteelRackTennisRacketHolder(unittest.TestCase):
         front_half = self.fit_test & (Pos(0.0, 20.0, 50.0) * Box(80.0, 40.0, 100.0))
         rear_half = self.fit_test & (Pos(0.0, -25.0, 50.0) * Box(80.0, 40.0, 100.0))
         self.assertAlmostEqual(front_half.bounding_box().max.Z, FIT_TEST_HEIGHT, places=2)
-        self.assertLess(rear_half.bounding_box().max.Z, FIT_TEST_HEIGHT - 2.0)
+        self.assertLess(rear_half.bounding_box().max.Z, FIT_TEST_HEIGHT - 1.0)
 
 
 if __name__ == "__main__":

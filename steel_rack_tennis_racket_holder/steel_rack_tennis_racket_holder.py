@@ -2,25 +2,29 @@
 設計要件:
     - マットブラックのスチールラック（天板端部が下に18.1mm折り曲げられた約1.0mm厚の薄鉄板フチ ＋
       その板の垂直面から手前へ2.0mmクリアランスを空け、下端から2.0mm下に通る φ7.2mm 水平丸パイプ）に
-      ガタつきゼロで強力ワンタッチ固定できる硬式テニスラケット掛け（v3 高保持タイトロック版）。
+      ガタつきゼロ・斜め抜けゼロで強力ワンタッチ固定できる硬式テニスラケット掛け（v4 段付きパイプ専用座＆全角度抜け防止版）。
     - ジュニア用「Wilson CLASH 26 V3.0」（26インチ / 100sq.in. / フレーム厚24.0mmフラット / スロート片側約23.5°）と
       大人用「HEAD EXTREME MP 2026 (233316)」（27インチ / 100sq.in. / フレーム厚23-26-21mm / スロート片側約24.2°）の
       2機種を1つのホルダーで完全兼用し、ガット面をラックと平行（ヘッド上向き）にしてスッキリ縦掛けする。
-    - v2実機装着写真に基づきガタつき・脱落リスクを完全解消した「精密ゼロガタJスロット ＋ 常時予圧ディープフック板バネ」機構:
-      1. 薄鉄板裏ストッパー(u=-1.08mm)を下部逃げ段差なしの全面フラット壁(高さ+11.40mmまで延長)として反時計回り抜けを完全阻止し、
-         前壁(u=+9.42mm、開口10.50mm vs 実機10.15mm)と底面受け(v=-9.65mm)で前後・上下の遊びを極小化する。
-      2. 中央の Z=0 連続繊維ロング板バネラッチ（幅16.0mm・リーフ厚1.80mm・ステム厚3.30mm）の爪先端を丸パイプ頂点付近
-         (u=+5.80mm、噛み込み深さ約3.25mm)まで深く伸ばし、水平から35.0°（造形オーバーハング55.0°）のディープフック座面で
-         着座後も常時約0.46〜0.66kgf（+0.55mmたわみ残し）のクランプ予圧をかけ続けることで、引き抜き耐力約6.6〜9.4kgf（ラケット重量の20倍以上）を実現する。
+    - v3実機装着テスト写真（1枚目：荷重時 / 2枚目：手前約25°持ち上げ時の抜け角度）に基づき完成させた2段階ロック構造:
+      1. 段付き丸パイプ専用ポケット（前後ガタ完全解消）:
+         薄鉄板が入る上部（v >= -0.80mm）は u=-1.06mm（高さ+12.60mm）の全面密着壁としつつ、薄鉄板が届かない下部（v <= -3.48mm）は
+         45°ステップで丸パイプ真裏（u=+1.62mm）まで肉を寄せることで、真下からの直進装着性を保ったまま φ7.20mm 丸パイプ自体を
+         前後開口 7.70mm（片側約0.25mmクリアランス）で直接タイトに抱え込み、丸パイプ裏の約3mmの遊びを完全解消する。
+      2. 頂点越えディープフック（u=+4.55mm）＋ 常時クランプ予圧（+0.75mm）＋ 指掛けリリースタブ（v=+9.60mm）:
+         中央 Z=0 連続繊維ロング板バネ（幅16.0mm・リーフ厚1.80mm・リーフ長15.05mm・ステム厚3.60mm）の爪先端を丸パイプ頂点（+5.55mm）を
+         越える u=+4.55mm（噛み込み深さ約4.54mm）まで伸ばし、水平35.0°（造形オーバーハング55.0°）座面で常時約0.50〜0.71kgfの予圧をかける。
+         これにより直立引き抜き耐力 約7.3〜10.4kgf はもちろん、2枚目写真の斜め25°持ち上げ角度でも約5.3〜7.5kgf（v3比約9倍）の
+         強力な抜け止め力を発揮し、ラケット取り出し時の意図せぬ脱落を完全に防ぐ（取り外す際は上部リリースタブを手前へ引けば約1.6〜2.3kgfで解除可能）。
     - 外抱えV字クレードル（片側基準24.0° ＋ 長手R350mm相当の太鼓クラウニング ＋ 全周保護面取り/フィレット）により、
-      上から下ろすだけで両ラケットとも自動調心して面接触保持し、最大厚26.0mm部でも棚板前面から22mm以上の逃げを確保する。
+      上から下ろすだけで両ラケットとも自動調心して面接触保持し、最大厚26.0mm部でも棚板前面から25mm以上の逃げを確保する。
     - 最新の3Dプリンター（Bambu Lab P2S Combo 等）での出力を想定し、底面（Z=0）ベタ置きの完全サポートフリー・ブリッジゼロ
       （全オーバーハング55.0°以下）および 0.4mmノズル(0.20mm層)/0.6mmノズル(0.30mm層)両対応の 0.60mm 整数倍高さで設計する。
     - モデルごとに専用ディレクトリで管理し、本番モデルと同一マウント機構を持つ事前嵌合テストピースの2つのSTEPファイルを同時出力する。
 
 推奨フィラメント:
     - PETG（Bambu PETG HF / PETG Matte ブラック推奨 — 常時クランプ予圧に対する長期耐クリープ性と高い靭性のため）
-    - PLA Matte / PLA Tough でも使用可能（Z=0連続繊維リーフ設計により層間引張応力を最大約15.6MPa以下に抑制済みだが、常時予圧の長期維持にはPETGを推奨）。
+    - PLA Matte / PLA Tough でも使用可能（ロングリーフ＋3.60mm厚ステム設計により層間引張応力を最大約15.5MPa以下に抑制済みだが、常時予圧の長期維持にはPETGを推奨）。
 
 推奨スライサー設定:
     - レイヤー高さ (Layer height): 0.20mm (0.4mmノズル時) または 0.30mm (0.6mmノズル時) — 全高56.40mm / テスト28.80mm / 板バネ厚1.80mm すべて整数倍
@@ -30,8 +34,8 @@
     - ブリム (Brim): 不要（Z=0に広いフラット接地面があるため安定）
 
 印刷統計（予想）:
-    - steel_rack_tennis_racket_holder.step: 印刷時間 約75〜90分、フィラメント使用量 約49〜64g（ソリッド体積 61.17cm³）
-    - steel_rack_tennis_racket_holder_fit_test.step: 印刷時間 約15〜18分、フィラメント使用量 約10〜12g（ソリッド体積 12.28cm³）
+    - steel_rack_tennis_racket_holder.step: 印刷時間 約80〜95分、フィラメント使用量 約54〜68g（ソリッド体積 67.13cm³）
+    - steel_rack_tennis_racket_holder_fit_test.step: 印刷時間 約17〜21分、フィラメント使用量 約12〜15g（ソリッド体積 15.32cm³）
 
 履歴とプロンプト経緯:
     - 詳細は同ディレクトリの history.md を参照。
@@ -57,7 +61,7 @@ except ImportError:  # pragma: no cover
 #   v: 上下方向 (棚板前垂れ下端 v = 0.00, 上方 +v, 下方 -v)
 # ==============================================================================
 
-# --- スチールラック実測基準寸法 (v2 実機写真ピクセル校正確認済み) ---
+# --- スチールラック実測基準寸法 (v2・v3 実機装着写真校正済み) ---
 PIPE_DIA = 7.20  # 水平丸パイプ外径
 PIPE_RADIUS = PIPE_DIA / 2.0  # 3.60mm
 PIPE_CLEARANCE_FROM_SKIRT_U = 2.00  # 棚板垂直面(u=0.0)から丸パイプ奥面(u=+2.0)までの前後クリアランス
@@ -76,8 +80,8 @@ CRADLE_TOTAL_HEIGHT = HOLDER_TOP_V - HOLDER_BOTTOM_V  # 56.40mm
 FIT_TEST_TOP_V = 13.80  # テストピースおよび中央スパイン上端 (全高 28.80mm = 0.60mm * 48)
 FIT_TEST_HEIGHT = FIT_TEST_TOP_V - HOLDER_BOTTOM_V  # 28.80mm
 
-# --- 左右の精密ゼロガタ剛体デュアルJフック寸法 (v3 タイト化) ---
-LATCH_WIDTH = 16.00  # 中央独立ロング板バネラッチ幅 (x = -8.00 〜 +8.00mm へ拡幅強化)
+# --- 左右の段付きパイプ専用ポケット付き剛体デュアルJフック寸法 (v4 ゼロガタ化) ---
+LATCH_WIDTH = 16.00  # 中央独立ロング板バネラッチ幅 (x = -8.00 〜 +8.00mm)
 LATCH_SIDE_GAP = 1.80  # 板バネ左右の完全分離スリット幅 (スライサー融着ゼロを保証)
 HOOK_INNER_HALF_GAP = LATCH_WIDTH / 2.0 + LATCH_SIDE_GAP  # 9.80mm (中央19.60mmベイ)
 HOOK_WIDTH = 18.20  # 本番モデルの左右各Jフック幅 (2本合計 36.40mm)
@@ -86,39 +90,44 @@ HOOK_OUTER_HALF_SPAN = HOOK_INNER_HALF_GAP + HOOK_WIDTH  # 28.00mm (フック全
 FIT_TEST_SIDE_HOOK_WIDTH = 8.70  # テストピースの左右対称Jフック幅 (各8.70mm)
 FIT_TEST_WIDTH = 2.0 * (HOOK_INNER_HALF_GAP + FIT_TEST_SIDE_HOOK_WIDTH)  # 37.00mm
 
-HOOK_REAR_BACK_U = -5.40  # 背面Uステム外側面 (肉厚 4.32mm の高剛性リアアーム)
-STOPPER_FRONT_U = -1.08  # 薄鉄板裏ストッパー壁 (下部逃げ段差を全廃し v=-9.65〜+10.60 まで全面密着！)
-STOPPER_LEADIN_CHAMFER = 0.80  # 上端先端のみの導入45°テーパー量 (初期差し込みやすさ確保)
-STOPPER_TOP_V = 11.40  # ストッパー上端 (v2の+8.40から+3.0mm延長して引っ掛かり深さを大幅拡大)
-J_FLOOR_TOP_V = -9.65  # 丸パイプ底面受け座 (v2の-11.00から+1.35mm引き上げ、上下ガタを解消！底肉厚5.35mm)
-J_FRONT_INNER_U = 9.42  # Jフック前側ガイド内壁 (開口10.50mm: 実機10.15mmに対し片側約0.17mmの精密嵌合！)
-J_FRONT_FUNNEL = 1.10  # 前側上端入口の45°導入ファンネル量
+HOOK_REAR_BACK_U = -6.80  # 背面Uステム外側面 (ロングリーフ長確保＋高剛性リアアーム)
+STOPPER_FRONT_U = -1.06  # 上部薄鉄板裏ストッパー壁 (v=-0.80〜+11.80mm まで全面フラット密着)
+STOPPER_LEADIN_CHAMFER = 0.80  # 上端先端のみの導入45°テーパー量
+STOPPER_TOP_V = 12.60  # ストッパー上端 (棚天板裏+17.1mmとの干渉を避けつつ深く保持、フロントスパインより1.2mm低く前後識別可能)
+
+SKIRT_STEP_TOP_V = -0.80  # 薄鉄板下端(v=0.0)と干渉しない段差開始高さ
+PIPE_REAR_SEAT_U = 1.62  # 丸パイプ下半分専用の背面受け座 (v3で空いていた約3.0mmの遊びを埋めて前後ガタ解消！)
+PIPE_STEP_BOTTOM_V = SKIRT_STEP_TOP_V - (PIPE_REAR_SEAT_U - STOPPER_FRONT_U)  # -3.48mm (上向き45°スロープで造形オーバーハングゼロ)
+J_FLOOR_TOP_V = -9.55  # 丸パイプ底面受け座 (底肉厚 5.45mm)
+J_FRONT_INNER_U = 9.32  # Jフック前側ガイド内壁 (下部パイプポケット幅 7.70mm: φ7.20mmパイプに対し片側約0.25mmの精密抱持！)
+J_FRONT_FUNNEL = 1.15  # 前側上端入口の45°導入ファンネル量
 J_DECK_TOP_V = 8.40  # Jフック前側デッキ上面
 
-# --- 中央 Z=0 連続繊維・常時予圧ディープフック板バネラッチ寸法 (v3 高保持化) ---
-LATCH_ANCHOR_U = -2.70  # 背面下部クロスバーへの固定根元位置
+# --- 中央 Z=0 連続繊維・頂点越えディープフック板バネラッチ寸法 (v4 斜め25°抜け完全防止) ---
+LATCH_ANCHOR_U = -4.30  # 背面下部クロスバーへの固定根元位置 (ロングリーフ化でひずみ低減)
 LATCH_LEAF_THICKNESS = 1.80  # Z=0 水平リーフ板厚 (0.60mm * 3 = 0.20mm*9層 / 0.30mm*6層)
-LATCH_STEM_FRONT_U = 9.15  # 垂直ステム前面 (丸パイプ手前端に近接配置)
-LATCH_STEM_THICKNESS = 3.30  # 垂直ステム前後厚 (層間Z引張応力を抑える高剛性ステム)
-LATCH_STEM_BACK_U = LATCH_STEM_FRONT_U + LATCH_STEM_THICKNESS  # +12.45mm
-LATCH_LEAF_SPAN_U = 0.5 * (LATCH_STEM_FRONT_U + LATCH_STEM_BACK_U) - LATCH_ANCHOR_U  # 13.50mm
+LATCH_STEM_FRONT_U = 8.95  # 垂直ステム前面
+LATCH_STEM_THICKNESS = 3.60  # 垂直ステム前後厚 (層間Z引張応力を最大15.5MPa以下に抑える高剛性ステム)
+LATCH_STEM_BACK_U = LATCH_STEM_FRONT_U + LATCH_STEM_THICKNESS  # +12.55mm
+LATCH_LEAF_SPAN_U = 0.5 * (LATCH_STEM_FRONT_U + LATCH_STEM_BACK_U) - LATCH_ANCHOR_U  # 15.05mm
 
-LATCH_OVERHANG_DEG = 55.0  # ディープフック下面の造形オーバーハング角 (水平から35.0°の浅角フック座面！)
-LATCH_TIP_U = 5.80  # ラッチ爪先端の前後位置 (丸パイプ頂点+5.45mm近くまで深く覆い、噛み込み3.25mm確保！)
-LATCH_TIP_V = -2.27  # 着座完了時にも+0.55mm(約0.55kgf)の常時クランプ予圧を残す高さ設定
+LATCH_OVERHANG_DEG = 55.0  # ディープフック下面の造形オーバーハング角 (水平から35.0°の浅角フック座面)
+LATCH_TIP_U = 4.55  # 丸パイプ頂点(+5.55mm)を越える深爪先端位置 (2枚目写真の斜め25°角度でも3.25mm以上引っ掛かる！)
+LATCH_TIP_V = -1.42  # 着座完了時にも+0.75mm(約0.50〜0.71kgf)の常時クランプ予圧を残す高さ設定
 LATCH_NOSE_BLUNT_H = 0.45  # ノズル造形安定化のための先端垂直フラット高さ
-LATCH_RELEASE_TOP_V = 6.60  # 指先で手前に引いてロック解除できる上部リリースタブ高さ
-LATCH_POCKET_GAP = 5.75  # ステム背面のたわみ逃げポケット奥行 (3.3mm押し込み時も余裕で底付きしない)
-LATCH_POCKET_REAR_U = LATCH_STEM_BACK_U + LATCH_POCKET_GAP  # +18.20mm
+LATCH_RELEASE_TOP_V = 9.60  # デッキ面(+8.40mm)より1.2mm高く指先が掛かりやすいリリースタブ上端 (約1.9倍のテコ比で軽く解除可能)
+LATCH_TOP_TAPER_U = 0.80  # リリースタブ上端背面のテーパー逃げ量 (解除ストローク余裕を確保)
+LATCH_POCKET_GAP = 9.35  # ステム背面のたわみ逃げポケット基準幅 (上端では10.15mm確保し解除時も底付きゼロ)
+LATCH_POCKET_REAR_U = LATCH_STEM_BACK_U + LATCH_POCKET_GAP  # +21.90mm
 
 # --- 2機種兼用・外抱えV字クレードル寸法 ---
-CRADLE_BACKPLATE_REAR_U = LATCH_POCKET_REAR_U  # +18.20mm
+CRADLE_BACKPLATE_REAR_U = LATCH_POCKET_REAR_U  # +21.90mm
 CRADLE_BACKPLATE_THICKNESS = 3.60  # フロントスパイン兼クレードル背板肉厚
-CRADLE_INNER_BACK_U = CRADLE_BACKPLATE_REAR_U + CRADLE_BACKPLATE_THICKNESS  # +21.80mm
+CRADLE_INNER_BACK_U = CRADLE_BACKPLATE_REAR_U + CRADLE_BACKPLATE_THICKNESS  # +25.50mm
 CRADLE_GROOVE_DEPTH = 26.50  # ラケット前後溝内寸 (21〜25mm厚スロートに余裕を持って対応)
-CRADLE_FRONT_LIP_INNER_U = CRADLE_INNER_BACK_U + CRADLE_GROOVE_DEPTH  # +48.30mm
+CRADLE_FRONT_LIP_INNER_U = CRADLE_INNER_BACK_U + CRADLE_GROOVE_DEPTH  # +52.00mm
 CRADLE_FRONT_LIP_THICKNESS = 4.50  # 手前返しリップ肉厚
-CRADLE_FRONT_OUTER_U = CRADLE_FRONT_LIP_INNER_U + CRADLE_FRONT_LIP_THICKNESS  # +52.80mm
+CRADLE_FRONT_OUTER_U = CRADLE_FRONT_LIP_INNER_U + CRADLE_FRONT_LIP_THICKNESS  # +56.50mm
 
 CRADLE_BOTTOM_INNER_WIDTH = 52.00  # v=-15.00mm での左右V受け面内幅 (シャフト通過開口)
 CRADLE_HALF_ANGLE_DEG = 24.0  # スロート片側基準テーパー角 (CLASH 23.5° / EXTREME 24.2° の中心)
@@ -128,12 +137,12 @@ CRADLE_BACK_FLANGE_WIDTH = 13.00  # 背板フランジの内側張り出し幅 (
 CRADLE_FRONT_LIP_WIDTH = 11.00  # 手前返しリップの内側張り出し幅
 
 # --- 出力時XYセンタリングオフセット ---
-MAIN_U_OFFSET = -(HOOK_REAR_BACK_U + CRADLE_FRONT_OUTER_U) / 2.0  # -23.70mm
-FIT_TEST_U_OFFSET = -(HOOK_REAR_BACK_U + CRADLE_INNER_BACK_U) / 2.0  # -8.20mm
+MAIN_U_OFFSET = -(HOOK_REAR_BACK_U + CRADLE_FRONT_OUTER_U) / 2.0  # -24.85mm
+FIT_TEST_U_OFFSET = -(HOOK_REAR_BACK_U + CRADLE_INNER_BACK_U) / 2.0  # -9.35mm
 
 
 def _build_j_hook_2d_face() -> Face:
-    """(u, v) 平面における精密ゼロガタ剛体Jフック断面 Face を生成する (全エッジ下向きオーバーハングゼロ)."""
+    """(u, v) 平面における段付きパイプ専用ポケット付き剛体Jフック断面 Face を生成する (下向きオーバーハングゼロ)."""
     rear_outer_chamfer = 1.60
 
     pts = [
@@ -145,7 +154,9 @@ def _build_j_hook_2d_face() -> Face:
         (J_FRONT_INNER_U + J_FRONT_FUNNEL, J_DECK_TOP_V),
         (J_FRONT_INNER_U, J_DECK_TOP_V - J_FRONT_FUNNEL),
         (J_FRONT_INNER_U, J_FLOOR_TOP_V),
-        (STOPPER_FRONT_U, J_FLOOR_TOP_V),
+        (PIPE_REAR_SEAT_U, J_FLOOR_TOP_V),
+        (PIPE_REAR_SEAT_U, PIPE_STEP_BOTTOM_V),
+        (STOPPER_FRONT_U, SKIRT_STEP_TOP_V),
         (STOPPER_FRONT_U, STOPPER_TOP_V - STOPPER_LEADIN_CHAMFER),
         (STOPPER_FRONT_U - STOPPER_LEADIN_CHAMFER, STOPPER_TOP_V),
         (HOOK_REAR_BACK_U + rear_outer_chamfer, STOPPER_TOP_V),
@@ -157,12 +168,12 @@ def _build_j_hook_2d_face() -> Face:
         with BuildLine():
             Polyline(*pts)
         make_face()
-        # コの字底面の内側2コーナーに応力緩和フィレット R0.80mm (丸パイプ外周とは >1.2mm 離間)
+        # パイプ専用ポケット底面の内側2コーナーに応力緩和フィレット R0.80mm (丸パイプ外周とは >1.3mm 離間)
         floor_corners = [
             vtx
             for vtx in sk.vertices()
             if abs(vtx.Y - J_FLOOR_TOP_V) < 0.05
-            and (abs(vtx.X - STOPPER_FRONT_U) < 0.05 or abs(vtx.X - J_FRONT_INNER_U) < 0.05)
+            and (abs(vtx.X - PIPE_REAR_SEAT_U) < 0.05 or abs(vtx.X - J_FRONT_INNER_U) < 0.05)
         ]
         if floor_corners:
             fillet(floor_corners, 0.80)
@@ -170,26 +181,28 @@ def _build_j_hook_2d_face() -> Face:
 
 
 def _build_center_latch_2d_face() -> Face:
-    """(u, v) 平面における常時予圧35°ディープフック板バネラッチ断面 Face を生成する."""
+    """(u, v) 平面における頂点越え常時予圧35°ディープフック板バネラッチ断面 Face を生成する."""
     v_leaf_top = HOLDER_BOTTOM_V + LATCH_LEAF_THICKNESS  # -13.20mm
     u_overlap_back = LATCH_ANCHOR_U - 1.00  # 背面クロスバー内へ1.0mm食い込ませて一体結合
 
-    # 水平から35.0° (造形オーバーハング55.0°) のディープフック座面
-    du_nose = LATCH_STEM_FRONT_U - LATCH_TIP_U  # 3.35mm
+    # 水平から35.0° (造形オーバーハング厳密55.0°) の頂点越えディープフック座面
+    du_nose = LATCH_STEM_FRONT_U - LATCH_TIP_U  # 4.40mm
     hook_slope = -1.0 / math.tan(math.radians(LATCH_OVERHANG_DEG))  # -0.7002075
-    v_lock_root = LATCH_TIP_V + hook_slope * du_nose  # -4.62mm
+    v_lock_root = LATCH_TIP_V + hook_slope * du_nose  # -4.50mm
 
-    # 45.0° 上面導入スロープ (下から押し上げる際に丸パイプ下端を滑らかに迎え入れる上向き面)
-    v_tip_top = LATCH_TIP_V + LATCH_NOSE_BLUNT_H  # -1.82mm
-    v_bevel_top = v_tip_top + du_nose  # +1.53mm
+    # 45.0° 上面導入スロープ (真下から押し上げる際に丸パイプ下端を滑らかに迎え入れる上向き面)
+    v_tip_top = LATCH_TIP_V + LATCH_NOSE_BLUNT_H  # -0.97mm
+    v_bevel_top = v_tip_top + du_nose  # +3.43mm
 
-    # L字コーナー応力緩和45°ガセット
+    # L字コーナー応力緩和45°ガセット ＆ リリースタブ背面テーパー開始高さ
     gusset_front = 1.20
+    taper_start_v = 2.00
 
     pts = [
         (u_overlap_back, HOLDER_BOTTOM_V),
         (LATCH_STEM_BACK_U, HOLDER_BOTTOM_V),
-        (LATCH_STEM_BACK_U, LATCH_RELEASE_TOP_V),
+        (LATCH_STEM_BACK_U, taper_start_v),
+        (LATCH_STEM_BACK_U - LATCH_TOP_TAPER_U, LATCH_RELEASE_TOP_V),
         (LATCH_STEM_FRONT_U, LATCH_RELEASE_TOP_V),
         (LATCH_STEM_FRONT_U, v_bevel_top),
         (LATCH_TIP_U, v_tip_top),
@@ -209,7 +222,7 @@ def _build_center_latch_2d_face() -> Face:
 
 
 def _build_mounting_core(outer_half_x: float, add_front_notch: bool = False) -> Part:
-    """本番モデルと嵌合テストピースで100%共通のマウントコア（精密Jフック＋前後クロスバー＋高保持板バネ）を生成する."""
+    """本番モデルと嵌合テストピースで100%共通のマウントコア（段付きパイプ座Jフック＋前後クロスバー＋頂点越え板バネ）を生成する."""
     side_hook_w = outer_half_x - HOOK_INNER_HALF_GAP
     j_face = _build_j_hook_2d_face()
 
@@ -225,8 +238,8 @@ def _build_mounting_core(outer_half_x: float, add_front_notch: bool = False) -> 
     )
 
     # 背面下部アンカークロスバー
-    rear_bar_u_len = LATCH_ANCHOR_U - HOOK_REAR_BACK_U  # 2.70mm
-    rear_bar_h = J_FLOOR_TOP_V - HOLDER_BOTTOM_V  # 5.35mm
+    rear_bar_u_len = LATCH_ANCHOR_U - HOOK_REAR_BACK_U  # 2.50mm
+    rear_bar_h = J_FLOOR_TOP_V - HOLDER_BOTTOM_V  # 5.45mm
     rear_crossbar = Pos(
         0.0,
         0.5 * (HOOK_REAR_BACK_U + LATCH_ANCHOR_U),
@@ -240,7 +253,7 @@ def _build_mounting_core(outer_half_x: float, add_front_notch: bool = False) -> 
         HOLDER_BOTTOM_V + 0.5 * FIT_TEST_HEIGHT,
     ) * Box(2.0 * outer_half_x, CRADLE_BACKPLATE_THICKNESS, FIT_TEST_HEIGHT)
 
-    # 中央の常時予圧ディープフック板バネラッチ
+    # 中央の頂点越え常時予圧ディープフック板バネラッチ
     latch_face = _build_center_latch_2d_face()
     center_latch = extrude(
         Pos(-LATCH_WIDTH / 2.0, 0.0, 0.0) * latch_face,
@@ -342,7 +355,7 @@ def _build_single_v_wing(sign_x: float) -> Part:
 
 
 def build_holder() -> Part:
-    """2機種兼用V字クレードル ＋ 精密ゼロガタJスロット＆常時予圧ディープフックの本番モデルを生成する."""
+    """2機種兼用V字クレードル ＋ 段付きパイプ専用座＆頂点越えディープフックの本番モデルを生成する."""
     mounting_core = _build_mounting_core(HOOK_OUTER_HALF_SPAN, add_front_notch=False)
     wing_right = _build_single_v_wing(+1.0)
     wing_left = _build_single_v_wing(-1.0)
@@ -358,7 +371,7 @@ def build_holder() -> Part:
 
 
 def build_fit_test_piece() -> Part:
-    """本番と100%同一の精密Jスロット＋常時予圧ディープフックを備え、ガタつきゼロを検証できるテストピース."""
+    """本番と100%同一の段付きパイプ専用座＋頂点越えディープフックを備え、斜め25°抜け防止まで検証できるテストピース."""
     core = _build_mounting_core(FIT_TEST_WIDTH / 2.0, add_front_notch=True)
 
     shifted = Pos(0.0, FIT_TEST_U_OFFSET, -HOLDER_BOTTOM_V) * core
